@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Virtual environment (recreate from requirements.txt)
+.venv/
+venv/
+env/
+
+# Run artifacts — regenerable from src/ with fixed --seed(s).
+# To archive a specific result set for the paper: git add -f <path>
+logs/
+results/
+
+# OS / editor
+.DS_Store
+*.swp
+*~
+.idea/
+.vscode/

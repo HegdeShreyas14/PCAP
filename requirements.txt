@@ -1,0 +1,13 @@
+# Pinned to the versions the RQ1 results were produced with.
+# PyTorch is deliberately NOT pinned here: the correct wheel depends on your
+# CUDA version. See README for the install command.
+
+gglasso==0.3.0
+numpy==2.4.4
+scipy==1.17.1
+networkx==3.6.1
+numba==0.67.0
+
+# analysis / plotting for the report
+pandas==3.0.2
+matplotlib>=3.8
