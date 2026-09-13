@@ -41,7 +41,9 @@ import argparse
 import contextlib
 import csv
 import io
+import json
 import os
+from pathlib import Path
 import statistics
 import warnings
 
@@ -142,6 +144,8 @@ def main():
     ap.add_argument("--out", default="results/percolation.csv")
     ap.add_argument("--no-f1", action="store_true",
                     help="structure only, no solving: FAST but yields NO verdict")
+    ap.add_argument("--resume", action="store_true",
+                    help="resume lambda records from OUT.partial.jsonl")
     args = ap.parse_args()
 
     if args.no_f1:
@@ -150,7 +154,16 @@ def main():
         print("!! figure requires a full run.\n")
 
     lams = np.linspace(args.lam_min, args.lam_max, args.lam_steps)
+    out_path = Path(args.out)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    checkpoint = Path(f"{args.out}.partial.jsonl")
     rows = []
+    if args.resume and checkpoint.exists():
+        with checkpoint.open() as handle:
+            rows = [json.loads(line) for line in handle if line.strip()]
+        if not args.no_f1:
+            rows = [r for r in rows if r.get("f1_computed", True)]
+        print(f"Resuming from {len(rows)} checkpointed lambda records")
 
     print(f"BLAS threads: {os.environ.get('OMP_NUM_THREADS')}   "
           f"seeds: {args.seeds}   tol={args.tol} rtol={args.rtol}\n")
@@ -179,14 +192,21 @@ def main():
                     if seed == args.seeds[0]:
                         oracle_fmax = cubic_summary(p, sorted(sizes, reverse=True))["F_max"]
 
-                    recs = []
+                    recs = [r for r in rows
+                            if r["regime"] == regime and int(r["p"]) == p
+                            and int(r["n_over_p"]) == ratio and int(r["seed"]) == seed
+                            and (args.no_f1 or r.get("f1_computed", True))]
+                    completed_lams = {float(r["lambda"]) for r in recs}
                     for lam in lams:
+                        if float(lam) in completed_lams:
+                            continue
                         st = structure_at(S, p, float(lam))
                         st.update(regime=regime, p=p, n_over_p=ratio, seed=seed,
                                   blas_threads=os.environ.get("OMP_NUM_THREADS"),
                                   tol=args.tol, rtol=args.rtol,
                                   oracle_F_max=oracle_fmax,
                                   true_n_blocks=len(sizes),
+                                  f1_computed=not args.no_f1,
                                   **{"lambda": float(lam)})
                         if not args.no_f1:
                             try:
@@ -201,7 +221,10 @@ def main():
                         else:
                             st["support_f1"] = float("nan")
                         recs.append(st)
-                    rows.extend(recs)
+                        rows.append(st)
+                        with checkpoint.open("a") as handle:
+                            handle.write(json.dumps(st) + "\n")
+                            handle.flush()
 
                     perc_by_seed.append(percolation_lambda(recs, args.f_max_threshold))
                     usable = [r for r in recs if r["support_f1"] == r["support_f1"]]
@@ -243,10 +266,11 @@ def main():
 
     if rows:
         keys = sorted({k for r in rows for k in r})
-        with open(args.out, "w", newline="") as fh:
+        with out_path.open("w", newline="") as fh:
             w = csv.DictWriter(fh, fieldnames=keys)
             w.writeheader()
             w.writerows(rows)
+        checkpoint.unlink(missing_ok=True)
         print(f"\nWrote {len(rows)} rows to {args.out}")
 
     print("""

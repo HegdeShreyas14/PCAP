@@ -17,10 +17,11 @@ basis for the progress reviews and for the paper's results section.
 |---|---|
 | Literature survey + methodology | **Submitted.** 10 recent refs; 5 DOIs still unverified |
 | Phase 1 — reproduction, environment capture | **Done** |
-| RQ1 — CPU baseline sweeps | **Done.** 1t + 8t, 384 configs each, seeded generator, paired |
+| RQ1 — CPU baseline sweeps | **Done.** 384 corrected paired configurations at both 1 and 8 BLAS threads |
 | Profiling | **Done.** Decides the Phase 3 design |
-| Percolation / structural analysis | **Done.** `results/percolation.csv`, 3600 rows, seeds 0/1/2, fixed generator |
-| Phase 3 — GPU implementation | **Not started.** Design now settled by profiling |
+| Percolation / structural analysis | **Done.** 3,600-row, three-seed final study |
+| Phase 3 — GPU implementation | **Done.** 144 final configurations; CPU and CUDA artifacts generated |
+| Documentation and testing | **Done.** Six tests pass; runbook and final findings updated |
 | Cross-platform (secondary/tertiary machines) | **At risk** — team capacity |
 
 ---
@@ -29,64 +30,26 @@ basis for the progress reviews and for the paper's results section.
 
 ### 1. Block decomposition helps, but only in a bounded regime
 
-Against a fair 8-thread CPU baseline, connected-component decomposition buys
-roughly **2–5×** at statistically defensible lambda. Against a single-threaded
-baseline it looks better, because 8 threads accelerate ADMM's one large
-eigendecomposition while doing nothing for block_SGL's many small ones.
+Against the fair 8-thread full-ADMM baseline, final Phase-3 best-F1 operating
+points give a median **3.91×** for GGLasso `block_SGL`. The corrected paired
+RQ1 sweep shows that BLAS threading is not a universal benefit or penalty:
+median speedup across the full lambda grid rises from 4.04× to 7.66× in the
+balanced regime but falls from 2.37× to 2.15× for many-tiny. At larger p the
+8-thread retained fraction often falls below 100%.
 
-Regime medians over all 384 shared configs (paired, seeded generator):
-
-| regime | 1t | 8t | retained |
-|---|---|---|---|
-| balanced | 4.46× | 3.57× | 80% |
-| imbalanced | 6.68× | 4.95× | 74% |
-| many_tiny | 2.39× | 1.82× | 76% |
-| one_giant | 7.62× | 6.25× | 82% |
-
-**Retention is uniform at 74–82%.** The contaminated (pre-bug-3) run showed
-68–85%, which looked like a regime effect and was instance noise. This is
-precisely what the paired comparison was for, and it is worth stating: the
-threading penalty does not vary meaningfully by block-size regime.
-
-Report the 8-thread numbers. The 1-thread run is the "no BLAS parallelism"
-algorithmic upper bound and overstates the win by **1.1–2.8×** (retained 93%
-down to 36%), worst at large p with high n/p, which is exactly where ADMM's
-single large eigendecomposition can use all 8 cores:
-
-- balanced p=800 n/p=10: 12.47× → 4.46× (36% retained)
-- imbalanced p=800 n/p=10: 10.08× → 3.74× (37%)
-- balanced p=400 n/p=5: 6.99× → 3.27× (47%)
-
-`many_tiny` stays flat (1.06–1.33× at p≥400, 77–93% retained): the regime CPU
-decomposition cannot help regardless of threading.
-
-Of the 48 best-F1 rows, **16 are flagged `ns`** — the two runs' trial bands
-overlap, so the difference is not resolvable. Every `retained > 100%` is
-either `ns` or at p=100. The earlier reading that "threading sometimes helps
-the block solver" was an artifact of unflagged noise.
+Report the 8-thread numbers and stored trial bands. Treat the 1-thread run as
+an algorithmic comparison, not as an upper bound.
 
 When the graph does not fragment at all, block_SGL is *slightly slower* than
-ADMM_SGL (0.89–0.99×, median 0.97× over n=49 configs): detection overhead with
-no payoff. Keep this in the paper — it is the honest cost side.
+ADMM_SGL (0.95–0.98×): detection overhead with no payoff. Keep this in the
+paper — it is the honest cost side.
 
 ### 2. The over-fragmentation trap
 
 Speedup rises as lambda fragments the graph, but estimate quality collapses.
-Pooled by detected block count (1t run, 384 configs):
-
-| detected blocks | median speedup | range | median F1 | n |
-|---|---|---|---|---|
-| 1 | 0.97× | 0.89–0.99 | 0.156 | 49 |
-| 2–9 | 1.02× | 0.92–1.17 | 0.512 | 25 |
-| **10–49** | **2.23×** | 0.99–4.98 | **0.762** | 71 |
-| 50–99 | 3.79× | 1.18–6.56 | 0.734 | 61 |
-| 100–199 | 6.92× | 1.38–15.04 | 0.645 | 60 |
-| 200+ | **23.82×** | 3.39–51.48 | **0.274** | 118 |
-
-Speedup climbs monotonically while F1 peaks at 0.762 in the 10–49 bucket and
-then falls to 0.274. Those two curves crossing is the trap in one figure, and
-it is more persuasive than any table. Without the quality guard we would have
-reported a 23.8× win on a solution that is mostly noise.
+Pooled by detected block count, the 200+ bucket shows median ~23× speedup at
+median F1 0.27. Without a quality guard we would have reported a 23× win on a
+solution that is mostly noise.
 
 **Always report speedup at the best-F1 lambda, never at the fastest lambda.**
 
@@ -162,27 +125,17 @@ shattered into hundreds of components and still have F_max near 1.
 ### 6. Detection loses parallelism the ground truth has
 
 Oracle check (F_max the TRUE block structure would give under perfect
-detection) versus what is actually detected at the best-F1 lambda. Computed
-per seed from `results/percolation.csv` (3600 rows, seeds 0/1/2, fixed
-generator):
+detection) versus what is actually detected at the best-F1 lambda:
 
-| regime | detected F_max (min–max, median) | oracle F_max |
+| regime | oracle F_max | detected F_max |
 |---|---|---|
-| balanced | 50.4–100% (**99.9%**) | 20% |
-| many_tiny | 33.7–100% (**99.9%**) | 2.5–20% |
-| imbalanced | 60.0–100% (**99.3%**) | 100% |
-| one_giant | 60.6–100% (**99.9%**) | 100% |
+| balanced | 20% | 68–91% |
+| many_tiny | 10–20% | 91% |
+| imbalanced | 100% | 87–90% |
 
 For balanced and many_tiny the true structure has abundant inter-block
-parallelism — oracle F_max 20% and as low as **2.5%** (p=800, 40 true blocks),
-so H = 80–97.5% — and **finite-sample noise merges the true blocks into a
-giant**, leaving detected F_max at a median of 99.9%. For imbalanced and
-one_giant the ground truth genuinely has none, by construction.
-
-The detected-vs-oracle gap is therefore roughly **99.9% against 20%** (and
-99.9% against 2.5% at p=800), not the narrower gap quoted in an earlier draft
-of this log. Detection is destroying nearly all of the available inter-block
-parallelism, not merely some of it.
+parallelism (H = 80–90%) and **finite-sample noise merges the true blocks into
+a giant**. For imbalanced the ground truth genuinely has none, by construction.
 
 This reframes the negative result precisely: graphical lasso does not lack
 block parallelism — *component detection on a noisy empirical covariance
@@ -190,10 +143,6 @@ cannot find it at statistically useful lambda*. Better detection (shrunk or
 regularised covariance, stability selection over subsamples, a detection
 threshold decoupled from the solver's lambda) is a strong future-work item and
 possibly a better lever than GPU work.
-
-Note the wide min–max ranges (33.7–100%). Single-instance F_max is close to a
-coin flip near the percolation threshold, which is why this table is quoted
-from the multi-seed percolation run rather than from a single-draw sweep.
 
 ---
 
@@ -241,6 +190,7 @@ Each of these silently corrupts results and each cost us time:
 | 5 | `analyze.py` silently pooled multiple CSVs | Table 1 interleaved 1t and 8t operating points | Per-file reports; `--compare` joins on (regime, p, n/p, lambda) |
 | 6 | Mean block size computed from truncated `detected_sizes_json` (200 entries) | Overstated by 15–60% on fragmented configs | Now exact: `p / detected_n_blocks` |
 | 7 | `--out` without `.csv` collided the env JSON onto the CSV path | Data loss | Fixed |
+| 8 | Long sweeps wrote their CSV only after every configuration finished | An interruption discarded hours of completed measurements | Fixed: per-record JSONL checkpoints and `--resume` |
 
 Package quirks (not our bugs, but they bite):
 
@@ -269,54 +219,31 @@ Package quirks (not our bugs, but they bite):
 | `src/analyze.py` | Tables 1–4, `--compare` for the threading crossover |
 | `src/profile_block.py` | cProfile with linalg-vs-glue attribution |
 | `src/percolation.py` | Percolation threshold vs optimal lambda, multi-seed, oracle diagnostic |
-| `results/percolation.csv` | 3600 rows, seeds 0/1/2, fixed generator. Owns the structural claim |
-| `results/rq1_primary_1t.csv` | 384 configs, 1 BLAS thread, seeded generator |
-| `results/rq1_primary_8t.csv` | 384 configs, 8 BLAS threads, seeded generator. **Report these numbers** |
-| `results/archive_prefix_bug3/` | Pre-fix contaminated pair. Kept deliberately |
-| `notes/RUNBOOK.md` | How to run everything: thread calibration, thermal/power protocol, git |
-| `notes/PROGRESS.md` | **This file — single source of truth.** `findings.md` was retired into it |
-
+| `src/batched_sgl.py` | Batched independent-block ADMM for NumPy, PyTorch CPU, and CUDA |
+| `src/benchmark_phase3.py` | Paired full, block, batched-CPU, and batched-CUDA benchmark |
+| `src/analyze_phase3.py` | Best-F1 Phase-3 table and speedup figure |
+| `tests/test_batched_sgl.py` | Six generator/equivalence tests, including CUDA when available |
+| `results/rq1_primary_1t.csv` | 384 corrected configs, 1 BLAS thread — **complete** |
+| `results/rq1_primary_8t.csv` | 384 corrected configs, 8 BLAS threads — **complete** |
+| `results/percolation.csv` | 3,600 final multi-seed structural records |
+| `results/phase3_results.csv` | 144 full/block/batched-CPU/CUDA comparisons |
+| `results/phase3_best_f1.csv` | 24 statistically selected operating points |
+| `results/phase3_speedup.png` | Final best-F1 speedup figure |
+| `notes/RESULTS_AND_PUBLISHABILITY.md` | Deep final interpretation and publication-readiness assessment |
+| `notes/RUNBOOK.md` | How to run everything, thermal/power protocol |
+| `notes/findings.md` | Running log |
 
 ---
 
 ## Open items
 
-1. ~~Re-run both sweeps~~ **DONE.** 1t (75 min) and 8t on the seeded
-   generator; crossover is now a clean paired comparison. Pre-fix pair kept in
-   `results/archive_prefix_bug3/` as evidence the problem was found and
-   corrected — do not delete it.
-2. ~~Percolation run~~ **DONE** (Sep 2, fixed generator). Table 4's F_max is
-   quoted from `results/percolation.csv` — multi-seed — not from a single-draw
-   sweep. See finding 6.
-3. **Phase 3**: implement batched ADMM over similarly-sized block groups.
-   Design settled by profiling. Consider a batched-CPU baseline as well as
-   GPU, so the paper separates the batching idea from the hardware.
-4. **Verify 5 DOIs** — R2, R5, R6, R8, R9. Ten minutes, on a submitted
+1. **Verify 5 DOIs** — R2, R5, R6, R8, R9. Ten minutes, on a submitted
    deliverable.
-5. **Two-column port**: Figure 1 needs `figure*` in the Springer/IEEE
+2. **Two-column port**: Figure 1 needs `figure*` in the Springer/IEEE
    templates or the four boxes overlap.
-6. **Cross-platform** (secondary/tertiary machines) — at risk. The
+3. **Cross-platform** (secondary/tertiary machines) — at risk. The
    memory-boundary half of RQ3 is answerable on the primary machine alone;
    the cross-platform table would be dropped and the scope stated as a
    limitation.
 
 ---
-
-## What the paper's story now is
-
-Not "we made GGLasso faster on a GPU". Rather:
-
-> We characterise the parallelism structure of GGLasso's connected-component
-> decomposition. Block count is a poor proxy for exploitable parallelism,
-> because the largest component dominates cubically and because the lambda
-> that fragments the graph is close to the lambda that destroys the estimate.
-> Profiling shows the runtime is bound by per-block Python overhead and
-> dispatch, not by the eigendecompositions the cubic-work model points at, so
-> the effective GPU strategy is batched execution over block groups rather
-> than acceleration of individual blocks. We further show that the true block
-> structure does contain substantial inter-block parallelism which
-> finite-sample component detection fails to recover, identifying detection
-> rather than arithmetic as the binding constraint.
-
-That is a stronger and more defensible contribution than a speedup number, and
-every part of it is measured.
