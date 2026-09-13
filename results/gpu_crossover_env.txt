@@ -1,0 +1,11 @@
+torch 2.14.0+cu130
+cuda 13.0
+gpu NVIDIA GeForce RTX 5060 Laptop GPU
+compute_cap sm_120
+vram_total_mib 7708
+python 3.12.3
+numpy 2.4.4
+platform Linux-6.8.0-139-generic-x86_64-with-glibc2.39
+harness_commit ee38f30c81a4ab1a9ef793b8eac68bf3041a4420
+harness_md5_batched_admm 0148f0c018fbc59c61a522ecbbbefa74
+harness_md5_gpu_crossover f2567184ab3fd238491188145497a7ce
