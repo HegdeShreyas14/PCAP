@@ -402,6 +402,8 @@ def main():
     ap.add_argument("--rtol", type=float, default=1e-5)
     ap.add_argument("--max-iter", type=int, default=1000)
     ap.add_argument("--quick", action="store_true")
+    ap.add_argument("--resume", action="store_true",
+                    help="resume from the per-row JSONL checkpoint for --out")
     ap.add_argument("--blas-threads", type=int, default=1,
                     help="BLAS threads (applied before numpy import). "
                          "1 = clean algorithmic comparison; >1 = threaded CPU baseline.")
@@ -439,7 +441,22 @@ def main():
                    "trials": trials, "warmup": warmup,
                    "tol": args.tol, "rtol": args.rtol}, f, indent=2)
 
+    checkpoint_path = args.out + ".partial.jsonl"
     rows = []
+    completed = set()
+    if args.resume and os.path.exists(checkpoint_path):
+        with open(checkpoint_path, encoding="utf-8") as f:
+            for line in f:
+                if not line.strip():
+                    continue
+                row = json.loads(line)
+                rows.append(row)
+                completed.add((row["regime"], int(row["p"]),
+                               int(row["n_samples"]), float(row["lambda"])))
+        print(f"Resuming from {len(rows)} checkpointed configurations in "
+              f"{checkpoint_path}\n")
+    elif os.path.exists(checkpoint_path):
+        os.remove(checkpoint_path)
     total = len(regimes) * len(p_values) * len(ratios) * len(lambdas)
     i = 0
     for regime in regimes:
@@ -447,6 +464,11 @@ def main():
             for ratio in ratios:
                 for lam in lambdas:
                     i += 1
+                    key = (regime, p, ratio * p, float(lam))
+                    if key in completed:
+                        print(f"[{i:3d}/{total}] {regime:11s} p={p:4d} n/p={ratio:2d} "
+                              f"lam={lam:.2f} ... checkpointed")
+                        continue
                     print(f"[{i:3d}/{total}] {regime:11s} p={p:4d} n/p={ratio:2d} "
                           f"lam={lam:.2f} ... ", end="", flush=True)
                     try:
@@ -454,6 +476,9 @@ def main():
                                          warmup, trials, args.tol, args.rtol,
                                          args.max_iter, args.machine, env)
                         rows.append(row)
+                        with open(checkpoint_path, "a", encoding="utf-8") as checkpoint:
+                            checkpoint.write(json.dumps(row) + "\n")
+                            checkpoint.flush()
                         print(f"blocks={row['detected_n_blocks']:4d} "
                               f"speedup={row['algorithmic_speedup']:.2f}x "
                               f"[{row['speedup_lo']:.2f}-{row['speedup_hi']:.2f}] "
@@ -471,6 +496,8 @@ def main():
         w.writerows(rows)
     print(f"\nWrote {len(rows)} rows ({len(rows[0])} columns) to {args.out}")
     print(f"Environment written to {env_path}")
+    if os.path.exists(checkpoint_path):
+        os.remove(checkpoint_path)
 
     # RQ1 readout: speedup against DETECTED block count, bucketed.
     # F1 is shown alongside because a large lambda always looks fast: it
