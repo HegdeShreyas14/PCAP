@@ -340,6 +340,22 @@ def batched_block_SGL(S, lambda1, backend="numpy", device="cuda",
             continue
         groups.setdefault(idx.size, []).append(idx)
 
+    # Batch-composition memory metrics. A batched group is a (k, s, s) tensor,
+    # so its footprint scales as O(k * s^2), NOT as O(p^2). Peak VRAM is driven
+    # by whichever group MAXIMISES k*s^2 -- which is not necessarily the group
+    # with the largest s (that block is often alone, k=1) nor the group with
+    # the largest k (usually tiny crumbs). Record both the max-k and the
+    # max-(k*s^2) group so RQ3 can attribute memory to tensor shape rather than
+    # to global problem dimension p.
+    max_group_k = max((len(v) for v in groups.values()), default=0)
+    mem_group_s, mem_group_k, mem_group_ks2 = 0, 0, 0
+    for size, idx_list in groups.items():
+        ks2 = len(idx_list) * size * size
+        if ks2 > mem_group_ks2:
+            mem_group_ks2 = ks2
+            mem_group_s = size
+            mem_group_k = len(idx_list)
+
     info = {"n_blocks": numC, "n_singletons": len(singles),
             "n_groups": len(groups), "group_sizes": {}, "iters": {},
             "backend": backend,
@@ -351,6 +367,11 @@ def batched_block_SGL(S, lambda1, backend="numpy", device="cuda",
             # different artifact and should be labeled as such in any table
             # or figure: "CPU-best (batched)", not bare "CPU".
             "cpu_baseline_label": "CPU-best (batched numpy)" if backend == "numpy" else None,
+            # batch-composition memory metrics (see comment above)
+            "max_group_k": max_group_k,
+            "mem_group_s": mem_group_s,      # s of the memory-dominant group
+            "mem_group_k": mem_group_k,      # k of the memory-dominant group
+            "mem_group_ks2": mem_group_ks2,  # its k*s^2 (proportional to VRAM)
             "t_h2d": 0.0, "t_compute": 0.0, "t_d2h": 0.0,
             "max_conv_spread": 0.0}
 
