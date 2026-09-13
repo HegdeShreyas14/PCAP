@@ -9,10 +9,9 @@ __pycache__/
 venv/
 env/
 
-# Run artifacts — regenerable from src/ with fixed --seed(s).
-# To archive a specific result set for the paper: git add -f <path>
+# Run logs — regenerable, and noisy. Result CSVs ARE tracked (see runbook):
+# they are the data, they are small, and tags pin which code produced them.
 logs/
-results/
 
 # OS / editor
 .DS_Store
