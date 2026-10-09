@@ -74,12 +74,17 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # Pin BLAS before numpy import, same convention as sweep.py / percolation.py.
+# Explicit, not setdefault: an inherited OMP_NUM_THREADS used to win silently.
+_PRE = argparse.ArgumentParser(add_help=False)
+_PRE.add_argument("--blas-threads", type=int, default=8)
+_pre, _ = _PRE.parse_known_args()
 for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):
-    os.environ.setdefault(_v, "8")
+    os.environ[_v] = str(_pre.blas_threads)
 
 import numpy as np
 
 from blockgen import make_instance
+from provenance import write_env
 from batched_admm import batched_block_SGL, get_backend
 from gglasso.solver.single_admm_solver import get_connected_components, block_SGL
 
@@ -104,7 +109,7 @@ def timed_call(fn, warmup=2, trials=5):
 
 
 def main():
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(parents=[_PRE])
     ap.add_argument("--p", nargs="+", type=int, default=[1200])
     ap.add_argument("--regime", nargs="+", default=["many_tiny"])
     ap.add_argument("--ratio", type=int, default=10)
@@ -142,6 +147,7 @@ def main():
     lams = np.asarray(args.lam) if args.lam is not None else np.linspace(
         args.lam_min, args.lam_max, args.lam_steps)
     rows = []
+    print(f"environment -> {write_env(args.out, args=args, extra={'torch': torch.__version__, 'cuda': torch.version.cuda, 'gpu': torch.cuda.get_device_name(0), 'vram_total_mib': torch.cuda.get_device_properties(0).total_memory // 2**20})}")
 
     print(f"{'regime':11s} {'p':>5s} {'lam':>5s} {'blks':>5s} {'grps':>5s} "
           f"{'s_max':>6s} {'numpy':>8s} {'torch':>8s} {'ratio':>7s} {'maxdiff':>9s}")

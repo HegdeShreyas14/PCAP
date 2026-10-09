@@ -82,6 +82,7 @@ import gglasso
 from gglasso.solver.single_admm_solver import ADMM_SGL, block_SGL, get_connected_components
 
 from blockgen import make_instance, REGIMES
+from provenance import run_metadata, s_fingerprint
 
 
 # --------------------------------------------------------------------------
@@ -338,6 +339,8 @@ def run_config(regime, p, n_samples, lam, seed, warmup, trials,
         "lambda": lam,
         "seed": seed,
         "true_sparsity": sparsity(Theta_true),
+        # proves paired runs (1t vs 8t) saw the same data; compare with rtol
+        **s_fingerprint(S),
         # ground-truth block structure
         "true_n_blocks": len(true_sizes),
         "true_sizes_json": json.dumps(true_sizes),
@@ -437,7 +440,8 @@ def main():
     with open(env_path, "w") as f:
         json.dump({**env, "machine": args.machine,
                    "trials": trials, "warmup": warmup,
-                   "tol": args.tol, "rtol": args.rtol}, f, indent=2)
+                   "tol": args.tol, "rtol": args.rtol,
+                   "provenance": run_metadata(args)}, f, indent=2, default=str)
 
     rows = []
     total = len(regimes) * len(p_values) * len(ratios) * len(lambdas)

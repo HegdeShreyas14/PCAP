@@ -276,6 +276,23 @@ def compare(rows_a, label_a, rows_b, label_b):
     print(f"# {len(shared)} configurations present in both")
     print("#" * 92)
 
+    # A crossover is only meaningful if both runs solved the same problems.
+    # Bug 8: the pre-fix 1t/8t runs drew different S and agreed on detected
+    # structure in only 141/384 configs.
+    unpaired = [k for k in shared if A[k]["detected_sizes_json"] != B[k]["detected_sizes_json"]]
+    fp_cols = ("S_trace", "S_fro", "S_sum")
+    if all(c in A[next(iter(shared))] and c in B[next(iter(shared))] for c in fp_cols):
+        unpaired += [k for k in shared if k not in unpaired and any(
+            abs(float(A[k][c]) - float(B[k][c])) > 1e-9 * abs(float(A[k][c])) for c in fp_cols)]
+        how = "S fingerprint + detected structure"
+    else:
+        how = "detected structure only (no S fingerprint columns: pre-bug-8 data)"
+    print(f"# pairing check [{how}]: "
+          f"{len(shared) - len(unpaired)}/{len(shared)} configurations identical")
+    if unpaired:
+        print(f"# !! {len(unpaired)} configurations differ between runs: these runs are NOT")
+        print("# !! paired, and the retention numbers below mix threading with instance noise.")
+
     print()
     print("Regime medians (all shared configs)")
     print("-" * 92)

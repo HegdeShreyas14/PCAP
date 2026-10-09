@@ -67,6 +67,7 @@ _set_blas_threads(_pre.blas_threads)
 import numpy as np
 
 from blockgen import make_instance, REGIMES
+from provenance import write_env, s_fingerprint
 from gglasso.solver.single_admm_solver import get_connected_components, block_SGL
 
 
@@ -151,6 +152,7 @@ def main():
 
     lams = np.linspace(args.lam_min, args.lam_max, args.lam_steps)
     rows = []
+    print(f"environment -> {write_env(args.out, args=args)}")
 
     print(f"BLAS threads: {os.environ.get('OMP_NUM_THREADS')}   "
           f"seeds: {args.seeds}   tol={args.tol} rtol={args.rtol}\n")
@@ -169,6 +171,7 @@ def main():
                         regime, p, ratio * p, seed=seed)
                     S = S[0] if S.ndim == 3 else S
                     Omega_0 = np.eye(p)
+                    fp = s_fingerprint(S)
 
                     # Oracle: F_max the TRUE block structure would give if
                     # detection were perfect. If oracle F_max is low but the
@@ -187,7 +190,7 @@ def main():
                                   tol=args.tol, rtol=args.rtol,
                                   oracle_F_max=oracle_fmax,
                                   true_n_blocks=len(sizes),
-                                  **{"lambda": float(lam)})
+                                  **fp, **{"lambda": float(lam)})
                         if not args.no_f1:
                             try:
                                 with _silence():
