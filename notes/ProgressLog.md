@@ -17,9 +17,9 @@ basis for the progress reviews and for the paper's results section.
 |---|---|
 | Literature survey + methodology | **Submitted.** 10 recent refs; 5 DOIs still unverified |
 | Phase 1 — reproduction, environment capture | **Done** |
-| RQ1 — CPU baseline sweeps | **Done.** 1t + 8t, 384 configs each, seeded generator, paired |
+| RQ1 — CPU baseline sweeps | **Re-run needed** (bug 8): 1t and 8t used different S. Sampler fixed 2026-10-09 |
 | Profiling | **Done.** Decides the Phase 3 design |
-| Percolation / structural analysis | **Done.** `results/percolation.csv`, 3600 rows, seeds 0/1/2, fixed generator |
+| Percolation / structural analysis | **Re-run needed** (bug 8): `results/percolation.csv` does not reproduce from committed code |
 | Phase 3 — GPU implementation | **Not started.** Design now settled by profiling |
 | Cross-platform (secondary/tertiary machines) | **At risk** — team capacity |
 
@@ -241,6 +241,7 @@ Each of these silently corrupts results and each cost us time:
 | 5 | `analyze.py` silently pooled multiple CSVs | Table 1 interleaved 1t and 8t operating points | Per-file reports; `--compare` joins on (regime, p, n/p, lambda) |
 | 6 | Mean block size computed from truncated `detected_sizes_json` (200 entries) | Overstated by 15–60% on fragmented configs | Now exact: `p / detected_n_blocks` |
 | 7 | `--out` without `.csv` collided the env JSON onto the CSV path | Data loss | Fixed |
+| 8 | Seeded S still **depended on BLAS thread count**: gglasso's `sample_covariance_matrix` uses `multivariate_normal(method='svd')`, and the SVD of our block-diagonal Sigma (repeated eigenvalues) differs by thread count. Same seed → S differing by 0.1–0.5 per entry at 1t vs 8t | 1t/8t "paired" sweeps were not paired: detected block count matched in only 141/384 configs, and differed in 40 of the 48 best-F1 rows. Separately: `percolation.csv` does not reproduce from any committed code (rerun of 300 rows at 8 threads with HEAD 96f4249: 59/300 block counts match). Its Sep 2 20:18 timestamp, same day as the archived pre-fix sweeps, suggests it predates the bug-3 fix, but git cannot confirm this | Fixed 2026-10-09: Cholesky draw in `blockgen.sample_covariance`; regression test `tests/test_sampling_determinism.py`. **All datasets in `results/` must be regenerated** — Findings 1, 4, 5, 6 numbers are provisional until then |
 
 Package quirks (not our bugs, but they bite):
 
@@ -269,9 +270,9 @@ Package quirks (not our bugs, but they bite):
 | `src/analyze.py` | Tables 1–4, `--compare` for the threading crossover |
 | `src/profile_block.py` | cProfile with linalg-vs-glue attribution |
 | `src/percolation.py` | Percolation threshold vs optimal lambda, multi-seed, oracle diagnostic |
-| `results/percolation.csv` | 3600 rows, seeds 0/1/2, fixed generator. Owns the structural claim |
-| `results/rq1_primary_1t.csv` | 384 configs, 1 BLAS thread, seeded generator |
-| `results/rq1_primary_8t.csv` | 384 configs, 8 BLAS threads, seeded generator. **Report these numbers** |
+| `results/percolation.csv` | 3600 rows, seeds 0/1/2. **Stale** (bug 8): does not reproduce; regenerate before quoting |
+| `results/rq1_primary_1t.csv` | 384 configs, 1 BLAS thread. **Not paired with 8t** (bug 8); regenerate |
+| `results/rq1_primary_8t.csv` | 384 configs, 8 BLAS threads. **Not paired with 1t** (bug 8); regenerate |
 | `results/archive_prefix_bug3/` | Pre-fix contaminated pair. Kept deliberately |
 | `notes/RUNBOOK.md` | How to run everything: thread calibration, thermal/power protocol, git |
 | `notes/PROGRESS.md` | **This file — single source of truth.** `findings.md` was retired into it |

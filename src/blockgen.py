@@ -19,7 +19,7 @@ structure is exactly what we specify.
 """
 
 import numpy as np
-from gglasso.helper.data_generation import generate_precision_matrix, sample_covariance_matrix
+from gglasso.helper.data_generation import generate_precision_matrix
 
 
 def generate_block_precision(block_sizes, seed=None, style="powerlaw",
@@ -191,9 +191,30 @@ def make_instance(regime, p, n_samples, seed=0, style="powerlaw", strict=False):
     #
     # Offset so the sample seed differs from the network seed; using the same
     # integer for both would correlate the graph and the draw.
-    S, _ = sample_covariance_matrix(Sigma, n_samples,
-                                    seed=None if seed is None else seed + 90000)
+    S = sample_covariance(Sigma, n_samples,
+                          seed=None if seed is None else seed + 90000)
     return S, Theta, true_blocks, sizes, styles
+
+
+def sample_covariance(Sigma, n_samples, seed=None):
+    """
+    Draw n_samples from N(0, Sigma) and return the biased sample covariance.
+
+    Replaces gglasso's sample_covariance_matrix, which calls
+    rng.multivariate_normal with its default method='svd'. Our Sigma is block
+    diagonal with repeated eigenvalues, so the singular vectors LAPACK returns
+    -- and therefore the samples -- depend on the BLAS thread count. Measured:
+    the same seed gave S differing by 0.1-0.5 per entry at 1 vs 8 threads, so
+    the 1t and 8t sweeps silently ran on different data.
+
+    The Cholesky factor is unique, so this draw is identical across thread
+    counts up to round-off (<1e-12 measured at p=800).
+    """
+    rng = np.random.default_rng(seed)
+    L = np.linalg.cholesky(Sigma)
+    X = rng.standard_normal((n_samples, Sigma.shape[0])) @ L.T
+    # same estimator as gglasso: np.cov(sample, bias=True), i.e. mean-centred, /N
+    return np.cov(X, rowvar=False, bias=True)
 
 
 if __name__ == "__main__":
