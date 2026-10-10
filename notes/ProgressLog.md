@@ -186,12 +186,10 @@ block-parallel approach itself rather than any implementation.
 Note `F_max` is a **cubic-work** fraction, not a node fraction. A graph can be
 shattered into hundreds of components and still have F_max near 1.
 
-### 6. Detection loses parallelism the ground truth has
+### 6. The estimator, not detection, merges the true blocks
 
-Oracle check (F_max the TRUE block structure would give under perfect
-detection) versus what is actually detected at the best-F1 lambda. Computed
-per seed from `results/percolation.csv` (3600 rows, seeds 0/1/2, re-run
-generator):
+Oracle F_max (what the TRUE block structure would allow) versus the F_max of
+the components at the best-F1 lambda, per seed from `results/percolation.csv`:
 
 | regime | detected F_max (min–max, median) | oracle F_max |
 |---|---|---|
@@ -200,27 +198,40 @@ generator):
 | imbalanced | 43.1–100% (**99.4%**) | 100% |
 | one_giant | 58.7–100% (**99.9%**) | 100% |
 
-For balanced and many_tiny the true structure has abundant inter-block
-parallelism — oracle F_max 20% and as low as **2.5%** (p=800, 40 true blocks),
-so H = 80–97.5% — and **finite-sample noise merges the true blocks into a
-giant**, leaving detected F_max at a median of 99.9%. For imbalanced and
-one_giant the ground truth genuinely has none, by construction.
+For balanced and many_tiny the truth has abundant inter-block parallelism
+(H = 80–97.5%) and the components have almost none. For imbalanced and
+one_giant the truth has none by construction.
 
-The detected-vs-oracle gap is therefore roughly **99.9% against 20%** (and
-99.9% against 2.5% at p=800), not the narrower gap quoted in an earlier draft
-of this log. Detection is destroying nearly all of the available inter-block
-parallelism, not merely some of it.
+**This is not a detection failure.** Thresholding |S| at lambda and taking
+connected components gives *exactly* the vertex partition of the graphical
+lasso solution at that lambda (Witten, Friedman & Simon 2011; Mazumder & Hastie
+2012; gglasso's `block_SGL` cites the former). Verified on our instances:
+solving the full problem without decomposition (tol 1e-10) gives an identical
+partition in **36/36** best-F1 cells at p ≤ 400
+(`results/screening_exactness.csv`). The giant component is a property of the
+graphical lasso *estimate* at its statistically best lambda, not of the
+screening step.
 
-This reframes the negative result precisely: graphical lasso does not lack
-block parallelism — *component detection on a noisy empirical covariance
-cannot find it at statistically useful lambda*. Better detection (shrunk or
-regularised covariance, stability selection over subsamples, a detection
-threshold decoupled from the solver's lambda) is a strong future-work item and
-possibly a better lever than GPU work.
+**Mechanism: a handful of spurious cross-block entries fuses the true blocks**
+(`results/screening_cross_block.csv`, 72 best-F1 cells). In balanced, only a
+median **3–4%** of above-threshold entries of S join two different true blocks
+(e.g. 33–42 of ~1,900 at p=800, n/p=10), yet that fuses all 5 true blocks into
+the giant at every p ≥ 200. In many_tiny at p ≥ 400 the spurious share is
+~25% and all 20–40 true blocks fuse. The giant fuses ≥ 2 true blocks in
+68/72 cells. Because components are connectivity, one spurious entry per
+block pair is enough; F1 barely notices (3% of edges) while parallelism
+collapses.
 
-Note the wide min–max ranges (26.2–100%). Single-instance F_max is close to a
-coin flip near the percolation threshold, which is why this table is quoted
-from the multi-seed percolation run rather than from a single-draw sweep.
+**Consequence for "better detection".** Any partition finer than the
+thresholded one (a higher threshold, a shrunk covariance, stability
+selection) no longer yields the graphical lasso solution at lambda: solving
+the pieces independently is then an approximation, or a different estimator.
+That is a real trade-off (parallelism vs exactness) and the right framing for
+future work, not "detection is broken". The open question becomes: how much
+estimation error does a parallelism-preserving partition cost?
+
+Single-instance F_max is close to a coin flip near the percolation threshold
+(min–max 26.2–100%), which is why this table is multi-seed.
 
 ### 7. RQ2/RQ3: batching wins on CPU; the GPU only wins on one giant block
 
@@ -388,12 +399,15 @@ Not "we made GGLasso faster on a GPU". Rather:
 > because the largest component dominates cubically and because the lambda
 > that fragments the graph is close to the lambda that destroys the estimate.
 > Profiling shows the runtime is bound by per-block Python overhead and
-> dispatch, not by the eigendecompositions the cubic-work model points at, so
-> the effective GPU strategy is batched execution over block groups rather
-> than acceleration of individual blocks. We further show that the true block
-> structure does contain substantial inter-block parallelism which
-> finite-sample component detection fails to recover, identifying detection
-> rather than arithmetic as the binding constraint.
+> dispatch, not by the eigendecompositions the cubic-work model points at;
+> batching the per-block work recovers 1.25-1.7x on CPU, but on a consumer
+> GPU launch overhead erases it below ~2000-node blocks, so the GPU only pays
+> when one giant block dominates. Finally, the true structure contains
+> substantial inter-block parallelism that the graphical lasso estimate itself
+> does not have: screening is exact, and a few spurious cross-block entries
+> fuse the true blocks at the statistically best lambda. Recovering that
+> parallelism requires trading away exactness, which identifies estimation,
+> not arithmetic, as the binding constraint.
 
 That is a stronger and more defensible contribution than a speedup number, and
 every part of it is measured.
