@@ -1,0 +1,2 @@
+regime,p,lam,n_blocks,n_groups,s_max,cubic_gain,f_max,t_numpy,t_torch,t_torch_h2d,t_torch_compute,t_torch_d2h,max_conv_spread,max_group_k,mem_group_k,mem_group_s,mem_group_ks2,ratio_torch_over_numpy,peak_gpu_mem_mb,cpu_baseline_label,max_diff,t_ref
+many_tiny,2400,0.08,186,10,1958,1.8415995071201907,0.9999989116125598,7.651179467000475,5.6343482940001195,0.007383909000964195,5.497520319000614,0.01443180600017513,16.0,60,1,1958,3833764,1.3579528754280294,478.287109375,CPU-best (batched numpy),2.6201263381153694e-14,6.195246336000309

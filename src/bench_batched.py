@@ -47,6 +47,7 @@ import numpy as np
 
 from gglasso.solver.single_admm_solver import block_SGL, get_connected_components
 from blockgen import make_instance
+from provenance import write_env
 from batched_admm import batched_block_SGL
 
 
@@ -111,6 +112,7 @@ def main():
     args = ap.parse_args()
 
     lam_map = best_f1_lambdas(args.ref_csv)
+    print(f"environment -> {write_env(args.out, args=args)}")
     print(f"BLAS threads: {os.environ['OMP_NUM_THREADS']}   "
           f"trials={args.trials} warmup={args.warmup}   seed={args.seed}")
     print(f"lambda: {'override ' + str(args.lam) if args.lam else 'best-F1 from ' + args.ref_csv}")
