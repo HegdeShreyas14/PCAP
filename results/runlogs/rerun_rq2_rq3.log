@@ -1,0 +1,14 @@
+commit e86f56b664cf18c516495c13ba5f491b8ab3fae1  started 2026-10-10T19:19:34+05:30
+OK: S is identical (to 1e-10) at 1 and 8 BLAS threads
+[2026-10-10T19:19:35+05:30] START batched_cpu
+[2026-10-10T19:20:11+05:30] DONE  batched_cpu
+[2026-10-10T19:20:11+05:30] START batched_cpu_gpu
+[2026-10-10T19:21:23+05:30] DONE  batched_cpu_gpu
+[2026-10-10T19:21:23+05:30] START gpu_crossover
+[2026-10-10T19:33:09+05:30] DONE  gpu_crossover
+[2026-10-10T19:33:09+05:30] START gpu_mem_2400
+[2026-10-10T19:34:59+05:30] DONE  gpu_mem_2400
+[2026-10-10T19:34:59+05:30] START gpu_mem_3200
+[2026-10-10T19:38:49+05:30] DONE  gpu_mem_3200
+[2026-10-10T19:38:49+05:30] ALL DONE
+[2026-10-10T19:38:49+05:30] restarted trade_plat container

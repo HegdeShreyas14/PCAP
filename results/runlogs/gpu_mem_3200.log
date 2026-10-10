@@ -1,0 +1,10 @@
+environment -> results/gpu_mem_3200_env.json
+regime          p   lam  blks  grps  s_max    numpy    torch   ratio   maxdiff
+--------------------------------------------------------------------------------------------
+many_tiny    3200  0.06   102     6   3006 13.3114s 10.8322s   1.23x  2.13e-14
+    torch breakdown: h2d=9.8ms  compute=10647.5ms  d2h=30.4ms  F_max=100.0%  peak_vram=1066.2MB
+
+Wrote 1 rows to results/gpu_mem_3200.csv
+
+Crossover (first s_max where torch/numpy ratio exceeds 1.0):
+  many_tiny p=3200: s_max=3006 (n_groups=6, lambda=0.06)

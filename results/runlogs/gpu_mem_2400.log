@@ -1,0 +1,10 @@
+environment -> results/gpu_mem_2400_env.json
+regime          p   lam  blks  grps  s_max    numpy    torch   ratio   maxdiff
+--------------------------------------------------------------------------------------------
+many_tiny    2400  0.08   182     9   2001  5.7829s  5.8036s   1.00x  4.77e-14
+    torch breakdown: h2d=5.0ms  compute=5704.4ms  d2h=13.9ms  F_max=100.0%  peak_vram=490.3MB
+
+Wrote 1 rows to results/gpu_mem_2400.csv
+
+Crossover (first s_max where torch/numpy ratio exceeds 1.0):
+  many_tiny p=2400: no crossover in range. Best: 1.00x at s_max=2001

@@ -415,7 +415,8 @@ def fig_rq2_crossover(res, out, ext):
 
     ax.axhline(1.0, color=COL["grey"], lw=0.8, ls="--")
     ax.set_xlabel("$s_{\\max}$ (largest detected block)", fontsize=8)
-    ax.set_ylabel("Ratio: $T_{\\mathrm{torch}}/T_{\\mathrm{numpy}}$", fontsize=8)
+    # column is named ratio_torch_over_numpy but holds t_numpy / t_torch (GPU speedup)
+    ax.set_ylabel("GPU speedup: $T_{\\mathrm{numpy}}/T_{\\mathrm{torch}}$", fontsize=8)
     ax.legend(fontsize=6.5, frameon=False, loc="upper left")
     save(fig, out, "fig5_rq2_crossover", ext)
 
@@ -468,10 +469,19 @@ def fig_rq2_timing_breakdown(res, out, ext):
 # Fig 7: RQ3 VRAM model, fitted + held-out anchors
 # --------------------------------------------------------------------------
 
-def fig_rq3_vram(res, out, ext, fit_below=2000, device_mib=8151):
+def fig_rq3_vram(res, out, ext, fit_below=2000, device_mib=None):
     rows = load_csv(os.path.join(res, "gpu_crossover.csv"))
     if rows is None:
         return
+    if device_mib is None:
+        # the device the data was measured on, as recorded by the run itself
+        env = os.path.join(res, "gpu_crossover_env.json")
+        try:
+            device_mib = float(json.load(open(env))["vram_total_mib"])
+        except (OSError, KeyError, ValueError):
+            print(f"  [skip] fig7: no vram_total_mib in {env}; pass --device-mib",
+                  file=sys.stderr)
+            return
 
     anchors = []
     for fn in ("gpu_mem_2400.csv", "gpu_mem_3200.csv"):
@@ -580,8 +590,8 @@ def main():
     ap.add_argument("--perc-regime", default="balanced")
     ap.add_argument("--perc-p", type=int, default=400)
     ap.add_argument("--perc-ratio", type=int, default=10)
-    ap.add_argument("--device-mib", type=float, default=8151,
-                    help="GPU memory, for the RQ3 limit line")
+    ap.add_argument("--device-mib", type=float, default=None,
+                    help="GPU memory (MiB) for the RQ3 limit line; default: vram_total_mib from gpu_crossover_env.json")
     args = ap.parse_args()
 
     set_style()

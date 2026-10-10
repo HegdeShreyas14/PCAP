@@ -20,7 +20,7 @@ basis for the progress reviews and for the paper's results section.
 | RQ1 — CPU baseline sweeps | **Done (re-run 2026-10-10, commit 50ec233).** 1t + 8t, 384 configs each, pairing verified 384/384 |
 | Profiling | **Done.** Decides the Phase 3 design |
 | Percolation / structural analysis | **Done (re-run 2026-10-10, commit 50ec233).** 3600 rows, seeds 0/1/2; seed 0 matches RQ1 8t on 192/192 points |
-| Phase 3 — GPU implementation | **Not started.** Design now settled by profiling |
+| Phase 3 — GPU implementation | **Done; re-measured 2026-10-10 (commit e86f56b).** Batched CPU + torch solver, crossover, VRAM model |
 | Cross-platform (secondary/tertiary machines) | **At risk** — team capacity |
 
 ---
@@ -222,6 +222,36 @@ Note the wide min–max ranges (26.2–100%). Single-instance F_max is close to 
 coin flip near the percolation threshold, which is why this table is quoted
 from the multi-seed percolation run rather than from a single-draw sweep.
 
+### 7. RQ2/RQ3: batching wins on CPU; the GPU only wins on one giant block
+
+Re-measured 2026-10-10, commit e86f56b, performance profile, nothing else
+running (`results/runlogs/machine_state_rq2_rq3.txt`). Every batched result
+matches block_SGL to ≤ 1e-13.
+
+- **Batched CPU** (`batched_cpu.csv`, best-F1 lambda, p = 200–800):
+  **1.25–1.69×** over block_SGL. This is the batching idea on its own, with no
+  hardware change.
+- **Batched GPU at the same configs** (`batched_cpu_gpu.csv`): **0.10–0.79×**,
+  i.e. 1.3–10× *slower* than batched CPU. Launch and synchronisation overhead
+  per ADMM iteration swamps blocks of this size.
+- **Crossover** (`gpu_crossover.csv`, many_tiny, λ scan): at p = 1200 the GPU
+  never wins (best 0.95×, at one 1200-node block). At p = 2000 it first wins at
+  **s_max ≈ 1950 (1.07×)**. Anchors: 1.00× at s_max 2001 (p = 2400), 1.23× at
+  s_max 3006 (p = 3200). Host↔device transfer is ≤ 0.3% of GPU wall time, so
+  the loss is compute-side launch overhead, not PCIe.
+- **VRAM model** (RQ3): quadratic fit on s_max ≤ 2000 (R² = 1.000) predicts the
+  held-out anchors within **+0.1% and +0.2%**. On the 7707 MiB device it hits
+  the limit at s_max ≈ 8200, so memory is not the binding constraint in any
+  regime measured here.
+
+So the GPU's advantage is not batching: it wins only when one ≳2000-node block
+dominates, i.e. when the problem is essentially one large eigendecomposition.
+The paper must say this plainly; it inverts the original "batched GPU" pitch.
+
+The pre-fix measurements claimed crossovers at s_max 1035 / 1522 and 1.36× /
+1.59× at the anchors. Those were inflated ~30% by a throttled CPU baseline
+(bug 9), not by the sampler change.
+
 ---
 
 ## Measurement discipline learned the hard way
@@ -255,6 +285,14 @@ Each of these silently corrupts results and each cost us time:
    `tracemalloc` both add overhead. Iteration counts and peak memory are
    collected in separate untimed runs.
 
+6. **Record the machine state, and check for competing load.** A Docker
+   container from another project (2 cores busy, restarts on boot) and an
+   unrecorded power profile slowed 8-thread CPU runs by 16% (median per ADMM
+   iteration, up to 46%). Single-threaded runs were unaffected. RQ1 speedups
+   survived because both CPU solvers slowed together, but every GPU-vs-CPU
+   ratio was inflated ~30% (bug 9). `results/runlogs/machine_state*.txt` now
+   records profile, governor, load and what was stopped.
+
 ---
 
 ## Bugs found and fixed
@@ -269,6 +307,7 @@ Each of these silently corrupts results and each cost us time:
 | 6 | Mean block size computed from truncated `detected_sizes_json` (200 entries) | Overstated by 15–60% on fragmented configs | Now exact: `p / detected_n_blocks` |
 | 7 | `--out` without `.csv` collided the env JSON onto the CSV path | Data loss | Fixed |
 | 8 | Seeded S still **depended on BLAS thread count**: gglasso's `sample_covariance_matrix` uses `multivariate_normal(method='svd')`, and the SVD of our block-diagonal Sigma (repeated eigenvalues) differs by thread count. Same seed → S differing by 0.1–0.5 per entry at 1t vs 8t | 1t/8t "paired" sweeps were not paired: detected block count matched in only 141/384 configs, and differed in 40 of the 48 best-F1 rows. Separately: `percolation.csv` does not reproduce from any committed code (rerun of 300 rows at 8 threads with HEAD 96f4249: 59/300 block counts match). Its Sep 2 20:18 timestamp, same day as the archived pre-fix sweeps, suggests it predates the bug-3 fix, but git cannot confirm this | Fixed 2026-10-09: Cholesky draw in `blockgen.sample_covariance`; regression test `tests/test_sampling_determinism.py`. **All datasets in `results/` must be regenerated** — Findings 1, 4, 5, 6 numbers are provisional until then |
+| 9 | Machine state uncontrolled and unrecorded: competing Docker container (2 cores) and unrecorded power profile during the Sep runs | 8-thread CPU baseline 16% slower per iteration (up to 46%); GPU/CPU ratios inflated ~30%: claimed crossovers at s_max 1035/1522 are really none / ~1950. RQ1 ratios unaffected (0.98 median) | Re-measured 2026-10-10 on a quiet machine, `performance` profile; state recorded in `results/runlogs/machine_state*.txt`. Fig 5 axis label also fixed: it plots T_numpy/T_torch, not T_torch/T_numpy |
 
 Package quirks (not our bugs, but they bite):
 
@@ -306,7 +345,8 @@ Package quirks (not our bugs, but they bite):
 | `results/runlogs/` | Run logs, machine state (performance profile, competing container stopped), pairing check, profiling |
 | `results/archive_prefix_bug8/` | Unpaired pre-bug-8 RQ1 pair + irreproducible percolation. Kept deliberately |
 | `results/archive_prefix_bug3/` | Pre-bug-3 contaminated pair. Kept deliberately |
-| `results/gpu_crossover.csv`, `batched_cpu*.csv`, `gpu_mem_*.csv` | RQ2/RQ3. Produced with the **pre-bug-8 sampler** (commit ee38f30 / 96f4249); valid as run, not regenerable from current code |
+| `results/gpu_crossover.csv`, `batched_cpu*.csv`, `gpu_mem_*.csv` | RQ2/RQ3, commit e86f56b, each with `_env.json`. Pre-fix versions in `results/archive_prefix_bug8/` |
+| `src/make_graph.py` | All 7 paper figures from `results/`; VRAM limit read from the run's env |
 | `notes/RUNBOOK.md` | How to run everything: thread calibration, thermal/power protocol, git |
 | `notes/PROGRESS.md` | **This file — single source of truth.** `findings.md` was retired into it |
 
@@ -322,8 +362,8 @@ Package quirks (not our bugs, but they bite):
    it; seed 0 matches the RQ1 8t sweep on 192/192 points.
 2a. ~~Figure 1 by regime~~ **DONE**: now `fig1_rq1_threading` — (a) best-F1
    speedup vs p at 1t/8t, (b) per-config retention vs p with `ns` hollow.
-2b. **RQ2/RQ3 data** predate the sampler fix. Re-run `gpu_crossover.py` and
-   `bench_batched.py` before submission so every dataset comes from one commit.
+2b. ~~RQ2/RQ3 re-run~~ **DONE 2026-10-10** (19 min, commit e86f56b). See
+   finding 7: crossover moved from s_max ~1000–1500 to ~1950 (bug 9).
 3. **Phase 3**: implement batched ADMM over similarly-sized block groups.
    Design settled by profiling. Consider a batched-CPU baseline as well as
    GPU, so the paper separates the batching idea from the hardware.

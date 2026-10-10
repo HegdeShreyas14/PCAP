@@ -1,0 +1,18 @@
+environment -> results/batched_cpu_gpu_env.json
+BLAS threads: 8   trials=9 warmup=2   seed=0
+lambda: best-F1 from results/rq1_primary_8t.csv
+backends: block_SGL (ref) + batched ['numpy', 'torch']
+
+regime         p  n/p   lam  blks  grps    ref_s bat_numpy  x vs ref   maxdiff bat_torch  x vs ref   maxdiff
+------------------------------------------------------------------------------------------------------------
+imbalanced   200   10  0.10    44     7   0.0231    0.0163     1.42x   4.9e-15    0.1496     0.15x   7.3e-15
+imbalanced   400   10  0.10   113    12   0.0406    0.0242     1.68x   8.7e-15    0.2395     0.17x   6.1e-15
+imbalanced   800   10  0.05   175    13   0.1630    0.1025     1.59x   8.7e-15    0.3936     0.41x   1.0e-14
+many_tiny    200   10  0.15    57     9   0.0233    0.0185     1.26x   3.8e-15    0.2227     0.10x   6.3e-15
+many_tiny    400   10  0.20    60     5   0.3153    0.2514     1.25x   1.2e-14    0.7188     0.44x   8.9e-15
+many_tiny    800   10  0.10    45     4   1.0667    0.8856     1.20x   7.8e-15    1.3442     0.79x   1.0e-14
+
+Wrote 6 rows to results/batched_cpu_gpu.csv
+
+maxdiff is vs block_SGL at identical tol/rtol/max_iter/rho. Anything above ~1e-10 means the batched path is NOT solving the same problem.
+grps = distinct block SIZES, i.e. number of batched calls. Batching only pays when blocks share sizes; many groups means little batching.
