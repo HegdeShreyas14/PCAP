@@ -1,0 +1,7 @@
+recorded 2026-10-10T20:15:22+05:30 before fp32_diagnostic.py
+power_profile performance
+governor performance
+stopped: docker trade_plat-matching-engine-1 (restarted on exit)
+name, driver_version, temperature.gpu, utilization.gpu [%], memory.used [MiB]
+NVIDIA GeForce RTX 5060 Laptop GPU, 595.91.07, 47, 7 %, 15 MiB
+loadavg 2.00 2.67 3.02 2/1506 40427

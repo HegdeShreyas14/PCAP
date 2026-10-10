@@ -1,0 +1,10 @@
+environment -> results/fp32_diagnostic_env.json
+pre-registered criteria: {"all_converged": true, "max_obj_rel_diff": 1e-06, "max_theta_rel_err": 0.001, "max_err_ratio_vs_fp64": 10.0, "max_support_disagreement": 0.001, "max_nonmarginal_flips": 0, "max_f1_abs_diff": 0.005}
+s_max=  120 lam=0.226  numpy64 0.205s  torch64 1.057s  torch32 1.174s  | GPU speedup fp64 0.19x fp32 0.17x  | PASS
+s_max=  392 lam=0.161  numpy64 0.442s  torch64 1.380s  torch32 0.790s  | GPU speedup fp64 0.32x fp32 0.56x  | PASS
+s_max= 1027 lam=0.117  numpy64 1.553s  torch64 2.175s  torch32 0.719s  | GPU speedup fp64 0.71x fp32 2.16x  | PASS
+s_max= 2000 lam=0.030  numpy64 5.826s  torch64 5.370s  torch32 0.876s  | GPU speedup fp64 1.08x fp32 6.65x  | PASS
+
+wrote 4 rows to results/fp32_diagnostic.csv
+exit 0
+[2026-10-10T20:20:03+05:30] restarted trade_plat container
