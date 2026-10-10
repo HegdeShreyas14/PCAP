@@ -1,0 +1,37 @@
+config      : balanced  p=800  n/p=10  lam=0.1  seed=0  blas_threads=1
+true blocks : 5  (max 160)
+detected    : 244 blocks, 110 singletons, largest 192  ->  F_max(cubic) = 0.996
+solver      : tol=1e-07 rtol=1e-05 max_iter=1000  repeats=7 (warmup 2)
+------------------------------------------------------------------------------
+wall (median of 7)   215.11 ms     [min 214.32 ms, max 216.35 ms]
+
+  eigh           125.68 ms    58.4%   2302 calls
+  detect           8.01 ms     3.7%
+  assemble         5.29 ms     2.5%   (block_diag only)
+  glue            76.14 ms    35.4%   (loop + slicing + ADMM_SGL setup + inverse-perm indexing)
+
+  eigh calls  : mean 0.05 ms  median 0.01 ms  p90 0.01 ms  max 1.72 ms
+  largest call: 1.72 ms  = 1.4% of all eigh time  (dim 192)
+  eigh dims   : 1-2:583  3-8:1435  9-20:175  21-50:40  151-:69
+------------------------------------------------------------------------------
+verdict     : OVERHEAD-BOUND, NO DOMINANT KERNEL — eigh is the plurality of wall but spread over 2302 sub-ms calls
+            (largest 1%). Batching amortizes both the eig calls and the per-iteration Python cost.
+              eigh 58% of wall | largest eigh 1.4% of eigh | mean call 0.05 ms over 2302 calls
+------------------------------------------------------------------------------
+cProfile (top 12 by cumulative time):
+           250034 function calls (250033 primitive calls) in 1.026 seconds
+     Ordered by: cumulative time
+     List reduced from 202 to 12 due to restriction <12>
+     ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+          1    0.016    0.016    1.026    1.026 /home/hegde/Desktop/PCAP_Project/.venv/lib/python3.12/site-packages/gglasso/solver/single_admm_solver.py:331(block_SGL)
+        134    0.064    0.000    0.812    0.006 /home/hegde/Desktop/PCAP_Project/.venv/lib/python3.12/site-packages/gglasso/solver/single_admm_solver.py:15(ADMM_SGL)
+       2168    0.030    0.000    0.362    0.000 /home/hegde/Desktop/PCAP_Project/src/profile_block.py:84(_timed_eigh)
+       2168    0.057    0.000    0.338    0.000 /home/hegde/Desktop/PCAP_Project/.venv/lib/python3.12/site-packages/gglasso/solver/single_admm_solver.py:282(ADMM_stopping_criterion)
+       2168    0.168    0.000    0.305    0.000 /home/hegde/Desktop/PCAP_Project/.venv/lib/python3.12/site-packages/numpy/linalg/_linalg.py:1515(eigh)
+      10840    0.108    0.000    0.232    0.000 /home/hegde/Desktop/PCAP_Project/.venv/lib/python3.12/site-packages/numpy/linalg/_linalg.py:2598(norm)
+          3    0.000    0.000    0.113    0.038 /home/hegde/Desktop/PCAP_Project/src/profile_block.py:114(_timed_block_diag)
+          3    0.009    0.003    0.113    0.038 /home/hegde/Desktop/PCAP_Project/.venv/lib/python3.12/site-packages/scipy/linalg/_special_matrices.py:361(block_diag)
+      15444    0.048    0.000    0.072    0.000 /home/hegde/Desktop/PCAP_Project/.venv/lib/python3.12/site-packages/numpy/linalg/_linalg.py:169(isComplexType)
+      32627    0.051    0.000    0.051    0.000 {built-in method builtins.issubclass}
+        673    0.012    0.000    0.043    0.000 /home/hegde/Desktop/PCAP_Project/.venv/lib/python3.12/site-packages/numpy/lib/_index_tricks_impl.py:31(ix_)
+       2302    0.015    0.000    0.040    0.000 /home/hegde/Desktop/PCAP_Project/.venv/lib/python3.12/site-packages/numpy/linalg/_linalg.py:189(_commonType)

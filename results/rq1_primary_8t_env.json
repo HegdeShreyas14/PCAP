@@ -1,18 +1,70 @@
 {
-  "timestamp": "2026-09-12T11:08:14",
+  "timestamp": "2026-10-10T11:40:13",
   "python": "3.12.3",
-  "platform": "Linux-6.8.0-139-generic-x86_64-with-glibc2.39",
+  "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.39",
   "processor": "x86_64",
   "logical_cores": 32,
   "blas_threads": "8",
   "numpy": "2.4.4",
   "gglasso": "0.3.0",
-  "torch": null,
-  "cuda_available": false,
-  "gpu": null,
+  "torch": "2.14.0+cu130",
+  "cuda_available": true,
+  "gpu": "NVIDIA GeForce RTX 5060 Laptop GPU",
+  "cuda": "13.0",
   "machine": "primary",
   "trials": 9,
   "warmup": 2,
   "tol": 1e-07,
-  "rtol": 1e-05
+  "rtol": 1e-05,
+  "provenance": {
+    "timestamp": "2026-10-10T11:40:14",
+    "argv": [
+      "src/sweep.py",
+      "--machine",
+      "primary",
+      "--blas-threads",
+      "8",
+      "--out",
+      "results/rq1_primary_8t.csv"
+    ],
+    "args": {
+      "out": "results/rq1_primary_8t.csv",
+      "machine": "primary",
+      "trials": 9,
+      "warmup": 2,
+      "seed": 0,
+      "tol": 1e-07,
+      "rtol": 1e-05,
+      "max_iter": 1000,
+      "quick": false,
+      "blas_threads": 8
+    },
+    "git_commit": "50ec233d752924d395f8a19f13a439d9ec1b3bab",
+    "src_dirty": false,
+    "src_md5": {
+      "analyze.py": "15dd70cfa013b4fda7e8894c81df93f5",
+      "batched_admm.py": "9fdd97bfb29d61ee21fd643639e9b4d8",
+      "bench_batched.py": "038d0c30dff89aed5a045536f57d4262",
+      "blockgen.py": "01bb24bc0e1870f02549a9a6e3641992",
+      "gpu_crossover.py": "7eebe9ece64e0e0509636dd10b6666c5",
+      "make_graph.py": "1cdef2a89ea178cf3258e5649becbd56",
+      "percolation.py": "08de4e3e982c9d4a8d2a3af1cf8a2b0f",
+      "phase1_repro.py": "a1d891b62127afd804df653bd0d1a7ef",
+      "profile_block.py": "f9f939711afaf54484e815cb95f4f0a3",
+      "provenance.py": "b028adda8f3a366f49c505d76cfdf5d0",
+      "sweep.py": "8a74bb4c7553d7dfcd7e74a4e858d239"
+    },
+    "python": "3.12.3",
+    "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.39",
+    "logical_cores": 32,
+    "blas_threads": {
+      "OMP_NUM_THREADS": "8",
+      "OPENBLAS_NUM_THREADS": "8",
+      "MKL_NUM_THREADS": "8"
+    },
+    "numpy": "2.4.4",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "gglasso": "0.3.0"
+  }
 }

@@ -1,0 +1,12 @@
+commit 50ec233d752924d395f8a19f13a439d9ec1b3bab  started 2026-10-10T10:27:27+05:30
+OK: S is identical (to 1e-10) at 1 and 8 BLAS threads
+[2026-10-10T10:27:29+05:30] START rq1_primary_1t
+[2026-10-10T11:40:13+05:30] DONE  rq1_primary_1t
+[2026-10-10T11:40:13+05:30] START rq1_primary_8t
+[2026-10-10T12:26:26+05:30] DONE  rq1_primary_8t
+[2026-10-10T12:26:26+05:30] START rq1_compare
+[2026-10-10T12:26:26+05:30] DONE  rq1_compare
+# pairing check [S fingerprint + detected structure]: 384/384 configurations identical
+[2026-10-10T12:26:26+05:30] START percolation
+[2026-10-10T12:35:02+05:30] DONE  percolation
+[2026-10-10T12:35:02+05:30] ALL DONE

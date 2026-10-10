@@ -17,9 +17,9 @@ basis for the progress reviews and for the paper's results section.
 |---|---|
 | Literature survey + methodology | **Submitted.** 10 recent refs; 5 DOIs still unverified |
 | Phase 1 — reproduction, environment capture | **Done** |
-| RQ1 — CPU baseline sweeps | **Re-run needed** (bug 8): 1t and 8t used different S. Sampler fixed 2026-10-09 |
+| RQ1 — CPU baseline sweeps | **Done (re-run 2026-10-10, commit 50ec233).** 1t + 8t, 384 configs each, pairing verified 384/384 |
 | Profiling | **Done.** Decides the Phase 3 design |
-| Percolation / structural analysis | **Re-run needed** (bug 8): `results/percolation.csv` does not reproduce from committed code |
+| Percolation / structural analysis | **Done (re-run 2026-10-10, commit 50ec233).** 3600 rows, seeds 0/1/2; seed 0 matches RQ1 8t on 192/192 points |
 | Phase 3 — GPU implementation | **Not started.** Design now settled by profiling |
 | Cross-platform (secondary/tertiary machines) | **At risk** — team capacity |
 
@@ -34,39 +34,48 @@ roughly **2–5×** at statistically defensible lambda. Against a single-threade
 baseline it looks better, because 8 threads accelerate ADMM's one large
 eigendecomposition while doing nothing for block_SGL's many small ones.
 
-Regime medians over all 384 shared configs (paired, seeded generator):
+Re-run 2026-10-10 after bug 8. Pairing is now verified: 1t and 8t agree on S
+and on detected structure in 384/384 configs (`results/runlogs/rq1_compare.log`).
+
+Regime medians over all 384 shared configs:
 
 | regime | 1t | 8t | retained |
 |---|---|---|---|
-| balanced | 4.46× | 3.57× | 80% |
-| imbalanced | 6.68× | 4.95× | 74% |
-| many_tiny | 2.39× | 1.82× | 76% |
-| one_giant | 7.62× | 6.25× | 82% |
+| balanced | 3.83× | 3.40× | 89% |
+| imbalanced | 6.74× | 4.83× | 72% |
+| many_tiny | 2.08× | 1.66× | 80% |
+| one_giant | 7.27× | 5.71× | 79% |
 
-**Retention is uniform at 74–82%.** The contaminated (pre-bug-3) run showed
-68–85%, which looked like a regime effect and was instance noise. This is
-precisely what the paired comparison was for, and it is worth stating: the
-threading penalty does not vary meaningfully by block-size regime.
+**Retention is governed by p, not by regime.** At the best-F1 lambda:
+
+| p | median retained | range | `ns` |
+|---|---|---|---|
+| 100 | 96% | 89–110% | 7/12 |
+| 200 | 96% | 82–114% | 4/12 |
+| 400 | 65% | 59–90% | 0/12 |
+| 800 | 57% | 40–91% | 0/12 |
+
+(All configs, not just best-F1: 98% / 92% / 65% / 48% for p = 100 / 200 / 400 / 800.)
+At p ≤ 200 threading makes no resolvable difference; from p = 400 the 8-thread
+baseline claws back a third to a half of the win, because ADMM's single p×p
+eigendecomposition is finally large enough to use 8 cores. This replaces the
+earlier "uniform 74–82%" claim, which came from unpaired runs (bug 8).
 
 Report the 8-thread numbers. The 1-thread run is the "no BLAS parallelism"
-algorithmic upper bound and overstates the win by **1.1–2.8×** (retained 93%
-down to 36%), worst at large p with high n/p, which is exactly where ADMM's
-single large eigendecomposition can use all 8 cores:
+algorithmic upper bound and overstates the win by up to **2.5×** at large p:
 
-- balanced p=800 n/p=10: 12.47× → 4.46× (36% retained)
-- imbalanced p=800 n/p=10: 10.08× → 3.74× (37%)
-- balanced p=400 n/p=5: 6.99× → 3.27× (47%)
+- balanced p=800 n/p=10: 10.03× → 4.78× (48% retained)
+- imbalanced p=800 n/p=10: 8.37× → 4.40× (53%)
+- balanced p=400 n/p=10: 3.56× → 2.14× (60%)
 
-`many_tiny` stays flat (1.06–1.33× at p≥400, 77–93% retained): the regime CPU
-decomposition cannot help regardless of threading.
+`many_tiny` stays flat (0.99–1.45× at 8t for p≥400, 83–91% retained): the
+regime CPU decomposition cannot help regardless of threading.
 
-Of the 48 best-F1 rows, **16 are flagged `ns`** — the two runs' trial bands
-overlap, so the difference is not resolvable. Every `retained > 100%` is
-either `ns` or at p=100. The earlier reading that "threading sometimes helps
-the block solver" was an artifact of unflagged noise.
+Of the 48 best-F1 rows, **11 are flagged `ns`**, all at p ≤ 200. Every
+`retained > 100%` row is `ns`.
 
 When the graph does not fragment at all, block_SGL is *slightly slower* than
-ADMM_SGL (0.89–0.99×, median 0.97× over n=49 configs): detection overhead with
+ADMM_SGL (0.93–1.01× at 1t, 0.88–1.03× at 8t, median 0.97× over n=50 configs): detection overhead with
 no payoff. Keep this in the paper — it is the honest cost side.
 
 ### 2. The over-fragmentation trap
@@ -76,17 +85,19 @@ Pooled by detected block count (1t run, 384 configs):
 
 | detected blocks | median speedup | range | median F1 | n |
 |---|---|---|---|---|
-| 1 | 0.97× | 0.89–0.99 | 0.156 | 49 |
-| 2–9 | 1.02× | 0.92–1.17 | 0.512 | 25 |
-| **10–49** | **2.23×** | 0.99–4.98 | **0.762** | 71 |
-| 50–99 | 3.79× | 1.18–6.56 | 0.734 | 61 |
-| 100–199 | 6.92× | 1.38–15.04 | 0.645 | 60 |
-| 200+ | **23.82×** | 3.39–51.48 | **0.274** | 118 |
+| 1 | 0.97× | 0.93–1.01 | 0.152 | 50 |
+| 2–9 | 1.03× | 0.98–1.28 | 0.490 | 21 |
+| **10–49** | **2.01×** | 1.00–5.61 | **0.750** | 77 |
+| 50–99 | 3.66× | 1.27–7.28 | 0.734 | 58 |
+| 100–199 | 7.16× | 1.53–15.97 | 0.654 | 60 |
+| 200+ | **23.93×** | 2.86–51.61 | **0.286** | 118 |
 
-Speedup climbs monotonically while F1 peaks at 0.762 in the 10–49 bucket and
-then falls to 0.274. Those two curves crossing is the trap in one figure, and
+(8t: same buckets and F1, medians 0.97 / 1.03 / 1.91 / 3.31 / 5.52 / 13.11×.)
+
+Speedup climbs monotonically while F1 peaks at 0.750 in the 10–49 bucket and
+then falls to 0.286. Those two curves crossing is the trap in one figure, and
 it is more persuasive than any table. Without the quality guard we would have
-reported a 23.8× win on a solution that is mostly noise.
+reported a 23.9× win on a solution that is mostly noise.
 
 **Always report speedup at the best-F1 lambda, never at the fastest lambda.**
 
@@ -97,8 +108,8 @@ work in the largest block) says the largest block holds ~99% of "the work", so
 Amdahl should cap any block-parallel scheme.
 
 **Profiling contradicts this.** In the control config (balanced p=800, n/p=10,
-lambda=0.10, 238 blocks, largest 214) the largest single `eigh` is **1.7% of
-eigh time, ~1% of wall-clock**. There is no dominant kernel.
+lambda=0.10, 244 blocks, largest 192, cubic F_max 99.6%) the largest single
+`eigh` is **1.4% of eigh time, under 1% of wall-clock**. There is no dominant kernel.
 
 The proxy overweights the largest block because it ignores iteration counts
 and per-call dispatch overhead. This is a genuine methodological finding worth
@@ -108,25 +119,29 @@ stating in the paper: a reviewer would otherwise assume the model holds.
 
 | | high-headroom<br>imbalanced p=200 n/p=10 λ=0.15 | control<br>balanced p=800 n/p=10 λ=0.10 |
 |---|---|---|
-| detected | 59 blocks, largest 18 | 238 blocks, largest 214 |
-| wall | 29.6 ms | 297 ms |
-| `eigh` | 7.6 ms — **26%** | 174 ms — **58%** |
-| Python glue (loop, `ix_` slicing, ADMM_SGL setup, inverse-perm) | 19.4 ms — **65%** | 105 ms — **35%** |
-| `get_connected_components` | 1.0 ms — 3% | 12 ms — 4% |
-| `block_diag` assembly | 1.6 ms — 5% | 5.9 ms — 2% |
-| `eigh` calls | 831, mean 0.01 ms | 2173, mean 0.08 ms, max 3.0 ms |
+| detected | 58 blocks, largest 30 | 244 blocks, largest 192 |
+| wall | 24.1 ms | 215 ms |
+| `eigh` | 7.5 ms — **31%** | 126 ms — **58%** |
+| Python glue (loop, `ix_` slicing, ADMM_SGL setup, inverse-perm) | 15.0 ms — **62%** | 76 ms — **35%** |
+| `get_connected_components` | 0.6 ms — 3% | 8.0 ms — 4% |
+| `block_diag` assembly | 1.0 ms — 4% | 5.3 ms — 2% |
+| `eigh` calls | 801, mean 0.01 ms | 2302, mean 0.05 ms, max 1.7 ms |
 
-Both configs are bound by Python per-block glue (35–65%) plus thousands of
+Re-measured 2026-10-10 on commit 50ec233, 1 BLAS thread, median of 7
+(`results/runlogs/profile_*.log`).
+
+Both configs are bound by Python per-block glue (35–62%) plus thousands of
 sub-millisecond `eigh` calls that are mostly dispatch overhead.
-`ADMM_stopping_criterion` alone is 0.12–0.35 s cumulative across 4k–10k
-`np.linalg.norm` calls — pure per-iteration overhead.
+`ADMM_stopping_criterion` alone is 0.12–0.34 s cumulative over the profiled
+repeats — pure per-iteration overhead.
 
 **Phase 3 lever is batching, not a faster eigensolver.** Collapse the hundreds
 of independent `ADMM_SGL` calls into a vectorised batched ADMM over
 similarly-sized block groups: one batched `eigh`, batched prox, batched
-stopping test per group. A GPU eig kernel alone touches at most 26% of runtime
+stopping test per group. A GPU eig kernel alone touches at most 31% of runtime
 where headroom exists and 58% in the control. "Accelerate the giant block"
-only matters above ~214-node blocks, which this sweep never produces.
+only matters for blocks well above the ~200-node maximum this sweep produces
+(the RQ2 crossover puts it at s_max ≈ 1000–1500).
 
 This is *measured* evidence for a batched design over the original
 per-block-GPU proposal.
@@ -143,13 +158,19 @@ variables; above it the giant shatters into comparable fragments. Because
 block cost scales as s^3, a surviving giant holds nearly all the cubic work
 however many crumbs surround it.
 
-Measured at balanced p=400, n/p=10:
+Measured at balanced p=400, n/p=10 (`results/percolation.csv`, seed 0; the
+lambda grid is 0.02:0.02:0.50):
 
 | lambda | blocks | largest | F_max |
 |---|---|---|---|
-| 0.05 | 8 | 392 (98% of p) | 100.0% |
-| 0.10 | 77 | 95 (24%) | 50.6% |
-| 0.15 | 120 | 29 (7%) | 36.9% |
+| 0.06 | 21 | 354 (89% of p) | 100.0% |
+| 0.10 | 79 | 164 (41%) | 99.8% |
+| 0.14 | 113 | 66 (17%) | 86.7% |
+| 0.16 | 132 | 28 (7%) | 35.6% |
+
+The giant breaks between 0.14 and 0.16. Seed 1 is similar (F_max 54.8% at
+0.14); seed 2 never breaks in this range (largest block 225, F_max 100% at
+0.16). That seed-to-seed spread is why thresholds are quoted multi-seed.
 
 The statistically optimal lambda falls as p grows (0.20–0.35 at p=100 down to
 0.05–0.20 at p=800). Where it falls below the percolation threshold, the giant
@@ -163,15 +184,15 @@ shattered into hundreds of components and still have F_max near 1.
 
 Oracle check (F_max the TRUE block structure would give under perfect
 detection) versus what is actually detected at the best-F1 lambda. Computed
-per seed from `results/percolation.csv` (3600 rows, seeds 0/1/2, fixed
+per seed from `results/percolation.csv` (3600 rows, seeds 0/1/2, re-run
 generator):
 
 | regime | detected F_max (min–max, median) | oracle F_max |
 |---|---|---|
-| balanced | 50.4–100% (**99.9%**) | 20% |
-| many_tiny | 33.7–100% (**99.9%**) | 2.5–20% |
-| imbalanced | 60.0–100% (**99.3%**) | 100% |
-| one_giant | 60.6–100% (**99.9%**) | 100% |
+| balanced | 51.4–100% (**99.9%**) | 20% |
+| many_tiny | 26.2–100% (**99.9%**) | 2.5–20% |
+| imbalanced | 43.1–100% (**99.4%**) | 100% |
+| one_giant | 58.7–100% (**99.9%**) | 100% |
 
 For balanced and many_tiny the true structure has abundant inter-block
 parallelism — oracle F_max 20% and as low as **2.5%** (p=800, 40 true blocks),
@@ -191,7 +212,7 @@ regularised covariance, stability selection over subsamples, a detection
 threshold decoupled from the solver's lambda) is a strong future-work item and
 possibly a better lever than GPU work.
 
-Note the wide min–max ranges (33.7–100%). Single-instance F_max is close to a
+Note the wide min–max ranges (26.2–100%). Single-instance F_max is close to a
 coin flip near the percolation threshold, which is why this table is quoted
 from the multi-seed percolation run rather than from a single-draw sweep.
 
@@ -270,10 +291,16 @@ Package quirks (not our bugs, but they bite):
 | `src/analyze.py` | Tables 1–4, `--compare` for the threading crossover |
 | `src/profile_block.py` | cProfile with linalg-vs-glue attribution |
 | `src/percolation.py` | Percolation threshold vs optimal lambda, multi-seed, oracle diagnostic |
-| `results/percolation.csv` | 3600 rows, seeds 0/1/2. **Stale** (bug 8): does not reproduce; regenerate before quoting |
-| `results/rq1_primary_1t.csv` | 384 configs, 1 BLAS thread. **Not paired with 8t** (bug 8); regenerate |
-| `results/rq1_primary_8t.csv` | 384 configs, 8 BLAS threads. **Not paired with 1t** (bug 8); regenerate |
-| `results/archive_prefix_bug3/` | Pre-fix contaminated pair. Kept deliberately |
+| `src/provenance.py` | Writes `<out>_env.json`: commit, src-dirty flag, file md5s, versions, args |
+| `scripts/rerun_bug8.sh` | Sequential 1t → 8t → pairing check → percolation |
+| `tests/test_sampling_determinism.py` | Fails if S depends on BLAS thread count |
+| `results/percolation.csv` | 3600 rows, seeds 0/1/2, commit 50ec233. Owns the structural claim |
+| `results/rq1_primary_1t.csv` | 384 configs, 1 BLAS thread, commit 50ec233 |
+| `results/rq1_primary_8t.csv` | 384 configs, 8 BLAS threads, commit 50ec233, paired 384/384 with 1t. **Report these numbers** |
+| `results/runlogs/` | Run logs, machine state (performance profile, competing container stopped), pairing check, profiling |
+| `results/archive_prefix_bug8/` | Unpaired pre-bug-8 RQ1 pair + irreproducible percolation. Kept deliberately |
+| `results/archive_prefix_bug3/` | Pre-bug-3 contaminated pair. Kept deliberately |
+| `results/gpu_crossover.csv`, `batched_cpu*.csv`, `gpu_mem_*.csv` | RQ2/RQ3. Produced with the **pre-bug-8 sampler** (commit ee38f30 / 96f4249); valid as run, not regenerable from current code |
 | `notes/RUNBOOK.md` | How to run everything: thread calibration, thermal/power protocol, git |
 | `notes/PROGRESS.md` | **This file — single source of truth.** `findings.md` was retired into it |
 
@@ -282,13 +309,15 @@ Package quirks (not our bugs, but they bite):
 
 ## Open items
 
-1. ~~Re-run both sweeps~~ **DONE.** 1t (75 min) and 8t on the seeded
-   generator; crossover is now a clean paired comparison. Pre-fix pair kept in
-   `results/archive_prefix_bug3/` as evidence the problem was found and
-   corrected — do not delete it.
-2. ~~Percolation run~~ **DONE** (Sep 2, fixed generator). Table 4's F_max is
-   quoted from `results/percolation.csv` — multi-seed — not from a single-draw
-   sweep. See finding 6.
+1. ~~Re-run both sweeps~~ **DONE 2026-10-10** (bug 8 re-run, commit 50ec233):
+   1t 73 min, 8t 46 min, pairing verified 384/384. Earlier pairs kept in
+   `results/archive_prefix_bug3/` and `results/archive_prefix_bug8/`.
+2. ~~Percolation run~~ **DONE 2026-10-10** (9 min). Finding 6 is quoted from
+   it; seed 0 matches the RQ1 8t sweep on 192/192 points.
+2a. **Figure 1** still groups retention by regime. With paired data the effect
+   is by p (96% at p≤200, 57–65% at p≥400); re-plot retention vs p.
+2b. **RQ2/RQ3 data** predate the sampler fix. Re-run `gpu_crossover.py` and
+   `bench_batched.py` before submission so every dataset comes from one commit.
 3. **Phase 3**: implement batched ADMM over similarly-sized block groups.
    Design settled by profiling. Consider a batched-CPU baseline as well as
    GPU, so the paper separates the batching idea from the hardware.

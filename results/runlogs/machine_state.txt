@@ -1,0 +1,13 @@
+recorded 2026-10-10T10:27:17+05:30 before rerun_bug8.sh
+power_profile performance
+ac_online 1 0 0 0 
+stopped: docker trade_plat-matching-engine-1 (restart afterwards: docker start trade_plat-matching-engine-1)
+governor performance
+loadavg 1.81 2.47 2.25 2/1508 16402
+top processes:
+%CPU COMMAND
+ 100 ps
+ 6.2 code
+ 3.1 code
+ 3.0 code
+ 2.5 code

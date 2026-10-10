@@ -1,0 +1,467 @@
+Environment:
+  timestamp        2026-10-10T10:27:29
+  python           3.12.3
+  platform         Linux-6.8.0-138-generic-x86_64-with-glibc2.39
+  processor        x86_64
+  logical_cores    32
+  blas_threads     1
+  numpy            2.4.4
+  gglasso          0.3.0
+  torch            2.14.0+cu130
+  cuda_available   True
+  gpu              NVIDIA GeForce RTX 5060 Laptop GPU
+  cuda             13.0
+
+Machine label: primary   trials=9 warmup=2
+
+[  1/384] balanced    p= 100 n/p= 2 lam=0.05 ... blocks=   1 speedup=0.93x [0.91-1.07] F1=0.069
+[  2/384] balanced    p= 100 n/p= 2 lam=0.10 ... blocks=   1 speedup=0.97x [0.95-0.99] F1=0.136
+[  3/384] balanced    p= 100 n/p= 2 lam=0.15 ... blocks=   1 speedup=0.97x [0.95-0.98] F1=0.273
+[  4/384] balanced    p= 100 n/p= 2 lam=0.20 ... blocks=   7 speedup=1.08x [1.05-1.09] F1=0.464
+[  5/384] balanced    p= 100 n/p= 2 lam=0.25 ... blocks=  24 speedup=1.54x [1.48-1.63] F1=0.627
+[  6/384] balanced    p= 100 n/p= 2 lam=0.30 ... blocks=  38 speedup=2.44x [2.34-2.57] F1=0.684
+[  7/384] balanced    p= 100 n/p= 2 lam=0.35 ... blocks=  48 speedup=3.15x [3.04-3.26] F1=0.667
+[  8/384] balanced    p= 100 n/p= 2 lam=0.40 ... blocks=  56 speedup=3.74x [3.70-3.83] F1=0.619
+[  9/384] balanced    p= 100 n/p= 5 lam=0.05 ... blocks=   1 speedup=0.94x [0.89-1.03] F1=0.100
+[ 10/384] balanced    p= 100 n/p= 5 lam=0.10 ... blocks=   1 speedup=0.97x [0.97-0.99] F1=0.337
+[ 11/384] balanced    p= 100 n/p= 5 lam=0.15 ... blocks=  12 speedup=1.28x [1.24-1.30] F1=0.645
+[ 12/384] balanced    p= 100 n/p= 5 lam=0.20 ... blocks=  27 speedup=2.47x [1.63-2.65] F1=0.786
+[ 13/384] balanced    p= 100 n/p= 5 lam=0.25 ... blocks=  38 speedup=2.99x [2.91-3.04] F1=0.777
+[ 14/384] balanced    p= 100 n/p= 5 lam=0.30 ... blocks=  45 speedup=3.04x [3.01-3.08] F1=0.733
+[ 15/384] balanced    p= 100 n/p= 5 lam=0.35 ... blocks=  52 speedup=3.07x [3.01-3.10] F1=0.671
+[ 16/384] balanced    p= 100 n/p= 5 lam=0.40 ... blocks=  56 speedup=3.53x [3.47-3.58] F1=0.633
+[ 17/384] balanced    p= 100 n/p=10 lam=0.05 ... blocks=   1 speedup=0.95x [0.93-0.97] F1=0.170
+[ 18/384] balanced    p= 100 n/p=10 lam=0.10 ... blocks=   9 speedup=1.25x [1.22-1.29] F1=0.633
+[ 19/384] balanced    p= 100 n/p=10 lam=0.15 ... blocks=  26 speedup=2.46x [2.44-2.48] F1=0.812
+[ 20/384] balanced    p= 100 n/p=10 lam=0.20 ... blocks=  33 speedup=2.55x [2.53-2.56] F1=0.802
+[ 21/384] balanced    p= 100 n/p=10 lam=0.25 ... blocks=  38 speedup=3.15x [3.11-3.20] F1=0.790
+[ 22/384] balanced    p= 100 n/p=10 lam=0.30 ... blocks=  44 speedup=3.16x [3.13-3.23] F1=0.742
+[ 23/384] balanced    p= 100 n/p=10 lam=0.35 ... blocks=  53 speedup=3.33x [3.30-3.37] F1=0.662
+[ 24/384] balanced    p= 100 n/p=10 lam=0.40 ... blocks=  59 speedup=3.47x [3.44-3.51] F1=0.603
+[ 25/384] balanced    p= 200 n/p= 2 lam=0.05 ... blocks=   1 speedup=0.94x [0.89-0.97] F1=0.055
+[ 26/384] balanced    p= 200 n/p= 2 lam=0.10 ... blocks=   1 speedup=1.01x [0.95-1.04] F1=0.171
+[ 27/384] balanced    p= 200 n/p= 2 lam=0.15 ... blocks=   7 speedup=1.04x [0.94-1.06] F1=0.443
+[ 28/384] balanced    p= 200 n/p= 2 lam=0.20 ... blocks=  23 speedup=1.26x [1.23-1.29] F1=0.632
+[ 29/384] balanced    p= 200 n/p= 2 lam=0.25 ... blocks=  52 speedup=2.35x [2.33-2.36] F1=0.687
+[ 30/384] balanced    p= 200 n/p= 2 lam=0.30 ... blocks=  83 speedup=5.32x [5.29-5.38] F1=0.692
+[ 31/384] balanced    p= 200 n/p= 2 lam=0.35 ... blocks= 104 speedup=7.76x [7.64-7.82] F1=0.628
+[ 32/384] balanced    p= 200 n/p= 2 lam=0.40 ... blocks= 116 speedup=8.36x [8.22-8.43] F1=0.589
+[ 33/384] balanced    p= 200 n/p= 5 lam=0.05 ... blocks=   1 speedup=0.98x [0.97-0.98] F1=0.110
+[ 34/384] balanced    p= 200 n/p= 5 lam=0.10 ... blocks=   5 speedup=1.02x [1.01-1.03] F1=0.532
+[ 35/384] balanced    p= 200 n/p= 5 lam=0.15 ... blocks=  32 speedup=1.70x [1.69-1.72] F1=0.769
+[ 36/384] balanced    p= 200 n/p= 5 lam=0.20 ... blocks=  51 speedup=2.89x [2.87-2.90] F1=0.802
+[ 37/384] balanced    p= 200 n/p= 5 lam=0.25 ... blocks=  73 speedup=5.42x [5.15-5.48] F1=0.772
+[ 38/384] balanced    p= 200 n/p= 5 lam=0.30 ... blocks=  91 speedup=5.96x [5.87-6.00] F1=0.702
+[ 39/384] balanced    p= 200 n/p= 5 lam=0.35 ... blocks= 104 speedup=8.44x [8.37-8.57] F1=0.651
+[ 40/384] balanced    p= 200 n/p= 5 lam=0.40 ... blocks= 115 speedup=9.17x [9.09-9.24] F1=0.607
+[ 41/384] balanced    p= 200 n/p=10 lam=0.05 ... blocks=   1 speedup=0.99x [0.97-1.00] F1=0.239
+[ 42/384] balanced    p= 200 n/p=10 lam=0.10 ... blocks=  22 speedup=1.35x [1.33-1.37] F1=0.792
+[ 43/384] balanced    p= 200 n/p=10 lam=0.15 ... blocks=  44 speedup=3.39x [3.33-3.44] F1=0.864
+[ 44/384] balanced    p= 200 n/p=10 lam=0.20 ... blocks=  57 speedup=4.57x [4.52-4.60] F1=0.838
+[ 45/384] balanced    p= 200 n/p=10 lam=0.25 ... blocks=  74 speedup=6.01x [5.96-6.05] F1=0.783
+[ 46/384] balanced    p= 200 n/p=10 lam=0.30 ... blocks=  90 speedup=7.28x [7.23-7.34] F1=0.719
+[ 47/384] balanced    p= 200 n/p=10 lam=0.35 ... blocks= 102 speedup=7.79x [7.72-7.88] F1=0.667
+[ 48/384] balanced    p= 200 n/p=10 lam=0.40 ... blocks= 117 speedup=8.42x [8.34-8.53] F1=0.595
+[ 49/384] balanced    p= 400 n/p= 2 lam=0.05 ... blocks=   1 speedup=0.95x [0.92-1.02] F1=0.069
+[ 50/384] balanced    p= 400 n/p= 2 lam=0.10 ... blocks=   6 speedup=1.00x [1.00-1.02] F1=0.435
+[ 51/384] balanced    p= 400 n/p= 2 lam=0.15 ... blocks=  83 speedup=2.15x [2.12-2.19] F1=0.711
+[ 52/384] balanced    p= 400 n/p= 2 lam=0.20 ... blocks= 145 speedup=6.16x [6.10-6.27] F1=0.738
+[ 53/384] balanced    p= 400 n/p= 2 lam=0.25 ... blocks= 195 speedup=15.20x [14.90-15.46] F1=0.670
+[ 54/384] balanced    p= 400 n/p= 2 lam=0.30 ... blocks= 220 speedup=16.88x [16.65-17.16] F1=0.620
+[ 55/384] balanced    p= 400 n/p= 2 lam=0.35 ... blocks= 253 speedup=24.07x [23.73-24.55] F1=0.542
+[ 56/384] balanced    p= 400 n/p= 2 lam=0.40 ... blocks= 271 speedup=26.85x [26.64-27.31] F1=0.492
+[ 57/384] balanced    p= 400 n/p= 5 lam=0.05 ... blocks=   1 speedup=0.97x [0.94-1.00] F1=0.248
+[ 58/384] balanced    p= 400 n/p= 5 lam=0.10 ... blocks=  57 speedup=1.86x [1.84-1.92] F1=0.787
+[ 59/384] balanced    p= 400 n/p= 5 lam=0.15 ... blocks= 112 speedup=5.46x [5.32-5.54] F1=0.822
+[ 60/384] balanced    p= 400 n/p= 5 lam=0.20 ... blocks= 162 speedup=13.26x [12.87-13.66] F1=0.746
+[ 61/384] balanced    p= 400 n/p= 5 lam=0.25 ... blocks= 195 speedup=15.97x [15.54-16.42] F1=0.683
+[ 62/384] balanced    p= 400 n/p= 5 lam=0.30 ... blocks= 228 speedup=17.61x [17.14-18.12] F1=0.607
+[ 63/384] balanced    p= 400 n/p= 5 lam=0.35 ... blocks= 250 speedup=19.17x [18.80-19.48] F1=0.550
+[ 64/384] balanced    p= 400 n/p= 5 lam=0.40 ... blocks= 271 speedup=21.35x [20.66-21.86] F1=0.492
+[ 65/384] balanced    p= 400 n/p=10 lam=0.05 ... blocks=   6 speedup=1.03x [1.02-1.05] F1=0.592
+[ 66/384] balanced    p= 400 n/p=10 lam=0.10 ... blocks=  79 speedup=3.56x [3.51-3.64] F1=0.867
+[ 67/384] balanced    p= 400 n/p=10 lam=0.15 ... blocks= 120 speedup=10.73x [10.53-11.03] F1=0.824
+[ 68/384] balanced    p= 400 n/p=10 lam=0.20 ... blocks= 166 speedup=12.81x [12.60-13.15] F1=0.744
+[ 69/384] balanced    p= 400 n/p=10 lam=0.25 ... blocks= 191 speedup=14.36x [14.26-14.85] F1=0.692
+[ 70/384] balanced    p= 400 n/p=10 lam=0.30 ... blocks= 227 speedup=16.10x [15.95-16.58] F1=0.609
+[ 71/384] balanced    p= 400 n/p=10 lam=0.35 ... blocks= 253 speedup=17.98x [17.71-18.57] F1=0.542
+[ 72/384] balanced    p= 400 n/p=10 lam=0.40 ... blocks= 271 speedup=19.82x [19.39-20.30] F1=0.492
+[ 73/384] balanced    p= 800 n/p= 2 lam=0.05 ... blocks=   1 speedup=0.96x [0.94-1.05] F1=0.090
+[ 74/384] balanced    p= 800 n/p= 2 lam=0.10 ... blocks=  92 speedup=1.48x [1.45-1.56] F1=0.556
+[ 75/384] balanced    p= 800 n/p= 2 lam=0.15 ... blocks= 272 speedup=3.92x [3.87-4.17] F1=0.685
+[ 76/384] balanced    p= 800 n/p= 2 lam=0.20 ... blocks= 392 speedup=10.07x [9.95-10.53] F1=0.627
+[ 77/384] balanced    p= 800 n/p= 2 lam=0.25 ... blocks= 444 speedup=20.93x [19.88-21.42] F1=0.598
+[ 78/384] balanced    p= 800 n/p= 2 lam=0.30 ... blocks= 502 speedup=39.97x [39.63-40.95] F1=0.539
+[ 79/384] balanced    p= 800 n/p= 2 lam=0.35 ... blocks= 541 speedup=44.66x [44.24-45.45] F1=0.488
+[ 80/384] balanced    p= 800 n/p= 2 lam=0.40 ... blocks= 571 speedup=48.15x [47.11-49.41] F1=0.445
+[ 81/384] balanced    p= 800 n/p= 5 lam=0.05 ... blocks=  12 speedup=1.02x [1.00-1.03] F1=0.399
+[ 82/384] balanced    p= 800 n/p= 5 lam=0.10 ... blocks= 205 speedup=3.61x [3.56-3.63] F1=0.767
+[ 83/384] balanced    p= 800 n/p= 5 lam=0.15 ... blocks= 327 speedup=13.21x [13.06-13.27] F1=0.729
+[ 84/384] balanced    p= 800 n/p= 5 lam=0.20 ... blocks= 423 speedup=27.70x [27.48-28.33] F1=0.642
+[ 85/384] balanced    p= 800 n/p= 5 lam=0.25 ... blocks= 452 speedup=36.20x [35.38-37.02] F1=0.609
+[ 86/384] balanced    p= 800 n/p= 5 lam=0.30 ... blocks= 505 speedup=38.97x [38.38-39.92] F1=0.541
+[ 87/384] balanced    p= 800 n/p= 5 lam=0.35 ... blocks= 541 speedup=41.92x [41.25-43.07] F1=0.491
+[ 88/384] balanced    p= 800 n/p= 5 lam=0.40 ... blocks= 575 speedup=45.52x [44.31-46.82] F1=0.441
+[ 89/384] balanced    p= 800 n/p=10 lam=0.05 ... blocks=  64 speedup=1.27x [1.26-1.29] F1=0.735
+[ 90/384] balanced    p= 800 n/p=10 lam=0.10 ... blocks= 244 speedup=10.03x [9.98-10.09] F1=0.809
+[ 91/384] balanced    p= 800 n/p=10 lam=0.15 ... blocks= 339 speedup=25.84x [25.52-26.28] F1=0.733
+[ 92/384] balanced    p= 800 n/p=10 lam=0.20 ... blocks= 425 speedup=28.91x [28.47-29.58] F1=0.641
+[ 93/384] balanced    p= 800 n/p=10 lam=0.25 ... blocks= 454 speedup=32.15x [32.03-33.55] F1=0.606
+[ 94/384] balanced    p= 800 n/p=10 lam=0.30 ... blocks= 503 speedup=35.64x [34.93-37.13] F1=0.544
+[ 95/384] balanced    p= 800 n/p=10 lam=0.35 ... blocks= 546 speedup=37.87x [37.07-38.36] F1=0.484
+[ 96/384] balanced    p= 800 n/p=10 lam=0.40 ... blocks= 577 speedup=40.18x [39.55-41.54] F1=0.438
+[ 97/384] imbalanced  p= 100 n/p= 2 lam=0.05 ... blocks=   1 speedup=0.95x [0.94-0.95] F1=0.068
+[ 98/384] imbalanced  p= 100 n/p= 2 lam=0.10 ... blocks=   1 speedup=0.97x [0.96-0.97] F1=0.135
+[ 99/384] imbalanced  p= 100 n/p= 2 lam=0.15 ... blocks=   1 speedup=0.97x [0.97-0.98] F1=0.266
+[100/384] imbalanced  p= 100 n/p= 2 lam=0.20 ... blocks=   3 speedup=1.01x [1.01-1.01] F1=0.490
+[101/384] imbalanced  p= 100 n/p= 2 lam=0.25 ... blocks=  19 speedup=1.41x [1.40-1.42] F1=0.619
+[102/384] imbalanced  p= 100 n/p= 2 lam=0.30 ... blocks=  32 speedup=2.01x [1.99-2.03] F1=0.715
+[103/384] imbalanced  p= 100 n/p= 2 lam=0.35 ... blocks=  43 speedup=2.69x [2.67-2.71] F1=0.711
+[104/384] imbalanced  p= 100 n/p= 2 lam=0.40 ... blocks=  49 speedup=3.02x [2.99-3.06] F1=0.671
+[105/384] imbalanced  p= 100 n/p= 5 lam=0.05 ... blocks=   1 speedup=0.95x [0.94-0.96] F1=0.101
+[106/384] imbalanced  p= 100 n/p= 5 lam=0.10 ... blocks=   1 speedup=0.97x [0.96-0.97] F1=0.308
+[107/384] imbalanced  p= 100 n/p= 5 lam=0.15 ... blocks=  10 speedup=1.20x [1.19-1.21] F1=0.632
+[108/384] imbalanced  p= 100 n/p= 5 lam=0.20 ... blocks=  20 speedup=1.89x [1.87-1.89] F1=0.793
+[109/384] imbalanced  p= 100 n/p= 5 lam=0.25 ... blocks=  37 speedup=2.86x [2.85-2.88] F1=0.785
+[110/384] imbalanced  p= 100 n/p= 5 lam=0.30 ... blocks=  40 speedup=2.43x [2.42-2.45] F1=0.774
+[111/384] imbalanced  p= 100 n/p= 5 lam=0.35 ... blocks=  45 speedup=2.46x [2.45-2.49] F1=0.733
+[112/384] imbalanced  p= 100 n/p= 5 lam=0.40 ... blocks=  56 speedup=3.40x [3.37-3.42] F1=0.633
+[113/384] imbalanced  p= 100 n/p=10 lam=0.05 ... blocks=   1 speedup=0.96x [0.96-0.96] F1=0.158
+[114/384] imbalanced  p= 100 n/p=10 lam=0.10 ... blocks=   5 speedup=1.05x [1.05-1.06] F1=0.610
+[115/384] imbalanced  p= 100 n/p=10 lam=0.15 ... blocks=  24 speedup=2.12x [2.10-2.13] F1=0.816
+[116/384] imbalanced  p= 100 n/p=10 lam=0.20 ... blocks=  32 speedup=2.14x [2.12-2.16] F1=0.834
+[117/384] imbalanced  p= 100 n/p=10 lam=0.25 ... blocks=  36 speedup=2.25x [2.23-2.27] F1=0.805
+[118/384] imbalanced  p= 100 n/p=10 lam=0.30 ... blocks=  38 speedup=2.79x [2.76-2.82] F1=0.790
+[119/384] imbalanced  p= 100 n/p=10 lam=0.35 ... blocks=  51 speedup=3.15x [3.13-3.17] F1=0.681
+[120/384] imbalanced  p= 100 n/p=10 lam=0.40 ... blocks=  57 speedup=3.37x [3.35-3.39] F1=0.623
+[121/384] imbalanced  p= 200 n/p= 2 lam=0.05 ... blocks=   1 speedup=0.96x [0.96-0.97] F1=0.064
+[122/384] imbalanced  p= 200 n/p= 2 lam=0.10 ... blocks=   1 speedup=0.98x [0.98-0.98] F1=0.283
+[123/384] imbalanced  p= 200 n/p= 2 lam=0.15 ... blocks=  21 speedup=1.35x [1.35-1.36] F1=0.660
+[124/384] imbalanced  p= 200 n/p= 2 lam=0.20 ... blocks=  75 speedup=4.24x [4.21-4.26] F1=0.698
+[125/384] imbalanced  p= 200 n/p= 2 lam=0.25 ... blocks= 110 speedup=5.90x [5.87-5.94] F1=0.611
+[126/384] imbalanced  p= 200 n/p= 2 lam=0.30 ... blocks= 134 speedup=7.34x [7.28-7.37] F1=0.506
+[127/384] imbalanced  p= 200 n/p= 2 lam=0.35 ... blocks= 158 speedup=9.61x [9.54-9.73] F1=0.354
+[128/384] imbalanced  p= 200 n/p= 2 lam=0.40 ... blocks= 176 speedup=12.68x [12.62-12.74] F1=0.219
+[129/384] imbalanced  p= 200 n/p= 5 lam=0.05 ... blocks=   1 speedup=0.98x [0.97-0.98] F1=0.150
+[130/384] imbalanced  p= 200 n/p= 5 lam=0.10 ... blocks=  24 speedup=1.49x [1.48-1.50] F1=0.768
+[131/384] imbalanced  p= 200 n/p= 5 lam=0.15 ... blocks=  55 speedup=3.63x [3.61-3.64] F1=0.804
+[132/384] imbalanced  p= 200 n/p= 5 lam=0.20 ... blocks=  83 speedup=4.44x [4.41-4.46] F1=0.737
+[133/384] imbalanced  p= 200 n/p= 5 lam=0.25 ... blocks= 115 speedup=5.81x [5.75-5.83] F1=0.607
+[134/384] imbalanced  p= 200 n/p= 5 lam=0.30 ... blocks= 133 speedup=6.56x [6.52-6.59] F1=0.511
+[135/384] imbalanced  p= 200 n/p= 5 lam=0.35 ... blocks= 149 speedup=7.70x [7.69-7.74] F1=0.415
+[136/384] imbalanced  p= 200 n/p= 5 lam=0.40 ... blocks= 171 speedup=10.99x [10.89-11.09] F1=0.259
+[137/384] imbalanced  p= 200 n/p=10 lam=0.05 ... blocks=   1 speedup=0.98x [0.97-0.98] F1=0.409
+[138/384] imbalanced  p= 200 n/p=10 lam=0.10 ... blocks=  44 speedup=3.24x [3.21-3.26] F1=0.858
+[139/384] imbalanced  p= 200 n/p=10 lam=0.15 ... blocks=  58 speedup=3.79x [3.77-3.83] F1=0.837
+[140/384] imbalanced  p= 200 n/p=10 lam=0.20 ... blocks=  87 speedup=4.67x [4.64-4.68] F1=0.734
+[141/384] imbalanced  p= 200 n/p=10 lam=0.25 ... blocks= 113 speedup=5.81x [5.79-5.85] F1=0.617
+[142/384] imbalanced  p= 200 n/p=10 lam=0.30 ... blocks= 135 speedup=6.92x [6.54-7.03] F1=0.500
+[143/384] imbalanced  p= 200 n/p=10 lam=0.35 ... blocks= 154 speedup=8.38x [8.30-8.42] F1=0.382
+[144/384] imbalanced  p= 200 n/p=10 lam=0.40 ... blocks= 173 speedup=10.88x [10.79-10.99] F1=0.243
+[145/384] imbalanced  p= 400 n/p= 2 lam=0.05 ... blocks=   1 speedup=0.98x [0.97-0.98] F1=0.097
+[146/384] imbalanced  p= 400 n/p= 2 lam=0.10 ... blocks=  47 speedup=1.40x [1.39-1.41] F1=0.651
+[147/384] imbalanced  p= 400 n/p= 2 lam=0.15 ... blocks= 171 speedup=6.20x [6.13-6.24] F1=0.683
+[148/384] imbalanced  p= 400 n/p= 2 lam=0.20 ... blocks= 238 speedup=10.89x [10.76-10.96] F1=0.562
+[149/384] imbalanced  p= 400 n/p= 2 lam=0.25 ... blocks= 297 speedup=16.47x [16.32-16.55] F1=0.414
+[150/384] imbalanced  p= 400 n/p= 2 lam=0.30 ... blocks= 334 speedup=21.01x [20.78-21.14] F1=0.286
+[151/384] imbalanced  p= 400 n/p= 2 lam=0.35 ... blocks= 346 speedup=19.78x [19.44-19.90] F1=0.241
+[152/384] imbalanced  p= 400 n/p= 2 lam=0.40 ... blocks= 349 speedup=21.53x [21.37-21.64] F1=0.229
+[153/384] imbalanced  p= 400 n/p= 5 lam=0.05 ... blocks=   4 speedup=1.00x [1.00-1.01] F1=0.452
+[154/384] imbalanced  p= 400 n/p= 5 lam=0.10 ... blocks= 104 speedup=5.90x [5.87-5.93] F1=0.822
+[155/384] imbalanced  p= 400 n/p= 5 lam=0.15 ... blocks= 183 speedup=8.77x [8.72-8.80] F1=0.709
+[156/384] imbalanced  p= 400 n/p= 5 lam=0.20 ... blocks= 240 speedup=9.64x [9.58-9.74] F1=0.577
+[157/384] imbalanced  p= 400 n/p= 5 lam=0.25 ... blocks= 308 speedup=16.37x [16.26-16.46] F1=0.378
+[158/384] imbalanced  p= 400 n/p= 5 lam=0.30 ... blocks= 334 speedup=19.33x [19.05-19.52] F1=0.286
+[159/384] imbalanced  p= 400 n/p= 5 lam=0.35 ... blocks= 347 speedup=19.10x [18.97-19.20] F1=0.237
+[160/384] imbalanced  p= 400 n/p= 5 lam=0.40 ... blocks= 353 speedup=24.10x [23.79-24.29] F1=0.213
+[161/384] imbalanced  p= 400 n/p=10 lam=0.05 ... blocks=  38 speedup=1.38x [1.37-1.39] F1=0.783
+[162/384] imbalanced  p= 400 n/p=10 lam=0.10 ... blocks= 113 speedup=7.26x [7.21-7.31] F1=0.840
+[163/384] imbalanced  p= 400 n/p=10 lam=0.15 ... blocks= 181 speedup=7.77x [7.71-7.83] F1=0.713
+[164/384] imbalanced  p= 400 n/p=10 lam=0.20 ... blocks= 240 speedup=8.93x [8.87-9.08] F1=0.577
+[165/384] imbalanced  p= 400 n/p=10 lam=0.25 ... blocks= 306 speedup=15.22x [15.10-15.92] F1=0.384
+[166/384] imbalanced  p= 400 n/p=10 lam=0.30 ... blocks= 334 speedup=19.10x [18.95-19.35] F1=0.286
+[167/384] imbalanced  p= 400 n/p=10 lam=0.35 ... blocks= 349 speedup=19.58x [19.31-22.73] F1=0.229
+[168/384] imbalanced  p= 400 n/p=10 lam=0.40 ... blocks= 353 speedup=23.28x [22.49-26.32] F1=0.213
+[169/384] imbalanced  p= 800 n/p= 2 lam=0.05 ... blocks=  11 speedup=1.00x [0.99-1.01] F1=0.414
+[170/384] imbalanced  p= 800 n/p= 2 lam=0.10 ... blocks= 366 speedup=7.96x [7.84-8.03] F1=0.632
+[171/384] imbalanced  p= 800 n/p= 2 lam=0.15 ... blocks= 609 speedup=29.65x [29.30-30.58] F1=0.379
+[172/384] imbalanced  p= 800 n/p= 2 lam=0.20 ... blocks= 680 speedup=35.94x [35.60-37.03] F1=0.260
+[173/384] imbalanced  p= 800 n/p= 2 lam=0.25 ... blocks= 699 speedup=38.37x [37.34-39.28] F1=0.225
+[174/384] imbalanced  p= 800 n/p= 2 lam=0.30 ... blocks= 723 speedup=39.51x [39.05-40.77] F1=0.177
+[175/384] imbalanced  p= 800 n/p= 2 lam=0.35 ... blocks= 732 speedup=40.66x [39.56-42.18] F1=0.158
+[176/384] imbalanced  p= 800 n/p= 2 lam=0.40 ... blocks= 736 speedup=42.29x [41.76-44.05] F1=0.149
+[177/384] imbalanced  p= 800 n/p= 5 lam=0.05 ... blocks= 119 speedup=2.35x [2.31-2.37] F1=0.771
+[178/384] imbalanced  p= 800 n/p= 5 lam=0.10 ... blocks= 399 speedup=19.31x [19.02-19.61] F1=0.663
+[179/384] imbalanced  p= 800 n/p= 5 lam=0.15 ... blocks= 624 speedup=29.73x [29.27-30.25] F1=0.363
+[180/384] imbalanced  p= 800 n/p= 5 lam=0.20 ... blocks= 682 speedup=35.97x [35.41-37.14] F1=0.258
+[181/384] imbalanced  p= 800 n/p= 5 lam=0.25 ... blocks= 700 speedup=37.45x [36.43-38.14] F1=0.223
+[182/384] imbalanced  p= 800 n/p= 5 lam=0.30 ... blocks= 723 speedup=37.87x [36.71-39.43] F1=0.177
+[183/384] imbalanced  p= 800 n/p= 5 lam=0.35 ... blocks= 731 speedup=39.67x [39.18-40.89] F1=0.160
+[184/384] imbalanced  p= 800 n/p= 5 lam=0.40 ... blocks= 736 speedup=40.40x [39.67-41.40] F1=0.149
+[185/384] imbalanced  p= 800 n/p=10 lam=0.05 ... blocks= 175 speedup=8.37x [8.26-8.98] F1=0.847
+[186/384] imbalanced  p= 800 n/p=10 lam=0.10 ... blocks= 402 speedup=19.77x [19.55-20.51] F1=0.667
+[187/384] imbalanced  p= 800 n/p=10 lam=0.15 ... blocks= 623 speedup=30.24x [28.49-30.97] F1=0.364
+[188/384] imbalanced  p= 800 n/p=10 lam=0.20 ... blocks= 682 speedup=36.52x [34.83-38.17] F1=0.258
+[189/384] imbalanced  p= 800 n/p=10 lam=0.25 ... blocks= 700 speedup=36.37x [35.56-37.78] F1=0.223
+[190/384] imbalanced  p= 800 n/p=10 lam=0.30 ... blocks= 721 speedup=38.40x [36.36-39.48] F1=0.181
+[191/384] imbalanced  p= 800 n/p=10 lam=0.35 ... blocks= 731 speedup=40.80x [39.44-41.46] F1=0.160
+[192/384] imbalanced  p= 800 n/p=10 lam=0.40 ... blocks= 736 speedup=40.07x [38.76-41.58] F1=0.149
+[193/384] many_tiny   p= 100 n/p= 2 lam=0.05 ... blocks=   1 speedup=0.95x [0.95-0.96] F1=0.069
+[194/384] many_tiny   p= 100 n/p= 2 lam=0.10 ... blocks=   1 speedup=0.97x [0.96-0.98] F1=0.136
+[195/384] many_tiny   p= 100 n/p= 2 lam=0.15 ... blocks=   1 speedup=0.98x [0.97-0.98] F1=0.273
+[196/384] many_tiny   p= 100 n/p= 2 lam=0.20 ... blocks=   7 speedup=1.09x [1.08-1.10] F1=0.464
+[197/384] many_tiny   p= 100 n/p= 2 lam=0.25 ... blocks=  24 speedup=1.54x [1.54-1.55] F1=0.627
+[198/384] many_tiny   p= 100 n/p= 2 lam=0.30 ... blocks=  38 speedup=2.49x [2.48-2.52] F1=0.684
+[199/384] many_tiny   p= 100 n/p= 2 lam=0.35 ... blocks=  48 speedup=3.12x [3.09-3.15] F1=0.667
+[200/384] many_tiny   p= 100 n/p= 2 lam=0.40 ... blocks=  56 speedup=3.71x [3.69-3.73] F1=0.619
+[201/384] many_tiny   p= 100 n/p= 5 lam=0.05 ... blocks=   1 speedup=0.96x [0.95-0.96] F1=0.100
+[202/384] many_tiny   p= 100 n/p= 5 lam=0.10 ... blocks=   1 speedup=0.98x [0.97-0.99] F1=0.337
+[203/384] many_tiny   p= 100 n/p= 5 lam=0.15 ... blocks=  12 speedup=1.29x [1.27-1.30] F1=0.645
+[204/384] many_tiny   p= 100 n/p= 5 lam=0.20 ... blocks=  27 speedup=2.63x [2.62-2.66] F1=0.786
+[205/384] many_tiny   p= 100 n/p= 5 lam=0.25 ... blocks=  38 speedup=2.99x [2.96-3.01] F1=0.777
+[206/384] many_tiny   p= 100 n/p= 5 lam=0.30 ... blocks=  45 speedup=3.01x [3.00-3.02] F1=0.733
+[207/384] many_tiny   p= 100 n/p= 5 lam=0.35 ... blocks=  52 speedup=3.08x [3.03-3.10] F1=0.671
+[208/384] many_tiny   p= 100 n/p= 5 lam=0.40 ... blocks=  56 speedup=3.51x [3.47-3.53] F1=0.633
+[209/384] many_tiny   p= 100 n/p=10 lam=0.05 ... blocks=   1 speedup=0.97x [0.96-0.97] F1=0.170
+[210/384] many_tiny   p= 100 n/p=10 lam=0.10 ... blocks=   9 speedup=1.28x [1.28-1.29] F1=0.633
+[211/384] many_tiny   p= 100 n/p=10 lam=0.15 ... blocks=  26 speedup=2.47x [2.45-2.49] F1=0.812
+[212/384] many_tiny   p= 100 n/p=10 lam=0.20 ... blocks=  33 speedup=2.53x [2.52-2.54] F1=0.802
+[213/384] many_tiny   p= 100 n/p=10 lam=0.25 ... blocks=  38 speedup=3.10x [3.07-3.11] F1=0.790
+[214/384] many_tiny   p= 100 n/p=10 lam=0.30 ... blocks=  44 speedup=3.14x [3.12-3.16] F1=0.742
+[215/384] many_tiny   p= 100 n/p=10 lam=0.35 ... blocks=  53 speedup=3.32x [3.28-3.35] F1=0.662
+[216/384] many_tiny   p= 100 n/p=10 lam=0.40 ... blocks=  59 speedup=3.44x [3.41-3.47] F1=0.603
+[217/384] many_tiny   p= 200 n/p= 2 lam=0.05 ... blocks=   1 speedup=0.97x [0.97-0.98] F1=0.049
+[218/384] many_tiny   p= 200 n/p= 2 lam=0.10 ... blocks=   1 speedup=0.98x [0.98-0.99] F1=0.155
+[219/384] many_tiny   p= 200 n/p= 2 lam=0.15 ... blocks=   5 speedup=1.00x [1.00-1.00] F1=0.431
+[220/384] many_tiny   p= 200 n/p= 2 lam=0.20 ... blocks=  33 speedup=1.81x [1.80-1.81] F1=0.667
+[221/384] many_tiny   p= 200 n/p= 2 lam=0.25 ... blocks=  57 speedup=2.87x [2.86-2.88] F1=0.745
+[222/384] many_tiny   p= 200 n/p= 2 lam=0.30 ... blocks=  73 speedup=4.92x [4.89-4.94] F1=0.755
+[223/384] many_tiny   p= 200 n/p= 2 lam=0.35 ... blocks=  89 speedup=6.34x [6.31-6.37] F1=0.718
+[224/384] many_tiny   p= 200 n/p= 2 lam=0.40 ... blocks= 107 speedup=8.42x [8.37-8.52] F1=0.657
+[225/384] many_tiny   p= 200 n/p= 5 lam=0.05 ... blocks=   1 speedup=0.98x [0.97-0.99] F1=0.098
+[226/384] many_tiny   p= 200 n/p= 5 lam=0.10 ... blocks=   6 speedup=1.02x [1.02-1.03] F1=0.489
+[227/384] many_tiny   p= 200 n/p= 5 lam=0.15 ... blocks=  41 speedup=2.00x [1.99-2.02] F1=0.768
+[228/384] many_tiny   p= 200 n/p= 5 lam=0.20 ... blocks=  62 speedup=5.00x [4.98-5.02] F1=0.817
+[229/384] many_tiny   p= 200 n/p= 5 lam=0.25 ... blocks=  73 speedup=5.43x [5.39-5.46] F1=0.801
+[230/384] many_tiny   p= 200 n/p= 5 lam=0.30 ... blocks=  85 speedup=5.79x [5.74-5.82] F1=0.754
+[231/384] many_tiny   p= 200 n/p= 5 lam=0.35 ... blocks=  95 speedup=5.85x [5.80-5.90] F1=0.712
+[232/384] many_tiny   p= 200 n/p= 5 lam=0.40 ... blocks= 104 speedup=6.36x [6.32-6.38] F1=0.671
+[233/384] many_tiny   p= 200 n/p=10 lam=0.05 ... blocks=   1 speedup=0.98x [0.97-0.99] F1=0.216
+[234/384] many_tiny   p= 200 n/p=10 lam=0.10 ... blocks=  31 speedup=1.63x [1.62-1.64] F1=0.760
+[235/384] many_tiny   p= 200 n/p=10 lam=0.15 ... blocks=  57 speedup=4.35x [4.31-4.38] F1=0.844
+[236/384] many_tiny   p= 200 n/p=10 lam=0.20 ... blocks=  67 speedup=5.01x [4.98-5.04] F1=0.824
+[237/384] many_tiny   p= 200 n/p=10 lam=0.25 ... blocks=  73 speedup=5.17x [5.14-5.20] F1=0.801
+[238/384] many_tiny   p= 200 n/p=10 lam=0.30 ... blocks=  85 speedup=5.24x [5.20-5.27] F1=0.754
+[239/384] many_tiny   p= 200 n/p=10 lam=0.35 ... blocks=  96 speedup=5.39x [5.34-5.44] F1=0.707
+[240/384] many_tiny   p= 200 n/p=10 lam=0.40 ... blocks= 105 speedup=6.00x [5.97-6.04] F1=0.667
+[241/384] many_tiny   p= 400 n/p= 2 lam=0.05 ... blocks=   1 speedup=0.98x [0.98-0.99] F1=0.040
+[242/384] many_tiny   p= 400 n/p= 2 lam=0.10 ... blocks=   1 speedup=0.99x [0.99-0.99] F1=0.210
+[243/384] many_tiny   p= 400 n/p= 2 lam=0.15 ... blocks=  10 speedup=1.05x [1.04-1.05] F1=0.538
+[244/384] many_tiny   p= 400 n/p= 2 lam=0.20 ... blocks=  22 speedup=1.14x [1.14-1.15] F1=0.638
+[245/384] many_tiny   p= 400 n/p= 2 lam=0.25 ... blocks=  44 speedup=1.28x [1.27-1.28] F1=0.662
+[246/384] many_tiny   p= 400 n/p= 2 lam=0.30 ... blocks=  61 speedup=1.47x [1.46-1.48] F1=0.664
+[247/384] many_tiny   p= 400 n/p= 2 lam=0.35 ... blocks=  89 speedup=1.89x [1.89-1.90] F1=0.644
+[248/384] many_tiny   p= 400 n/p= 2 lam=0.40 ... blocks= 123 speedup=2.63x [2.61-2.63] F1=0.598
+[249/384] many_tiny   p= 400 n/p= 5 lam=0.05 ... blocks=   1 speedup=0.99x [0.98-0.99] F1=0.111
+[250/384] many_tiny   p= 400 n/p= 5 lam=0.10 ... blocks=  13 speedup=1.04x [1.04-1.05] F1=0.578
+[251/384] many_tiny   p= 400 n/p= 5 lam=0.15 ... blocks=  28 speedup=1.22x [1.21-1.22] F1=0.718
+[252/384] many_tiny   p= 400 n/p= 5 lam=0.20 ... blocks=  39 speedup=1.30x [1.30-1.31] F1=0.744
+[253/384] many_tiny   p= 400 n/p= 5 lam=0.25 ... blocks=  57 speedup=1.52x [1.51-1.53] F1=0.742
+[254/384] many_tiny   p= 400 n/p= 5 lam=0.30 ... blocks=  92 speedup=2.17x [2.16-2.18] F1=0.723
+[255/384] many_tiny   p= 400 n/p= 5 lam=0.35 ... blocks= 126 speedup=3.39x [3.38-3.40] F1=0.685
+[256/384] many_tiny   p= 400 n/p= 5 lam=0.40 ... blocks= 155 speedup=4.97x [4.94-4.99] F1=0.658
+[257/384] many_tiny   p= 400 n/p=10 lam=0.05 ... blocks=   1 speedup=0.99x [0.98-0.99] F1=0.321
+[258/384] many_tiny   p= 400 n/p=10 lam=0.10 ... blocks=  18 speedup=1.10x [1.10-1.11] F1=0.732
+[259/384] many_tiny   p= 400 n/p=10 lam=0.15 ... blocks=  38 speedup=1.33x [1.33-1.34] F1=0.792
+[260/384] many_tiny   p= 400 n/p=10 lam=0.20 ... blocks=  60 speedup=1.74x [1.72-1.74] F1=0.798
+[261/384] many_tiny   p= 400 n/p=10 lam=0.25 ... blocks=  87 speedup=2.96x [2.95-2.97] F1=0.788
+[262/384] many_tiny   p= 400 n/p=10 lam=0.30 ... blocks= 120 speedup=3.73x [3.72-3.75] F1=0.761
+[263/384] many_tiny   p= 400 n/p=10 lam=0.35 ... blocks= 149 speedup=5.99x [5.96-6.01] F1=0.734
+[264/384] many_tiny   p= 400 n/p=10 lam=0.40 ... blocks= 185 speedup=14.37x [14.12-14.43] F1=0.692
+[265/384] many_tiny   p= 800 n/p= 2 lam=0.05 ... blocks=   1 speedup=0.98x [0.97-0.99] F1=0.044
+[266/384] many_tiny   p= 800 n/p= 2 lam=0.10 ... blocks=   5 speedup=1.00x [0.99-1.01] F1=0.390
+[267/384] many_tiny   p= 800 n/p= 2 lam=0.15 ... blocks=  34 speedup=1.05x [1.04-1.06] F1=0.730
+[268/384] many_tiny   p= 800 n/p= 2 lam=0.20 ... blocks=  82 speedup=1.27x [1.26-1.29] F1=0.790
+[269/384] many_tiny   p= 800 n/p= 2 lam=0.25 ... blocks= 125 speedup=1.53x [1.51-1.54] F1=0.782
+[270/384] many_tiny   p= 800 n/p= 2 lam=0.30 ... blocks= 167 speedup=1.92x [1.89-1.94] F1=0.761
+[271/384] many_tiny   p= 800 n/p= 2 lam=0.35 ... blocks= 229 speedup=2.86x [2.84-2.88] F1=0.719
+[272/384] many_tiny   p= 800 n/p= 2 lam=0.40 ... blocks= 299 speedup=5.24x [5.21-5.27] F1=0.669
+[273/384] many_tiny   p= 800 n/p= 5 lam=0.05 ... blocks=   1 speedup=0.98x [0.97-0.98] F1=0.205
+[274/384] many_tiny   p= 800 n/p= 5 lam=0.10 ... blocks=  35 speedup=1.05x [1.04-1.06] F1=0.804
+[275/384] many_tiny   p= 800 n/p= 5 lam=0.15 ... blocks=  72 speedup=1.28x [1.27-1.29] F1=0.860
+[276/384] many_tiny   p= 800 n/p= 5 lam=0.20 ... blocks= 127 speedup=1.61x [1.60-1.62] F1=0.846
+[277/384] many_tiny   p= 800 n/p= 5 lam=0.25 ... blocks= 176 speedup=2.72x [2.68-2.73] F1=0.819
+[278/384] many_tiny   p= 800 n/p= 5 lam=0.30 ... blocks= 242 speedup=4.89x [4.85-4.93] F1=0.779
+[279/384] many_tiny   p= 800 n/p= 5 lam=0.35 ... blocks= 299 speedup=9.51x [9.44-9.60] F1=0.745
+[280/384] many_tiny   p= 800 n/p= 5 lam=0.40 ... blocks= 360 speedup=15.98x [15.90-16.24] F1=0.696
+[281/384] many_tiny   p= 800 n/p=10 lam=0.05 ... blocks=   4 speedup=0.98x [0.98-0.99] F1=0.598
+[282/384] many_tiny   p= 800 n/p=10 lam=0.10 ... blocks=  45 speedup=1.09x [1.08-1.10] F1=0.892
+[283/384] many_tiny   p= 800 n/p=10 lam=0.15 ... blocks= 109 speedup=1.57x [1.56-1.59] F1=0.878
+[284/384] many_tiny   p= 800 n/p=10 lam=0.20 ... blocks= 166 speedup=3.68x [3.59-3.71] F1=0.855
+[285/384] many_tiny   p= 800 n/p=10 lam=0.25 ... blocks= 217 speedup=6.22x [6.19-6.27] F1=0.829
+[286/384] many_tiny   p= 800 n/p=10 lam=0.30 ... blocks= 284 speedup=15.04x [14.91-15.33] F1=0.787
+[287/384] many_tiny   p= 800 n/p=10 lam=0.35 ... blocks= 332 speedup=21.71x [21.52-22.18] F1=0.749
+[288/384] many_tiny   p= 800 n/p=10 lam=0.40 ... blocks= 379 speedup=23.55x [23.33-24.05] F1=0.702
+[289/384] one_giant   p= 100 n/p= 2 lam=0.05 ... blocks=   1 speedup=0.95x [0.95-0.96] F1=0.069
+[290/384] one_giant   p= 100 n/p= 2 lam=0.10 ... blocks=   1 speedup=0.98x [0.97-0.98] F1=0.134
+[291/384] one_giant   p= 100 n/p= 2 lam=0.15 ... blocks=   1 speedup=0.98x [0.97-0.98] F1=0.259
+[292/384] one_giant   p= 100 n/p= 2 lam=0.20 ... blocks=   4 speedup=1.02x [1.02-1.03] F1=0.424
+[293/384] one_giant   p= 100 n/p= 2 lam=0.25 ... blocks=   7 speedup=1.15x [1.14-1.15] F1=0.580
+[294/384] one_giant   p= 100 n/p= 2 lam=0.30 ... blocks=  17 speedup=1.47x [1.47-1.48] F1=0.680
+[295/384] one_giant   p= 100 n/p= 2 lam=0.35 ... blocks=  23 speedup=1.79x [1.79-1.80] F1=0.713
+[296/384] one_giant   p= 100 n/p= 2 lam=0.40 ... blocks=  31 speedup=2.22x [2.21-2.23] F1=0.709
+[297/384] one_giant   p= 100 n/p= 5 lam=0.05 ... blocks=   1 speedup=0.96x [0.96-0.97] F1=0.101
+[298/384] one_giant   p= 100 n/p= 5 lam=0.10 ... blocks=   1 speedup=0.98x [0.97-0.98] F1=0.304
+[299/384] one_giant   p= 100 n/p= 5 lam=0.15 ... blocks=   6 speedup=1.06x [1.06-1.07] F1=0.607
+[300/384] one_giant   p= 100 n/p= 5 lam=0.20 ... blocks=  10 speedup=1.21x [1.21-1.22] F1=0.749
+[301/384] one_giant   p= 100 n/p= 5 lam=0.25 ... blocks=  17 speedup=1.81x [1.79-1.82] F1=0.822
+[302/384] one_giant   p= 100 n/p= 5 lam=0.30 ... blocks=  25 speedup=2.58x [2.56-2.61] F1=0.807
+[303/384] one_giant   p= 100 n/p= 5 lam=0.35 ... blocks=  31 speedup=3.03x [3.01-3.05] F1=0.788
+[304/384] one_giant   p= 100 n/p= 5 lam=0.40 ... blocks=  39 speedup=3.50x [3.48-3.54] F1=0.750
+[305/384] one_giant   p= 100 n/p=10 lam=0.05 ... blocks=   1 speedup=0.97x [0.97-0.98] F1=0.162
+[306/384] one_giant   p= 100 n/p=10 lam=0.10 ... blocks=   4 speedup=1.05x [1.05-1.05] F1=0.575
+[307/384] one_giant   p= 100 n/p=10 lam=0.15 ... blocks=   8 speedup=1.17x [1.16-1.18] F1=0.752
+[308/384] one_giant   p= 100 n/p=10 lam=0.20 ... blocks=  15 speedup=1.43x [1.42-1.44] F1=0.800
+[309/384] one_giant   p= 100 n/p=10 lam=0.25 ... blocks=  23 speedup=2.43x [2.41-2.45] F1=0.825
+[310/384] one_giant   p= 100 n/p=10 lam=0.30 ... blocks=  26 speedup=2.67x [2.67-2.69] F1=0.821
+[311/384] one_giant   p= 100 n/p=10 lam=0.35 ... blocks=  34 speedup=4.26x [4.24-4.31] F1=0.800
+[312/384] one_giant   p= 100 n/p=10 lam=0.40 ... blocks=  40 speedup=5.61x [5.56-5.64] F1=0.755
+[313/384] one_giant   p= 200 n/p= 2 lam=0.05 ... blocks=   1 speedup=0.97x [0.96-0.97] F1=0.064
+[314/384] one_giant   p= 200 n/p= 2 lam=0.10 ... blocks=   1 speedup=0.98x [0.97-0.98] F1=0.292
+[315/384] one_giant   p= 200 n/p= 2 lam=0.15 ... blocks=  24 speedup=1.29x [1.28-1.30] F1=0.652
+[316/384] one_giant   p= 200 n/p= 2 lam=0.20 ... blocks=  71 speedup=4.61x [4.57-4.64] F1=0.725
+[317/384] one_giant   p= 200 n/p= 2 lam=0.25 ... blocks=  99 speedup=5.39x [5.34-5.41] F1=0.645
+[318/384] one_giant   p= 200 n/p= 2 lam=0.30 ... blocks= 123 speedup=7.00x [6.96-7.07] F1=0.549
+[319/384] one_giant   p= 200 n/p= 2 lam=0.35 ... blocks= 144 speedup=8.13x [8.08-8.20] F1=0.439
+[320/384] one_giant   p= 200 n/p= 2 lam=0.40 ... blocks= 161 speedup=10.90x [10.78-10.99] F1=0.328
+[321/384] one_giant   p= 200 n/p= 5 lam=0.05 ... blocks=   1 speedup=0.98x [0.97-0.98] F1=0.163
+[322/384] one_giant   p= 200 n/p= 5 lam=0.10 ... blocks=  22 speedup=1.35x [1.34-1.35] F1=0.771
+[323/384] one_giant   p= 200 n/p= 5 lam=0.15 ... blocks=  58 speedup=3.00x [2.99-3.01] F1=0.795
+[324/384] one_giant   p= 200 n/p= 5 lam=0.20 ... blocks=  76 speedup=4.37x [4.35-4.39] F1=0.765
+[325/384] one_giant   p= 200 n/p= 5 lam=0.25 ... blocks= 111 speedup=5.95x [5.92-5.98] F1=0.618
+[326/384] one_giant   p= 200 n/p= 5 lam=0.30 ... blocks= 125 speedup=6.79x [6.75-6.84] F1=0.547
+[327/384] one_giant   p= 200 n/p= 5 lam=0.35 ... blocks= 143 speedup=7.06x [7.01-7.12] F1=0.445
+[328/384] one_giant   p= 200 n/p= 5 lam=0.40 ... blocks= 163 speedup=10.33x [10.22-10.44] F1=0.314
+[329/384] one_giant   p= 200 n/p=10 lam=0.05 ... blocks=   1 speedup=0.98x [0.97-0.98] F1=0.437
+[330/384] one_giant   p= 200 n/p=10 lam=0.10 ... blocks=  38 speedup=2.80x [2.79-2.81] F1=0.860
+[331/384] one_giant   p= 200 n/p=10 lam=0.15 ... blocks=  61 speedup=4.14x [4.12-4.17] F1=0.817
+[332/384] one_giant   p= 200 n/p=10 lam=0.20 ... blocks=  78 speedup=4.47x [4.45-4.50] F1=0.760
+[333/384] one_giant   p= 200 n/p=10 lam=0.25 ... blocks= 110 speedup=5.49x [5.47-5.52] F1=0.623
+[334/384] one_giant   p= 200 n/p=10 lam=0.30 ... blocks= 125 speedup=5.97x [5.93-6.03] F1=0.547
+[335/384] one_giant   p= 200 n/p=10 lam=0.35 ... blocks= 145 speedup=7.47x [7.42-7.51] F1=0.433
+[336/384] one_giant   p= 200 n/p=10 lam=0.40 ... blocks= 161 speedup=9.04x [9.01-9.08] F1=0.328
+[337/384] one_giant   p= 400 n/p= 2 lam=0.05 ... blocks=   2 speedup=0.98x [0.98-0.99] F1=0.335
+[338/384] one_giant   p= 400 n/p= 2 lam=0.10 ... blocks= 172 speedup=4.61x [4.57-4.66] F1=0.575
+[339/384] one_giant   p= 400 n/p= 2 lam=0.15 ... blocks= 320 speedup=13.13x [13.04-13.26] F1=0.296
+[340/384] one_giant   p= 400 n/p= 2 lam=0.20 ... blocks= 341 speedup=20.17x [19.97-20.31] F1=0.253
+[341/384] one_giant   p= 400 n/p= 2 lam=0.25 ... blocks= 342 speedup=18.89x [18.78-19.02] F1=0.254
+[342/384] one_giant   p= 400 n/p= 2 lam=0.30 ... blocks= 343 speedup=26.80x [26.42-27.00] F1=0.250
+[343/384] one_giant   p= 400 n/p= 2 lam=0.35 ... blocks= 344 speedup=25.28x [25.15-25.48] F1=0.246
+[344/384] one_giant   p= 400 n/p= 2 lam=0.40 ... blocks= 349 speedup=24.93x [24.67-25.07] F1=0.227
+[345/384] one_giant   p= 400 n/p= 5 lam=0.05 ... blocks=  46 speedup=1.74x [1.73-1.75] F1=0.728
+[346/384] one_giant   p= 400 n/p= 5 lam=0.10 ... blocks= 208 speedup=6.97x [6.94-7.01] F1=0.640
+[347/384] one_giant   p= 400 n/p= 5 lam=0.15 ... blocks= 333 speedup=11.23x [11.15-11.33] F1=0.288
+[348/384] one_giant   p= 400 n/p= 5 lam=0.20 ... blocks= 343 speedup=21.75x [21.56-21.95] F1=0.250
+[349/384] one_giant   p= 400 n/p= 5 lam=0.25 ... blocks= 343 speedup=21.63x [21.43-21.76] F1=0.250
+[350/384] one_giant   p= 400 n/p= 5 lam=0.30 ... blocks= 343 speedup=21.96x [21.80-22.09] F1=0.250
+[351/384] one_giant   p= 400 n/p= 5 lam=0.35 ... blocks= 343 speedup=21.77x [21.50-21.92] F1=0.250
+[352/384] one_giant   p= 400 n/p= 5 lam=0.40 ... blocks= 345 speedup=22.10x [21.87-22.22] F1=0.242
+[353/384] one_giant   p= 400 n/p=10 lam=0.05 ... blocks=  84 speedup=3.68x [3.67-3.70] F1=0.823
+[354/384] one_giant   p= 400 n/p=10 lam=0.10 ... blocks= 206 speedup=7.59x [7.46-7.63] F1=0.654
+[355/384] one_giant   p= 400 n/p=10 lam=0.15 ... blocks= 337 speedup=19.55x [19.38-19.66] F1=0.273
+[356/384] one_giant   p= 400 n/p=10 lam=0.20 ... blocks= 343 speedup=22.75x [22.38-22.88] F1=0.250
+[357/384] one_giant   p= 400 n/p=10 lam=0.25 ... blocks= 343 speedup=20.94x [20.75-21.14] F1=0.250
+[358/384] one_giant   p= 400 n/p=10 lam=0.30 ... blocks= 343 speedup=21.09x [20.98-21.27] F1=0.250
+[359/384] one_giant   p= 400 n/p=10 lam=0.35 ... blocks= 343 speedup=20.68x [20.51-20.87] F1=0.250
+[360/384] one_giant   p= 400 n/p=10 lam=0.40 ... blocks= 345 speedup=21.23x [21.07-21.52] F1=0.242
+[361/384] one_giant   p= 800 n/p= 2 lam=0.05 ... blocks= 423 speedup=11.06x [11.02-11.21] F1=0.492
+[362/384] one_giant   p= 800 n/p= 2 lam=0.10 ... blocks= 736 speedup=44.55x [44.21-46.07] F1=0.144
+[363/384] one_giant   p= 800 n/p= 2 lam=0.15 ... blocks= 738 speedup=49.95x [48.83-51.60] F1=0.144
+[364/384] one_giant   p= 800 n/p= 2 lam=0.20 ... blocks= 738 speedup=47.65x [46.77-49.97] F1=0.144
+[365/384] one_giant   p= 800 n/p= 2 lam=0.25 ... blocks= 738 speedup=50.00x [49.40-52.60] F1=0.144
+[366/384] one_giant   p= 800 n/p= 2 lam=0.30 ... blocks= 738 speedup=50.88x [48.38-52.17] F1=0.144
+[367/384] one_giant   p= 800 n/p= 2 lam=0.35 ... blocks= 738 speedup=40.96x [39.28-42.56] F1=0.144
+[368/384] one_giant   p= 800 n/p= 2 lam=0.40 ... blocks= 738 speedup=40.91x [40.30-41.96] F1=0.144
+[369/384] one_giant   p= 800 n/p= 5 lam=0.05 ... blocks= 506 speedup=22.71x [22.25-23.08] F1=0.521
+[370/384] one_giant   p= 800 n/p= 5 lam=0.10 ... blocks= 738 speedup=48.71x [48.30-50.46] F1=0.144
+[371/384] one_giant   p= 800 n/p= 5 lam=0.15 ... blocks= 738 speedup=51.61x [50.80-53.25] F1=0.144
+[372/384] one_giant   p= 800 n/p= 5 lam=0.20 ... blocks= 738 speedup=47.73x [47.15-50.43] F1=0.144
+[373/384] one_giant   p= 800 n/p= 5 lam=0.25 ... blocks= 738 speedup=40.76x [40.38-41.32] F1=0.144
+[374/384] one_giant   p= 800 n/p= 5 lam=0.30 ... blocks= 738 speedup=40.76x [39.02-42.19] F1=0.144
+[375/384] one_giant   p= 800 n/p= 5 lam=0.35 ... blocks= 738 speedup=40.74x [39.26-41.78] F1=0.144
+[376/384] one_giant   p= 800 n/p= 5 lam=0.40 ... blocks= 738 speedup=37.13x [36.82-39.01] F1=0.144
+[377/384] one_giant   p= 800 n/p=10 lam=0.05 ... blocks= 498 speedup=23.80x [22.94-23.99] F1=0.545
+[378/384] one_giant   p= 800 n/p=10 lam=0.10 ... blocks= 738 speedup=44.94x [43.75-46.19] F1=0.144
+[379/384] one_giant   p= 800 n/p=10 lam=0.15 ... blocks= 738 speedup=44.69x [42.79-45.27] F1=0.144
+[380/384] one_giant   p= 800 n/p=10 lam=0.20 ... blocks= 738 speedup=38.34x [36.53-39.07] F1=0.144
+[381/384] one_giant   p= 800 n/p=10 lam=0.25 ... blocks= 738 speedup=32.75x [32.28-33.95] F1=0.144
+[382/384] one_giant   p= 800 n/p=10 lam=0.30 ... blocks= 738 speedup=33.61x [32.00-33.90] F1=0.144
+[383/384] one_giant   p= 800 n/p=10 lam=0.35 ... blocks= 738 speedup=33.93x [32.41-34.59] F1=0.144
+[384/384] one_giant   p= 800 n/p=10 lam=0.40 ... blocks= 738 speedup=38.44x [36.82-39.21] F1=0.144
+
+Wrote 384 rows (69 columns) to results/rq1_primary_1t.csv
+Environment written to results/rq1_primary_1t_env.json
+
+Speedup vs detected block count (all regimes pooled):
+  blocks        1: median  0.97x  range 0.93-1.01  median F1 0.152  n=50
+  blocks      2-9: median  1.03x  range 0.98-1.28  median F1 0.490  n=21
+  blocks    10-49: median  2.01x  range 1.00-5.61  median F1 0.750  n=77
+  blocks    50-99: median  3.66x  range 1.27-7.28  median F1 0.734  n=58
+  blocks  100-199: median  7.16x  range 1.53-15.97  median F1 0.654  n=60
+  blocks    200-+: median 23.93x  range 2.86-51.61  median F1 0.286  n=118
+
+By regime:
+  balanced     median  3.83x  range 0.93-48.15  n=96
+  imbalanced   median  6.74x  range 0.95-42.29  n=96
+  many_tiny    median  2.08x  range 0.95-23.55  n=96
+  one_giant    median  7.27x  range 0.95-51.61  n=96
+
+Speedup at the best-F1 lambda (per regime / p / sample ratio):
+  balanced    p= 100 n/p= 2: best F1 0.684 at lam=0.30 -> 2.44x (38 blocks)
+  balanced    p= 100 n/p= 5: best F1 0.786 at lam=0.20 -> 2.47x (27 blocks)
+  balanced    p= 100 n/p=10: best F1 0.812 at lam=0.15 -> 2.46x (26 blocks)
+  balanced    p= 200 n/p= 2: best F1 0.692 at lam=0.30 -> 5.32x (83 blocks)
+  balanced    p= 200 n/p= 5: best F1 0.802 at lam=0.20 -> 2.89x (51 blocks)
+  balanced    p= 200 n/p=10: best F1 0.864 at lam=0.15 -> 3.39x (44 blocks)
+  balanced    p= 400 n/p= 2: best F1 0.738 at lam=0.20 -> 6.16x (145 blocks)
+  balanced    p= 400 n/p= 5: best F1 0.822 at lam=0.15 -> 5.46x (112 blocks)
+  balanced    p= 400 n/p=10: best F1 0.867 at lam=0.10 -> 3.56x (79 blocks)
+  balanced    p= 800 n/p= 2: best F1 0.685 at lam=0.15 -> 3.92x (272 blocks)
+  balanced    p= 800 n/p= 5: best F1 0.767 at lam=0.10 -> 3.61x (205 blocks)
+  balanced    p= 800 n/p=10: best F1 0.809 at lam=0.10 -> 10.03x (244 blocks)
+  imbalanced  p= 100 n/p= 2: best F1 0.715 at lam=0.30 -> 2.01x (32 blocks)
+  imbalanced  p= 100 n/p= 5: best F1 0.793 at lam=0.20 -> 1.89x (20 blocks)
+  imbalanced  p= 100 n/p=10: best F1 0.834 at lam=0.20 -> 2.14x (32 blocks)
+  imbalanced  p= 200 n/p= 2: best F1 0.698 at lam=0.20 -> 4.24x (75 blocks)
+  imbalanced  p= 200 n/p= 5: best F1 0.804 at lam=0.15 -> 3.63x (55 blocks)
+  imbalanced  p= 200 n/p=10: best F1 0.858 at lam=0.10 -> 3.24x (44 blocks)
+  imbalanced  p= 400 n/p= 2: best F1 0.683 at lam=0.15 -> 6.20x (171 blocks)
+  imbalanced  p= 400 n/p= 5: best F1 0.822 at lam=0.10 -> 5.90x (104 blocks)
+  imbalanced  p= 400 n/p=10: best F1 0.840 at lam=0.10 -> 7.26x (113 blocks)
+  imbalanced  p= 800 n/p= 2: best F1 0.632 at lam=0.10 -> 7.96x (366 blocks)
+  imbalanced  p= 800 n/p= 5: best F1 0.771 at lam=0.05 -> 2.35x (119 blocks)
+  imbalanced  p= 800 n/p=10: best F1 0.847 at lam=0.05 -> 8.37x (175 blocks)
+  many_tiny   p= 100 n/p= 2: best F1 0.684 at lam=0.30 -> 2.49x (38 blocks)
+  many_tiny   p= 100 n/p= 5: best F1 0.786 at lam=0.20 -> 2.63x (27 blocks)
+  many_tiny   p= 100 n/p=10: best F1 0.812 at lam=0.15 -> 2.47x (26 blocks)
+  many_tiny   p= 200 n/p= 2: best F1 0.755 at lam=0.30 -> 4.92x (73 blocks)
+  many_tiny   p= 200 n/p= 5: best F1 0.817 at lam=0.20 -> 5.00x (62 blocks)
+  many_tiny   p= 200 n/p=10: best F1 0.844 at lam=0.15 -> 4.35x (57 blocks)
+  many_tiny   p= 400 n/p= 2: best F1 0.664 at lam=0.30 -> 1.47x (61 blocks)
+  many_tiny   p= 400 n/p= 5: best F1 0.744 at lam=0.20 -> 1.30x (39 blocks)
+  many_tiny   p= 400 n/p=10: best F1 0.798 at lam=0.20 -> 1.74x (60 blocks)
+  many_tiny   p= 800 n/p= 2: best F1 0.790 at lam=0.20 -> 1.27x (82 blocks)
+  many_tiny   p= 800 n/p= 5: best F1 0.860 at lam=0.15 -> 1.28x (72 blocks)
+  many_tiny   p= 800 n/p=10: best F1 0.892 at lam=0.10 -> 1.09x (45 blocks)
+  one_giant   p= 100 n/p= 2: best F1 0.713 at lam=0.35 -> 1.79x (23 blocks)
+  one_giant   p= 100 n/p= 5: best F1 0.822 at lam=0.25 -> 1.81x (17 blocks)
+  one_giant   p= 100 n/p=10: best F1 0.825 at lam=0.25 -> 2.43x (23 blocks)
+  one_giant   p= 200 n/p= 2: best F1 0.725 at lam=0.20 -> 4.61x (71 blocks)
+  one_giant   p= 200 n/p= 5: best F1 0.795 at lam=0.15 -> 3.00x (58 blocks)
+  one_giant   p= 200 n/p=10: best F1 0.860 at lam=0.10 -> 2.80x (38 blocks)
+  one_giant   p= 400 n/p= 2: best F1 0.575 at lam=0.10 -> 4.61x (172 blocks)
+  one_giant   p= 400 n/p= 5: best F1 0.728 at lam=0.05 -> 1.74x (46 blocks)
+  one_giant   p= 400 n/p=10: best F1 0.823 at lam=0.05 -> 3.68x (84 blocks)
+  one_giant   p= 800 n/p= 2: best F1 0.492 at lam=0.05 -> 11.06x (423 blocks)
+  one_giant   p= 800 n/p= 5: best F1 0.521 at lam=0.05 -> 22.71x (506 blocks)
+  one_giant   p= 800 n/p=10: best F1 0.545 at lam=0.05 -> 23.80x (498 blocks)

@@ -1,0 +1,75 @@
+{
+  "timestamp": "2026-10-10T12:26:27",
+  "argv": [
+    "src/percolation.py",
+    "--seeds",
+    "0",
+    "1",
+    "2",
+    "--blas-threads",
+    "8",
+    "--out",
+    "results/percolation.csv"
+  ],
+  "args": {
+    "blas_threads": 8,
+    "regimes": [
+      "balanced",
+      "imbalanced",
+      "many_tiny",
+      "one_giant"
+    ],
+    "ps": [
+      100,
+      200,
+      400,
+      800
+    ],
+    "ratios": [
+      2,
+      5,
+      10
+    ],
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "lam_min": 0.02,
+    "lam_max": 0.5,
+    "lam_steps": 25,
+    "f_max_threshold": 0.9,
+    "tol": 1e-07,
+    "rtol": 1e-05,
+    "max_iter": 1000,
+    "out": "results/percolation.csv",
+    "no_f1": false
+  },
+  "git_commit": "50ec233d752924d395f8a19f13a439d9ec1b3bab",
+  "src_dirty": false,
+  "src_md5": {
+    "analyze.py": "15dd70cfa013b4fda7e8894c81df93f5",
+    "batched_admm.py": "9fdd97bfb29d61ee21fd643639e9b4d8",
+    "bench_batched.py": "038d0c30dff89aed5a045536f57d4262",
+    "blockgen.py": "01bb24bc0e1870f02549a9a6e3641992",
+    "gpu_crossover.py": "7eebe9ece64e0e0509636dd10b6666c5",
+    "make_graph.py": "1cdef2a89ea178cf3258e5649becbd56",
+    "percolation.py": "08de4e3e982c9d4a8d2a3af1cf8a2b0f",
+    "phase1_repro.py": "a1d891b62127afd804df653bd0d1a7ef",
+    "profile_block.py": "f9f939711afaf54484e815cb95f4f0a3",
+    "provenance.py": "b028adda8f3a366f49c505d76cfdf5d0",
+    "sweep.py": "8a74bb4c7553d7dfcd7e74a4e858d239"
+  },
+  "python": "3.12.3",
+  "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.39",
+  "logical_cores": 32,
+  "blas_threads": {
+    "OMP_NUM_THREADS": "8",
+    "OPENBLAS_NUM_THREADS": "8",
+    "MKL_NUM_THREADS": "8"
+  },
+  "numpy": "2.4.4",
+  "scipy": "1.17.1",
+  "networkx": "3.6.1",
+  "gglasso": "0.3.0"
+}
