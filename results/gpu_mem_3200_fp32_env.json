@@ -1,0 +1,94 @@
+{
+  "timestamp": "2026-10-10T20:33:48",
+  "argv": [
+    "src/gpu_crossover.py",
+    "--p",
+    "3200",
+    "--regime",
+    "many_tiny",
+    "--lam",
+    "0.06",
+    "--dtype",
+    "float32",
+    "--out",
+    "results/gpu_mem_3200_fp32.csv"
+  ],
+  "args": {
+    "blas_threads": 8,
+    "p": [
+      3200
+    ],
+    "regime": [
+      "many_tiny"
+    ],
+    "ratio": 10,
+    "seed": 0,
+    "lam_min": 0.03,
+    "lam_max": 0.4,
+    "lam_steps": 18,
+    "lam": [
+      0.06
+    ],
+    "trials": 5,
+    "ref_every": 4,
+    "device": "cuda",
+    "dtype": "float32",
+    "out": "results/gpu_mem_3200_fp32.csv",
+    "check_correctness": true
+  },
+  "git_commit": "f07d5cf87dc6fb023dedb23f88390e70d9485833",
+  "src_dirty": false,
+  "src_md5": {
+    "analyze.py": "15dd70cfa013b4fda7e8894c81df93f5",
+    "batched_admm.py": "f9375c8b52ee4fc47debaa93c708daa7",
+    "bench_batched.py": "1c91cf1cb13e7813e1adfc2d881cbd88",
+    "blockgen.py": "01bb24bc0e1870f02549a9a6e3641992",
+    "fp32_diagnostic.py": "01e9c0993af857625f48525e840f1fcd",
+    "gpu_crossover.py": "073fe90ee5b114005bda9e530edcf1d9",
+    "make_graph.py": "f2a3689194c40fc7949982554ae0b43c",
+    "percolation.py": "08de4e3e982c9d4a8d2a3af1cf8a2b0f",
+    "phase1_repro.py": "a1d891b62127afd804df653bd0d1a7ef",
+    "profile_block.py": "f9f939711afaf54484e815cb95f4f0a3",
+    "provenance.py": "9eb3b7e8362090ebcf7d6311e24edc71",
+    "screening.py": "8b32c042ef02c259efb0d7d2cf3374c0",
+    "sweep.py": "8a74bb4c7553d7dfcd7e74a4e858d239"
+  },
+  "python": "3.12.3",
+  "platform": "Linux-6.8.0-138-generic-x86_64-with-glibc2.39",
+  "logical_cores": 32,
+  "blas_threads": {
+    "OMP_NUM_THREADS": "8",
+    "OPENBLAS_NUM_THREADS": "8",
+    "MKL_NUM_THREADS": "8"
+  },
+  "numpy": "2.4.4",
+  "scipy": "1.17.1",
+  "networkx": "3.6.1",
+  "gglasso": "0.3.0",
+  "system": {
+    "machine_vendor": "LENOVO",
+    "machine_product": "83LT",
+    "bios_version": "RLCN32WW",
+    "cpu_model": "AMD Ryzen 9 8945HX with Radeon Graphics",
+    "cpu_physical_cores": 16,
+    "cpu_logical_cores": 32,
+    "smt_active": "1",
+    "ram_gib": 14.9,
+    "os": "Ubuntu 24.04.5 LTS",
+    "kernel": "6.8.0-138-generic",
+    "libc": "glibc 2.39",
+    "cpufreq_driver": "amd-pstate-epp",
+    "cpufreq_governor": "performance",
+    "cpufreq_epp": "performance",
+    "power_profile": "performance",
+    "ac_online": "1 0 0 0",
+    "loadavg_at_start": "7.26 5.62 4.66 1/1500 49626",
+    "docker_running": "",
+    "blas_library": "scipy-openblas 0.3.31.188.0",
+    "nvidia_smi": "NVIDIA GeForce RTX 5060 Laptop GPU, 595.91.07, 12.0, 8151 MiB"
+  },
+  "torch": "2.14.0+cu130",
+  "cuda": "13.0",
+  "gpu": "NVIDIA GeForce RTX 5060 Laptop GPU",
+  "vram_total_mib": 7707
+}

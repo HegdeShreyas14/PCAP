@@ -1,0 +1,10 @@
+environment -> results/gpu_mem_3200_fp32_env.json
+regime          p   lam  blks  grps  s_max    numpy    torch   gpu_x   maxdiff
+--------------------------------------------------------------------------------------------
+many_tiny    3200  0.06   102     6   3006 14.5233s  1.6630s   8.73x  1.04e-04
+    torch breakdown: h2d=13.0ms  compute=1471.0ms  d2h=16.9ms  F_max=100.0%  peak_vram=549.1MB
+
+Wrote 1 rows to results/gpu_mem_3200_fp32.csv
+
+Crossover (first s_max where GPU speedup t_numpy/t_torch exceeds 1.0):
+  many_tiny p=3200: s_max=3006 (n_groups=6, lambda=0.06)

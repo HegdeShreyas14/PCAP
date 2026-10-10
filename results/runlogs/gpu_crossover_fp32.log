@@ -1,0 +1,81 @@
+environment -> results/gpu_crossover_fp32_env.json
+regime          p   lam  blks  grps  s_max    numpy    torch   gpu_x   maxdiff
+--------------------------------------------------------------------------------------------
+many_tiny    1200  0.03     1     1   1200  2.1923s  0.4712s   4.65x  1.07e-04
+    torch breakdown: h2d=1.1ms  compute=449.7ms  d2h=0.7ms  F_max=100.0%  peak_vram=114.4MB
+many_tiny    1200  0.05    11     2   1186  2.0079s  0.4961s   4.05x  1.29e-04
+    torch breakdown: h2d=1.1ms  compute=475.8ms  d2h=0.8ms  F_max=100.0%  peak_vram=112.5MB
+many_tiny    1200  0.07    48     5   1115  1.7573s  0.5001s   3.51x  6.13e-04
+    torch breakdown: h2d=1.6ms  compute=480.4ms  d2h=0.7ms  F_max=100.0%  peak_vram=103.2MB
+many_tiny    1200  0.10    92     6   1016  1.4914s  0.4519s   3.30x  1.32e-04
+    torch breakdown: h2d=1.3ms  compute=432.5ms  d2h=0.7ms  F_max=100.0%  peak_vram=92.0MB
+many_tiny    1200  0.12   130     8    904  1.1534s  0.4655s   2.48x  7.99e-05
+    torch breakdown: h2d=1.4ms  compute=445.9ms  d2h=0.7ms  F_max=100.0%  peak_vram=78.8MB
+many_tiny    1200  0.14   171     9    776  0.9547s  0.4493s   2.12x  7.11e-05
+    torch breakdown: h2d=1.4ms  compute=430.2ms  d2h=0.6ms  F_max=100.0%  peak_vram=66.5MB
+many_tiny    1200  0.16   209    11    643  0.7448s  0.4901s   1.52x  1.47e-04
+    torch breakdown: h2d=1.5ms  compute=471.3ms  d2h=0.6ms  F_max=100.0%  peak_vram=55.7MB
+many_tiny    1200  0.18   238    13    508  0.5570s  0.5679s   0.98x  7.57e-05
+    torch breakdown: h2d=1.7ms  compute=549.6ms  d2h=0.6ms  F_max=100.0%  peak_vram=46.8MB
+many_tiny    1200  0.20   278    15    365  0.3782s  0.7064s   0.54x  2.51e-04
+    torch breakdown: h2d=1.8ms  compute=686.8ms  d2h=0.5ms  F_max=99.9%  peak_vram=39.9MB
+many_tiny    1200  0.23   313    15    260  0.2718s  0.7391s   0.37x  8.19e-05
+    torch breakdown: h2d=1.8ms  compute=718.2ms  d2h=0.5ms  F_max=99.8%  peak_vram=36.4MB
+many_tiny    1200  0.25   340    15    162  0.1974s  0.8295s   0.24x  3.38e-05
+    torch breakdown: h2d=1.7ms  compute=808.9ms  d2h=0.5ms  F_max=98.7%  peak_vram=34.0MB
+many_tiny    1200  0.27   379    15    112  0.1518s  1.6483s   0.09x  3.56e-04  !! CORRECTNESS/CONVERGENCE
+    torch breakdown: h2d=1.6ms  compute=1620.9ms  d2h=0.4ms  F_max=96.3%  peak_vram=33.2MB
+many_tiny    1200  0.29   406    14     88  0.1358s  1.4708s   0.09x  2.22e-04  !! CORRECTNESS/CONVERGENCE
+    torch breakdown: h2d=1.5ms  compute=1451.7ms  d2h=0.4ms  F_max=92.9%  peak_vram=32.9MB
+many_tiny    1200  0.31   439    15     64  0.1158s  1.2396s   0.09x  1.79e-04  !! CORRECTNESS/CONVERGENCE
+    torch breakdown: h2d=1.7ms  compute=1222.1ms  d2h=0.5ms  F_max=84.3%  peak_vram=32.7MB
+many_tiny    1200  0.33   473    14     56  0.1051s  1.1590s   0.09x  1.38e-04  !! CORRECTNESS/CONVERGENCE
+    torch breakdown: h2d=1.5ms  compute=1140.8ms  d2h=0.4ms  F_max=80.4%  peak_vram=32.6MB
+many_tiny    1200  0.36   499    14     56  0.1042s  1.1525s   0.09x  9.23e-05  !! CORRECTNESS/CONVERGENCE
+    torch breakdown: h2d=1.6ms  compute=1133.7ms  d2h=0.4ms  F_max=81.3%  peak_vram=32.6MB
+many_tiny    1200  0.38   528    14     46  0.0887s  1.0845s   0.08x  2.17e-05  !! CORRECTNESS/CONVERGENCE
+    torch breakdown: h2d=1.6ms  compute=1066.0ms  d2h=0.5ms  F_max=71.4%  peak_vram=32.5MB
+many_tiny    1200  0.40   563    13     34  0.0795s  0.9920s   0.08x  1.56e-05
+    torch breakdown: h2d=1.4ms  compute=974.5ms  d2h=0.4ms  F_max=52.2%  peak_vram=32.4MB
+many_tiny    2000  0.03     1     1   2000  5.3724s  0.8782s   6.12x  8.06e-05
+    torch breakdown: h2d=4.4ms  compute=810.9ms  d2h=1.9ms  F_max=100.0%  peak_vram=263.9MB
+many_tiny    2000  0.05    29     5   1951  5.4433s  0.9470s   5.75x  7.29e-05
+    torch breakdown: h2d=4.7ms  compute=887.0ms  d2h=2.3ms  F_max=100.0%  peak_vram=249.8MB
+many_tiny    2000  0.07   104     7   1784  4.6712s  0.8979s   5.20x  6.86e-05
+    torch breakdown: h2d=4.2ms  compute=839.8ms  d2h=1.7ms  F_max=100.0%  peak_vram=214.1MB
+many_tiny    2000  0.10   221    11   1411  3.2746s  0.7993s   4.10x  7.58e-05
+    torch breakdown: h2d=3.5ms  compute=751.8ms  d2h=1.3ms  F_max=100.0%  peak_vram=149.2MB
+many_tiny    2000  0.12   338    15   1027  1.5918s  0.7116s   2.24x  8.08e-05
+    torch breakdown: h2d=3.6ms  compute=678.8ms  d2h=1.0ms  F_max=100.0%  peak_vram=92.4MB
+many_tiny    2000  0.14   407    17    687  0.8321s  0.6690s   1.24x  7.00e-05
+    torch breakdown: h2d=2.6ms  compute=628.2ms  d2h=0.8ms  F_max=100.0%  peak_vram=59.0MB
+many_tiny    2000  0.16   471    18    392  0.4401s  0.7898s   0.56x  1.84e-04
+    torch breakdown: h2d=2.2ms  compute=743.8ms  d2h=0.7ms  F_max=99.8%  peak_vram=41.0MB
+many_tiny    2000  0.18   518    18    241  0.3085s  0.8637s   0.36x  6.64e-05
+    torch breakdown: h2d=2.2ms  compute=818.5ms  d2h=0.6ms  F_max=99.2%  peak_vram=35.9MB
+many_tiny    2000  0.20   553    17    136  0.2113s  0.8901s   0.24x  1.47e-04
+    torch breakdown: h2d=1.9ms  compute=847.2ms  d2h=0.5ms  F_max=95.7%  peak_vram=33.6MB
+many_tiny    2000  0.23   585    16    120  0.2006s  1.1683s   0.17x  4.09e-05
+    torch breakdown: h2d=1.9ms  compute=1125.7ms  d2h=0.5ms  F_max=94.2%  peak_vram=33.3MB
+many_tiny    2000  0.25   631    16     54  0.1507s  1.2606s   0.12x  2.05e-04  !! CORRECTNESS/CONVERGENCE
+    torch breakdown: h2d=1.9ms  compute=1218.3ms  d2h=0.5ms  F_max=59.8%  peak_vram=32.6MB
+many_tiny    2000  0.27   669    15     47  0.1501s  1.2143s   0.12x  1.75e-04  !! CORRECTNESS/CONVERGENCE
+    torch breakdown: h2d=1.9ms  compute=1177.3ms  d2h=0.5ms  F_max=51.7%  peak_vram=32.6MB
+many_tiny    2000  0.29   709    15     38  0.1428s  1.1751s   0.12x  1.48e-04  !! CORRECTNESS/CONVERGENCE
+    torch breakdown: h2d=1.8ms  compute=1134.0ms  d2h=0.5ms  F_max=37.7%  peak_vram=32.5MB
+many_tiny    2000  0.31   757    15     37  0.1417s  1.1740s   0.12x  1.19e-04  !! CORRECTNESS/CONVERGENCE
+    torch breakdown: h2d=1.7ms  compute=1132.2ms  d2h=0.5ms  F_max=37.1%  peak_vram=32.5MB
+many_tiny    2000  0.33   804    15     35  0.1418s  1.1510s   0.12x  1.45e-05  !! CORRECTNESS/CONVERGENCE
+    torch breakdown: h2d=1.8ms  compute=1107.8ms  d2h=0.5ms  F_max=34.9%  peak_vram=32.6MB
+many_tiny    2000  0.36   843    15     23  0.1208s  0.7577s   0.16x  6.27e-05
+    torch breakdown: h2d=1.7ms  compute=715.2ms  d2h=0.5ms  F_max=13.7%  peak_vram=32.6MB
+many_tiny    2000  0.38   889    15     23  0.1186s  0.9982s   0.12x  4.35e-05  !! CORRECTNESS/CONVERGENCE
+    torch breakdown: h2d=1.8ms  compute=954.8ms  d2h=0.5ms  F_max=14.5%  peak_vram=32.6MB
+many_tiny    2000  0.40   948    15     23  0.1141s  0.9774s   0.12x  9.26e-06  !! CORRECTNESS/CONVERGENCE
+    torch breakdown: h2d=1.7ms  compute=934.4ms  d2h=0.5ms  F_max=15.7%  peak_vram=32.7MB
+
+Wrote 36 rows to results/gpu_crossover_fp32.csv
+
+Crossover (first s_max where GPU speedup t_numpy/t_torch exceeds 1.0):
+  many_tiny p=1200: s_max=643 (n_groups=11, lambda=0.16)
+  many_tiny p=2000: s_max=687 (n_groups=17, lambda=0.14)

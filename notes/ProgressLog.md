@@ -259,6 +259,24 @@ So the GPU's advantage is not batching: it wins only when one ≳2000-node block
 dominates, i.e. when the problem is essentially one large eigendecomposition.
 The paper must say this plainly; it inverts the original "batched GPU" pitch.
 
+**float32 changes the GPU picture (2026-10-10, provisional — not yet
+written into the claims above).** Diagnostic (`fp32_diagnostic.csv`, criteria
+pre-registered in commit 3e2a362) passed 4/4; full crossover in float32
+(`gpu_crossover_fp32.csv`, anchors `gpu_mem_*_fp32.csv`):
+- Large blocks: GPU speedup over batched numpy float64 is 2.1–6.1× for
+  s_max ≥ ~650, and 5.7× / 8.7× at the s_max 2001 / 3006 anchors. Crossover
+  falls from s_max ≈ 1950 (float64) to **≈ 650** (p = 1200 and 2000 agree).
+  Peak VRAM roughly halves. Accuracy within the pre-registered 1e-3 bound
+  everywhere (max 5e-4 relative).
+- Small blocks: **13/36 points (s_max ≲ 120) fail to converge** in float32
+  (hit max_iter = 1000; float64 needs 118–329). The absolute term of the
+  stopping test (dim·tol) is below float32 resolution for tiny blocks. So
+  float32 is valid only where the GPU wins anyway, and fails the
+  pre-registered `all_converged` criterion elsewhere.
+- Still owed before quoting: a float32 CPU baseline (GPU fp32 vs CPU fp64 is
+  not like-for-like), and a decision on how to report the small-block
+  non-convergence (mixed precision, or float64 fallback below a block size).
+
 The pre-fix measurements claimed crossovers at s_max 1035 / 1522 and 1.36× /
 1.59× at the anchors. Those were inflated ~30% by a throttled CPU baseline
 (bug 9), not by the sampler change.
