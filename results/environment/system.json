@@ -1,0 +1,44 @@
+{
+  "captured": "2026-10-10T19:46:13",
+  "git_commit": "2d5734181e8d86b8cb669c2ef75cda9a203d30ed",
+  "src_dirty": false,
+  "python": "3.12.3",
+  "system": {
+    "machine_vendor": "LENOVO",
+    "machine_product": "83LT",
+    "bios_version": "RLCN32WW",
+    "cpu_model": "AMD Ryzen 9 8945HX with Radeon Graphics",
+    "cpu_physical_cores": 16,
+    "cpu_logical_cores": 32,
+    "smt_active": "1",
+    "ram_gib": 14.9,
+    "os": "Ubuntu 24.04.5 LTS",
+    "kernel": "6.8.0-138-generic",
+    "libc": "glibc 2.39",
+    "cpufreq_driver": "amd-pstate-epp",
+    "cpufreq_governor": "performance",
+    "cpufreq_epp": "performance",
+    "power_profile": "performance",
+    "ac_online": "1 0 0 0",
+    "loadavg_at_start": "2.87 3.12 3.53 3/1540 23825",
+    "docker_running": "trade_plat-matching-engine-1",
+    "blas_library": "scipy-openblas 0.3.31.188.0",
+    "nvidia_smi": "NVIDIA GeForce RTX 5060 Laptop GPU, 595.91.07, 12.0, 8151 MiB"
+  },
+  "torch": {
+    "torch": "2.14.0+cu130",
+    "torch_cuda": "13.0",
+    "cudnn": 92400,
+    "cuda_available": true,
+    "gpu": "NVIDIA GeForce RTX 5060 Laptop GPU",
+    "compute_capability": "12.0",
+    "vram_visible_to_cuda_mib": 7707,
+    "sm_count": 26
+  },
+  "packages": {
+    "numpy": "2.4.4",
+    "scipy": "1.17.1",
+    "networkx": "3.6.1",
+    "gglasso": "0.3.0"
+  }
+}
