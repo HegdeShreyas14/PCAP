@@ -130,6 +130,10 @@ def main():
                          "-- it is O(s_max^3) and not the quantity this "
                          "script is measuring")
     ap.add_argument("--device", default="cuda")
+    ap.add_argument("--dtype", default="float64", choices=["float64", "float32"],
+                    help="torch solver precision. float64 is the reference; "
+                         "float32 was validated in fp32_diagnostic.py. The numpy "
+                         "CPU baseline is always float64.")
     ap.add_argument("--out", default="results/gpu_crossover.csv")
     ap.add_argument("--check-correctness", action="store_true", default=True)
     args = ap.parse_args()
@@ -174,12 +178,13 @@ def main():
                     trials=args.trials)
                 t_gpu, (sol_gpu, info_gpu) = timed_call(
                     lambda: batched_block_SGL(S, lam, backend="torch",
-                                              device=args.device,
+                                              device=args.device, dtype=args.dtype,
                                               return_info=True),
                     trials=args.trials)
                 peak_mem_mb = torch.cuda.max_memory_allocated() / 1024**2
 
                 maxdiff = float(np.max(np.abs(sol_np["Theta"] - sol_gpu["Theta"])))
+                max_rel_diff = maxdiff / float(np.max(np.abs(sol_np["Theta"])))
                 n_groups = info_np["n_groups"]
 
                 # Structural context, same definitions as analyze.py: F_max is
@@ -206,7 +211,11 @@ def main():
                             warmup=1, trials=3)
 
                 ratio_gpu_np = t_np / t_gpu if t_gpu > 0 else float("nan")
-                flag = "" if maxdiff < 1e-8 else "  !! CORRECTNESS"
+                # float64 must match the numpy path to round-off; float32 is held
+                # to the pre-registered bound from fp32_diagnostic.py
+                ok = maxdiff < 1e-8 if args.dtype == "float64" else max_rel_diff <= 1e-3
+                ok = ok and info_gpu["n_not_converged"] == 0
+                flag = "" if ok else "  !! CORRECTNESS/CONVERGENCE"
                 print(f"{regime:11s} {p:5d} {lam:5.2f} {numC:5d} {n_groups:5d} "
                       f"{s_max:6d} {t_np:7.4f}s {t_gpu:7.4f}s {ratio_gpu_np:6.2f}x "
                       f"{maxdiff:9.2e}{flag}")
@@ -230,7 +239,11 @@ def main():
                                  gpu_speedup=ratio_gpu_np,          # t_numpy / t_torch: >1 means GPU faster
                                  peak_gpu_mem_mb=peak_mem_mb,
                                  cpu_baseline_label=info_np["cpu_baseline_label"],
-                                 max_diff=maxdiff, t_ref=t_ref))
+                                 max_diff=maxdiff, t_ref=t_ref,
+                                 dtype=args.dtype, max_rel_diff=max_rel_diff,
+                                 not_converged_torch=info_gpu["n_not_converged"],
+                                 max_iters_torch=info_gpu["max_iters"],
+                                 max_iters_numpy=info_np["max_iters"]))
 
     if rows:
         with open(args.out, "w", newline="") as f:
