@@ -150,7 +150,7 @@ def main():
     print(f"environment -> {write_env(args.out, args=args, extra={'torch': torch.__version__, 'cuda': torch.version.cuda, 'gpu': torch.cuda.get_device_name(0), 'vram_total_mib': torch.cuda.get_device_properties(0).total_memory // 2**20})}")
 
     print(f"{'regime':11s} {'p':>5s} {'lam':>5s} {'blks':>5s} {'grps':>5s} "
-          f"{'s_max':>6s} {'numpy':>8s} {'torch':>8s} {'ratio':>7s} {'maxdiff':>9s}")
+          f"{'s_max':>6s} {'numpy':>8s} {'torch':>8s} {'gpu_x':>7s} {'maxdiff':>9s}")
     print("-" * 92)
 
     for regime in args.regime:
@@ -227,7 +227,7 @@ def main():
                                  mem_group_k=info_gpu["mem_group_k"],
                                  mem_group_s=info_gpu["mem_group_s"],
                                  mem_group_ks2=info_gpu["mem_group_ks2"],
-                                 ratio_torch_over_numpy=ratio_gpu_np,
+                                 gpu_speedup=ratio_gpu_np,          # t_numpy / t_torch: >1 means GPU faster
                                  peak_gpu_mem_mb=peak_mem_mb,
                                  cpu_baseline_label=info_np["cpu_baseline_label"],
                                  max_diff=maxdiff, t_ref=t_ref))
@@ -240,23 +240,23 @@ def main():
         print(f"\nWrote {len(rows)} rows to {args.out}")
 
     # crude crossover readout: smallest s_max where torch beats numpy
-    print("\nCrossover (first s_max where torch/numpy ratio exceeds 1.0):")
+    print("\nCrossover (first s_max where GPU speedup t_numpy/t_torch exceeds 1.0):")
     for regime in args.regime:
         for p in args.p:
             sub = sorted(
                 [r for r in rows if r["regime"] == regime and r["p"] == p],
                 key=lambda r: r["s_max"])
-            won = [r for r in sub if r["ratio_torch_over_numpy"] > 1.0]
+            won = [r for r in sub if r["gpu_speedup"] > 1.0]
             if won:
                 print(f"  {regime} p={p}: s_max={won[0]['s_max']} "
                       f"(n_groups={won[0]['n_groups']}, "
                       f"lambda={won[0]['lam']:.2f})")
             else:
-                best = max(sub, key=lambda r: r["ratio_torch_over_numpy"],
+                best = max(sub, key=lambda r: r["gpu_speedup"],
                           default=None)
                 if best:
                     print(f"  {regime} p={p}: no crossover in range. "
-                          f"Best: {best['ratio_torch_over_numpy']:.2f}x "
+                          f"Best: {best['gpu_speedup']:.2f}x "
                           f"at s_max={best['s_max']}")
 
 

@@ -146,11 +146,22 @@ class _TorchBackend:
         self.torch.cuda.synchronize()
 
 
-def get_backend(name="numpy", device="cuda"):
+def get_backend(name="numpy", device="cuda", dtype="float64"):
+    """
+    dtype applies to the torch backend only. float64 is the reference and the
+    default; float32 exists to measure how much of the GPU result is the cost
+    of FP64 on a consumer GPU. The numpy backend is the CPU baseline and stays
+    float64 so the baseline cannot be changed by accident.
+    """
+    if dtype not in ("float64", "float32"):
+        raise ValueError(f"unknown dtype {dtype!r}")
     if name == "numpy":
+        if dtype != "float64":
+            raise ValueError("numpy backend is the float64 CPU baseline")
         return _NumpyBackend()
     if name == "torch":
-        return _TorchBackend(device=device)
+        import torch
+        return _TorchBackend(device=device, dtype=getattr(torch, dtype))
     raise ValueError(f"unknown backend {name!r}")
 
 
@@ -294,12 +305,16 @@ def batched_admm_group(S_stack, lambda1, bk, rho=1.0, max_iter=1000,
     # 0 in conv_iter_v) are stamped with the final iteration count so they
     # count as slowest rather than fastest.
     ci = bk.to_numpy(conv_iter_v).astype(float)
+    n_not_converged = int((ci == 0).sum())
     ci[ci == 0] = iters
     conv_min = float(ci.min())
     conv_max = float(ci.max())
     timing = {"t_h2d": t_h2d, "t_compute": t_compute,
               "conv_iter_min": conv_min, "conv_iter_max": conv_max,
-              "conv_iter_spread": conv_max - conv_min}
+              "conv_iter_spread": conv_max - conv_min,
+              # problems that hit max_iter without meeting the stopping test.
+              # Must be 0 for a result to count as converged.
+              "n_not_converged": n_not_converged}
     return Theta, Omega, iters, timing
 
 
@@ -309,7 +324,7 @@ def batched_admm_group(S_stack, lambda1, bk, rho=1.0, max_iter=1000,
 
 def batched_block_SGL(S, lambda1, backend="numpy", device="cuda",
                       max_iter=1000, tol=1e-7, rtol=1e-5, rho=1.0,
-                      return_info=False):
+                      return_info=False, dtype="float64"):
     """
     Drop-in analogue of gglasso's block_SGL using batched execution.
 
@@ -319,7 +334,7 @@ def batched_block_SGL(S, lambda1, backend="numpy", device="cuda",
     from gglasso.solver.single_admm_solver import get_connected_components
 
     p = S.shape[0]
-    bk = get_backend(backend, device)
+    bk = get_backend(backend, device, dtype)
 
     numC, allC = get_connected_components(S, lambda1)
     Theta_full = np.zeros((p, p))
@@ -358,7 +373,8 @@ def batched_block_SGL(S, lambda1, backend="numpy", device="cuda",
 
     info = {"n_blocks": numC, "n_singletons": len(singles),
             "n_groups": len(groups), "group_sizes": {}, "iters": {},
-            "backend": backend,
+            "backend": backend, "dtype": dtype,
+            "n_not_converged": 0, "max_iters": 0,
             # Explicit label so downstream analysis never confuses this with
             # the unbatched gglasso reference: above p=1600 (see RUNBOOK) the
             # unbatched block_SGL reference is dropped and this batched-numpy
@@ -394,6 +410,8 @@ def batched_block_SGL(S, lambda1, backend="numpy", device="cuda",
         info["t_d2h"] += t_d2h
         info["max_conv_spread"] = max(info["max_conv_spread"],
                                       timing["conv_iter_spread"])
+        info["n_not_converged"] += timing["n_not_converged"]
+        info["max_iters"] = max(info["max_iters"], iters)
 
     sol = {"Theta": Theta_full}
     return (sol, info) if return_info else sol

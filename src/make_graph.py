@@ -98,6 +98,13 @@ def inum(row, key, default=0):
         return default
 
 
+def gpu_speedup(row):
+    """t_numpy / t_torch (>1 = GPU faster). Older CSVs call this column
+    ratio_torch_over_numpy despite holding the same quantity; read either."""
+    v = fnum(row, "gpu_speedup")
+    return v if v == v else fnum(row, "ratio_torch_over_numpy")
+
+
 def median(xs):
     xs = [x for x in xs if x == x]          # drop NaN
     return float(np.median(xs)) if xs else float("nan")
@@ -398,13 +405,13 @@ def fig_rq2_crossover(res, out, ext):
     for i, p in enumerate(sorted(by_p)):
         sub = sorted(by_p[p], key=lambda r: fnum(r, "s_max"))
         xs = [fnum(r, "s_max") for r in sub]
-        ys = [fnum(r, "ratio_torch_over_numpy") for r in sub]
+        ys = [gpu_speedup(r) for r in sub]
         ax.plot(xs, ys, markers[i % 4], ms=3.5, lw=1.1,
                 color=colors[i % 4], label=f"$p={p}$ ({len(sub)} pts)")
 
     if anchors:
         xs = [fnum(r, "s_max") for r in anchors]
-        ys = [fnum(r, "ratio_torch_over_numpy") for r in anchors]
+        ys = [gpu_speedup(r) for r in anchors]
         ax.plot(xs, ys, "^", ms=7, color=COL["green"],
                 label="RQ3 anchors", linestyle="none")
         # label each anchor by p: the write-up references them individually
@@ -415,7 +422,6 @@ def fig_rq2_crossover(res, out, ext):
 
     ax.axhline(1.0, color=COL["grey"], lw=0.8, ls="--")
     ax.set_xlabel("$s_{\\max}$ (largest detected block)", fontsize=8)
-    # column is named ratio_torch_over_numpy but holds t_numpy / t_torch (GPU speedup)
     ax.set_ylabel("GPU speedup: $T_{\\mathrm{numpy}}/T_{\\mathrm{torch}}$", fontsize=8)
     ax.legend(fontsize=6.5, frameon=False, loc="upper left")
     save(fig, out, "fig5_rq2_crossover", ext)
@@ -423,7 +429,7 @@ def fig_rq2_crossover(res, out, ext):
     # report the crossover per series
     for p in sorted(by_p):
         sub = sorted(by_p[p], key=lambda r: fnum(r, "s_max"))
-        won = [r for r in sub if fnum(r, "ratio_torch_over_numpy") > 1.0]
+        won = [r for r in sub if gpu_speedup(r) > 1.0]
         if won:
             r = won[0]
             print(f"    p={p}: crosses 1.0 at s_max={inum(r,'s_max')} "
