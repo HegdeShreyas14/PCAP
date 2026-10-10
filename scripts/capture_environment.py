@@ -55,7 +55,18 @@ def machine_states():
     return sorted(out)
 
 
+def commit_map():
+    """old -> new hash from results/environment/commit_map.tsv (history rewrite;
+    trees identical). Env files keep the hash that was current when they ran."""
+    path = os.path.join(OUT, "commit_map.tsv")
+    if not os.path.exists(path):
+        return {}
+    rows = [l.split("\t") for l in open(path) if l.strip() and not l.startswith(("#", "old_commit"))]
+    return {r[0]: r[1] for r in rows}
+
+
 def dataset_rows():
+    cmap = commit_map()
     states = machine_states()
     rows = []
     for path in sorted(glob.glob(os.path.join(ROOT, "results", "*_env.json"))):
@@ -67,7 +78,7 @@ def dataset_rows():
         rows.append({
             "dataset": csv,
             "date": (p.get("timestamp") or "")[:16].replace("T", " "),
-            "commit": (p.get("git_commit") or "?")[:7],
+            "commit": cmap.get(p.get("git_commit"), p.get("git_commit") or "?")[:7],
             "src_dirty": p.get("src_dirty"),
             "blas_threads": threads,
             "kernel": (p.get("platform") or "").split("-with")[0]
@@ -149,6 +160,9 @@ baseline inflated GPU/CPU ratios ~30% (bug 9). See `notes/ProgressLog.md`.
 
 Every dataset has an `_env.json` with the commit, a dirty-tree flag, md5 of
 every source file, package versions, BLAS threads and the full command line.
+Commit hashes below are current; history was rewritten once (messages only,
+identical trees), so some env files record the pre-rewrite hash. The mapping
+is `results/environment/commit_map.tsv`.
 
 | dataset | produced | commit | src clean | BLAS threads | kernel | machine state |
 |---|---|---|---|---|---|---|
