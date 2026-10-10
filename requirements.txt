@@ -1,4 +1,6 @@
-# Pinned to the versions the RQ1 results were produced with.
+# Minimal direct dependencies. The exact environment that produced results/
+# (all packages, including torch 2.14.0+cu130) is
+# results/environment/requirements-lock.txt; use that to reproduce the paper.
 # PyTorch is deliberately NOT pinned here: the correct wheel depends on your
 # CUDA version. See README for the install command.
 
@@ -10,4 +12,4 @@ numba==0.67.0
 
 # analysis / plotting for the report
 pandas==3.0.2
-matplotlib>=3.8
+matplotlib==3.11.1

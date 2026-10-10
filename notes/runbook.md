@@ -1,6 +1,6 @@
 # Runbook
 
-How to run everything. `notes/PROGRESS.md` is the source of truth for what has
+How to run everything. `notes/ProgressLog.md` is the source of truth for what has
 been done and what was found; this file is how to do it.
 
 ---
@@ -13,7 +13,7 @@ python3 -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
-python src/phase1_repro.py         # paste ENVIRONMENT block into PROGRESS.md
+python src/phase1_repro.py         # install check (gglasso example)
 ```
 
 PyTorch is deliberately **not** in requirements.txt — the correct wheel depends
@@ -36,6 +36,23 @@ Needed for Phase 3 only. RQ1 is CPU-only.
 - Don't use the machine while it runs.
 - **Never run two sweeps concurrently**, or one sweep alongside percolation.
   They compete for cores and you end up measuring contention.
+
+---
+
+## Record the environment (for the paper)
+
+Every harness writes `<out>_env.json` (commit, dirty flag, file md5s, package
+versions, BLAS threads, args, and a system snapshot: CPU, BLAS library, power
+profile, governor, load, running containers). Before a timed batch, write
+`results/runlogs/machine_state*.txt` (the rerun scripts show how). After the
+datasets are final, on the same machine:
+
+```bash
+.venv/bin/python scripts/capture_environment.py   # ENVIRONMENT.md + results/environment/
+```
+
+Check for competing load first: `ps -eo pcpu,args --sort=-pcpu | head` and
+`docker ps`. An unrelated container cost us a whole GPU dataset (bug 9).
 
 ---
 
@@ -118,10 +135,10 @@ percolation run is multi-seed and owns that claim.
 
 ```bash
 nohup python src/percolation.py --seeds 0 1 2 --blas-threads 8 \
-      --out results/percolation.csv > logs/perc.log 2>&1 &
+      --out results/percolation.csv > results/runlogs/percolation.log 2>&1 &
 ```
 
-Already done (3600 rows, seeds 0/1/2, fixed generator). Re-run only if the
+Done 2026-10-10 (3600 rows, seeds 0/1/2, commit 50ec233). Re-run only if the
 generator changes again.
 
 `--no-f1` is structure-only and much faster, but yields **no verdict** —
@@ -141,7 +158,7 @@ python src/profile_block.py --regime imbalanced --p 200 --ratio 10 --lam 0.15
 python src/profile_block.py --regime balanced --p 800 --ratio 10 --lam 0.10
 ```
 
-Result (see PROGRESS.md finding 4): both are bound by Python per-block glue
+Result (see ProgressLog.md finding 4): both are bound by Python per-block glue
 (35–65%) plus thousands of sub-millisecond `eigh` calls that are mostly
 dispatch overhead. The largest single `eigh` is ~1% of wall-clock. **The
 Phase 3 lever is batching, not a faster eigensolver.**
@@ -152,7 +169,7 @@ Phase 3 lever is batching, not a faster eigensolver.**
 
 ```bash
 git add -A && git commit -m "..."
-git tag rq1-v3-seeded          # tag the commit that produced each dataset
+git tag rq1-v4-paired          # tag the commit that produced each dataset
 git push --tags
 ```
 
@@ -161,5 +178,5 @@ git push --tags
   take it out.
 - Three code corrections have already invalidated earlier datasets. Without
   tags you cannot tell which CSV came from which code version.
-- Log who did what, dated, in PROGRESS.md. "Contribution of each team member"
+- Log who did what, dated, in ProgressLog.md. "Contribution of each team member"
   is part of the demo marks and is miserable to reconstruct in October.

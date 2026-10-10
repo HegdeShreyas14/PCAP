@@ -36,6 +36,68 @@ def _version(mod):
         return None
 
 
+def _read(path):
+    try:
+        with open(path) as f:
+            return f.read().strip()
+    except OSError:
+        return None
+
+
+def _cmd(*argv):
+    try:
+        return subprocess.run(argv, capture_output=True, text=True,
+                              timeout=10, check=True).stdout.strip()
+    except Exception:
+        return None
+
+
+def system_snapshot():
+    """
+    Hardware, OS, BLAS and power state, best effort (Linux). Recorded with
+    every run because two of our bugs were environmental: BLAS behaviour
+    (bug 8) and an unrecorded power profile plus competing load (bug 9).
+    """
+    cpuinfo = _read("/proc/cpuinfo") or ""
+    field = lambda k: next((l.split(":", 1)[1].strip() for l in cpuinfo.splitlines()
+                            if l.startswith(k)), None)
+    meminfo = _read("/proc/meminfo") or ""
+    mem_kb = next((int(l.split()[1]) for l in meminfo.splitlines()
+                   if l.startswith("MemTotal")), None)
+    osrel = dict(l.split("=", 1) for l in (_read("/etc/os-release") or "").splitlines() if "=" in l)
+    cf = "/sys/devices/system/cpu/cpu0/cpufreq/"
+    snap = {
+        "machine_vendor": _read("/sys/class/dmi/id/sys_vendor"),
+        "machine_product": _read("/sys/class/dmi/id/product_name"),
+        "bios_version": _read("/sys/class/dmi/id/bios_version"),
+        "cpu_model": field("model name"),
+        "cpu_physical_cores": int(field("cpu cores")) if field("cpu cores") else None,
+        "cpu_logical_cores": os.cpu_count(),
+        "smt_active": _read("/sys/devices/system/cpu/smt/active"),
+        "ram_gib": round(mem_kb / 2**20, 1) if mem_kb else None,
+        "os": osrel.get("PRETTY_NAME", "").strip('"') or None,
+        "kernel": platform.release(),
+        "libc": " ".join(platform.libc_ver()),
+        "cpufreq_driver": _read(cf + "scaling_driver"),
+        "cpufreq_governor": _read(cf + "scaling_governor"),
+        "cpufreq_epp": _read(cf + "energy_performance_preference"),
+        "power_profile": _cmd("powerprofilesctl", "get"),
+        "ac_online": _cmd("sh", "-c", "cat /sys/class/power_supply/*/online | tr '\\n' ' '"),
+        "loadavg_at_start": _read("/proc/loadavg"),
+        "docker_running": _cmd("docker", "ps", "--format", "{{.Names}}"),
+    }
+    try:
+        import numpy as np
+        blas = np.show_config(mode="dicts")["Build Dependencies"]["blas"]
+        snap["blas_library"] = f"{blas.get('name')} {blas.get('version')}"
+    except Exception:
+        snap["blas_library"] = None
+    smi = _cmd("nvidia-smi", "--query-gpu=name,driver_version,compute_cap,memory.total",
+               "--format=csv,noheader")
+    snap["nvidia_smi"] = smi
+    return snap
+
+
 def run_metadata(args=None):
     """Code version, environment and arguments for one harness run."""
     dirty = _git("status", "--porcelain", "--untracked-files=no", "--", "src")
@@ -58,6 +120,7 @@ def run_metadata(args=None):
         "scipy": _version("scipy"),
         "networkx": _version("networkx"),
         "gglasso": _version("gglasso"),
+        "system": system_snapshot(),
     }
     return meta
 
