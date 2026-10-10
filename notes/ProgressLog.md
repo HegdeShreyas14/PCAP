@@ -61,6 +61,12 @@ baseline claws back a third to a half of the win, because ADMM's single p×p
 eigendecomposition is finally large enough to use 8 cores. This replaces the
 earlier "uniform 74–82%" claim, which came from unpaired runs (bug 8).
 
+The one exception at p ≥ 400 is `many_tiny`, which keeps 83–91%: its speedup
+is only ~1.3× to begin with, so there is little for the threaded baseline to
+take back. The other three regimes lose 40–60% there. Put precisely: the
+threaded baseline erodes the win *where a win exists*, and the erosion grows
+with p (Fig 1b; the p=800 cluster near 90% is `many_tiny`).
+
 Report the 8-thread numbers. The 1-thread run is the "no BLAS parallelism"
 algorithmic upper bound and overstates the win by up to **2.5×** at large p:
 
@@ -314,8 +320,8 @@ Package quirks (not our bugs, but they bite):
    `results/archive_prefix_bug3/` and `results/archive_prefix_bug8/`.
 2. ~~Percolation run~~ **DONE 2026-10-10** (9 min). Finding 6 is quoted from
    it; seed 0 matches the RQ1 8t sweep on 192/192 points.
-2a. **Figure 1** still groups retention by regime. With paired data the effect
-   is by p (96% at p≤200, 57–65% at p≥400); re-plot retention vs p.
+2a. ~~Figure 1 by regime~~ **DONE**: now `fig1_rq1_threading` — (a) best-F1
+   speedup vs p at 1t/8t, (b) per-config retention vs p with `ns` hollow.
 2b. **RQ2/RQ3 data** predate the sampler fix. Re-run `gpu_crossover.py` and
    `bench_batched.py` before submission so every dataset comes from one commit.
 3. **Phase 3**: implement batched ADMM over similarly-sized block groups.
