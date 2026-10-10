@@ -138,7 +138,7 @@ nohup python src/percolation.py --seeds 0 1 2 --blas-threads 8 \
       --out results/percolation.csv > results/runlogs/percolation.log 2>&1 &
 ```
 
-Done 2026-10-10 (3600 rows, seeds 0/1/2, commit 50ec233). Re-run only if the
+Done 2026-10-10 (3600 rows, seeds 0/1/2, commit ebd6d6d). Re-run only if the
 generator changes again.
 
 `--no-f1` is structure-only and much faster, but yields **no verdict** —

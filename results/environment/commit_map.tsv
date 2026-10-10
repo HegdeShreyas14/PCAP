@@ -1,0 +1,19 @@
+# Commit hashes rewritten on 2026-10-10 to remove a co-author trailer from commit messages.
+# Only messages changed: each pair has an identical tree (verify: git rev-parse <hash>^{tree}).
+# Machine-written records (results/*_env.json, results/runlogs/*) keep the original hash; resolve it here.
+old_commit	new_commit	tree_identical	subject
+ad99acfb38bb5325af1b23eb8a6c79de1b2267ec	2b07a474abb22d0a8a2e0d959c41bd3a3705cbd6	same	Make sampled covariance independent of BLAS thread count (bug 8)
+45066eddb624b94d0add18fc789f271a26dc72ec	8a257d161e32df024e64f053d2fdd7dae72bb8b6	same	Record run provenance and verify pairing of 1t/8t sweeps
+50ec233d752924d395f8a19f13a439d9ec1b3bab	ebd6d6d365c83c798798fbae911d8881048d0e66	same	Add sequential rerun script for bug-8 datasets
+a4a478a6a481a505712f6c706758cf31d59e7907	080f0ece1eced4556000a13eb5a2fbc2412d9a7e	same	Regenerate RQ1 pair and percolation on the fixed sampler (bug 8)
+d4c1a9b201180e766f5fb3a1a3eb25860349bb6e	81cf0c38bf78fcd1aa87563ba070b63160e50aaa	same	Figure 1: threading retention by p instead of by regime
+e86f56b664cf18c516495c13ba5f491b8ab3fae1	cf112c1b20e57ba6c1fcf740b5b9fd6e8f2ec903	same	Add RQ2/RQ3 rerun script; archive pre-bug-8 GPU data
+61160469922f287bc428aadce95e72d76814cd13	7e3769a8f3ada9c0df6470a1438784bb97a6fa1e	same	Re-measure RQ2/RQ3 on fixed sampler and quiet machine (bug 9)
+2d5734181e8d86b8cb669c2ef75cda9a203d30ed	eea4a1006d84ec814c5939e382aff2e6410ef869	same	Document the full environment for the paper's reproducibility appendix
+684ae8c89bb6e9807c50da73b084baca5c8c215b	03ca7cd07f1b25e2a681e1b5ca9f567a60b3c97f	same	Capture environment snapshot and lock for current datasets
+646ff57e4feea9edb58c7f6e26c01574424babaa	e08ac1cc779606cc0c462a8f02ffb39ed15c5f8f	same	Add screening.py: exactness of component screening and cross-block mechanism
+f3bdb542296ab8cb48da4c5b6f1f1ef8370cd4cc	a88435a554ea28eaeafedb7fb0d9a5aeed48979e	same	Reframe Finding 6: screening is exact; the estimator merges true blocks
+28a81af7b3d04d3ece5fd917383c91ae615eb397	3e2a362d8b97c896899de332f280e36abc9a7237	same	float32 diagnostic: dtype option, convergence reporting, pre-registered criteria
+f99b0e3d0f5b3f7a1e480c3760a9ed2e750a259a	27ad0cf31ae4b0018b767273b4e4214ba778c76e	same	gpu_crossover: --dtype option (float64 default), per-row dtype, relative error and convergence columns
+089fc06987a7b6d4482711d64b4ba595508ee283	b5e3b0af3a1b5afba6af1c60381d8965a4b453dc	same	float32 diagnostic results: passes all pre-registered criteria at 4/4 points
+3291514bd418d11cda49d76ba3f85c7b580954fc	d87e372a794a33c857b9e57b4353dc1f8548a50c	same	Add float32 crossover run script

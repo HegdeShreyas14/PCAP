@@ -1,6 +1,6 @@
 {
-  "captured": "2026-10-10T19:46:13",
-  "git_commit": "2d5734181e8d86b8cb669c2ef75cda9a203d30ed",
+  "captured": "2026-10-10T20:22:57",
+  "git_commit": "e0f900385d97f620204f61d1f0867bcb58a72f6f",
   "src_dirty": false,
   "python": "3.12.3",
   "system": {
@@ -20,7 +20,7 @@
     "cpufreq_epp": "performance",
     "power_profile": "performance",
     "ac_online": "1 0 0 0",
-    "loadavg_at_start": "2.87 3.12 3.53 3/1540 23825",
+    "loadavg_at_start": "2.64 3.66 3.48 4/1542 44531",
     "docker_running": "trade_plat-matching-engine-1",
     "blas_library": "scipy-openblas 0.3.31.188.0",
     "nvidia_smi": "NVIDIA GeForce RTX 5060 Laptop GPU, 595.91.07, 12.0, 8151 MiB"
