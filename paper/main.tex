@@ -33,6 +33,7 @@ natural source of parallelism. We characterise how much of it is usable in
 practice: on a multicore CPU and on a consumer laptop GPU, across four
 block-size regimes, three sample sizes and problem dimensions up to $p=3200$,
 with every result tied to a recorded code version and machine state.
+% PENDING-SEEDS: add spread across seeds 0-2 to the 2.5x median
 We find that (i) decomposition yields a median $2.5\times$ speedup against an
 8-thread CPU baseline at the statistically best regularisation, and the
 multithreaded baseline erodes the gain as $p$ grows; (ii) speedup and
@@ -72,7 +73,17 @@ this as \texttt{block\_SGL}.
 
 It is tempting to conclude that more components mean more parallel speedup,
 and that a GPU, which excels at many independent small problems, is the
-natural accelerator. This paper tests both conclusions.
+natural accelerator. This paper tests both conclusions through three
+research questions:
+\begin{description}
+\item[RQ1] How much does component decomposition speed up the graphical lasso
+  at a statistically useful regularisation, against a fair multithreaded CPU
+  baseline, and why is the gain not larger?
+\item[RQ2] Does batched execution of the per-block work help, on a CPU and on
+  a consumer GPU, and what limits it?
+\item[RQ3] Is GPU memory a binding constraint at the problem sizes where a GPU
+  could help?
+\end{description}
 
 \textbf{Contributions.}
 \begin{itemize}
@@ -91,6 +102,43 @@ natural accelerator. This paper tests both conclusions.
 \item A reproducibility account: two subtle environmental faults that
   invalidated earlier datasets, and the provenance tooling that caught them.
 \end{itemize}
+
+% =====================================================================
+\section{Related Work}
+\textbf{Graphical lasso solvers.} The graphical lasso \cite{friedman2008,
+banerjee2008} has been solved by block coordinate descent \cite{friedman2008},
+alternating linearisation \cite{scheinberg2010}, ADMM \cite{boyd2011}, and
+second-order methods such as QUIC \cite{hsieh2014quic}, whose BigQUIC variant
+scales to a million variables through block-wise computation and
+parallelism \cite{hsieh2013bigquic}. Mazumder and Hastie \cite{mazumder2012ejs}
+analyse the convergence behaviour of the block coordinate algorithm. We do not
+propose a new solver; we study how much parallelism the exact component
+decomposition exposes to an existing ADMM solver \cite{gglasso2021}.
+
+\textbf{Screening.} Witten et al.\ \cite{witten2011} and Mazumder and Hastie
+\cite{mazumder2012} showed that thresholding the sample covariance yields the
+exact component structure of the solution, and used it to solve large
+problems block by block. Their analyses establish exactness; our contribution
+is to measure how much block parallelism survives at statistically useful
+regularisation, and why it does not.
+
+\textbf{Batched and GPU linear algebra.} Batched BLAS and LAPACK interfaces
+target many small independent matrix problems, where per-call launch overhead
+dominates arithmetic \cite{dongarra2017batched}. Our batched ADMM follows
+this design, and our measurements show the same overhead-bound behaviour for
+small blocks on both CPU and GPU.
+
+\textbf{Mixed precision.} Lower precision can accelerate numerical linear
+algebra substantially on GPUs, but requires care about accuracy and
+convergence \cite{higham2022mixed,abdelfattah2021survey}. We evaluate single
+precision against acceptance criteria fixed before measurement, and find it
+accurate on large blocks but non-convergent on small ones on the GPU.
+
+\textbf{Benchmarking methodology.} Hoefler and Belli \cite{hoefler2015}
+catalogue common pitfalls in reporting parallel performance. Our
+reproducibility section adds two concrete, silent failure modes: random data
+that depend on the BLAS thread count, and an uncontrolled machine state that
+biased CPU-versus-GPU comparisons.
 
 % =====================================================================
 \section{Background}
@@ -141,6 +189,19 @@ vectors. A difference is flagged as not resolvable (\emph{ns}) when the
 min--max bands of two runs overlap. The structural study uses a finer grid
 ($\lambda=0.02,0.04,\dots,0.50$) and three seeds (3600 rows).
 
+\subsection{Batched solver}
+\label{sec:batched}
+Our batched solver replaces GGLasso's per-component loop. After screening,
+components are grouped by size, and each group of $k$ blocks of size $s$ is
+stored as one $(k,s,s)$ array. Each ADMM iteration then performs, per group:
+one batched symmetric eigendecomposition for the $\Omega$ update, one
+batched off-diagonal soft-threshold, one batched dual update, and one batched
+evaluation of the primal and dual residuals. Converged problems in a group
+are frozen by a mask, and the adaptive penalty is tracked per problem.
+Singleton components are solved in closed form ($\Theta_{ii}=1/S_{ii}$). The
+same code runs on NumPy (CPU) and PyTorch (GPU) backends, in float64 by
+default, and reproduces GGLasso's ADMM iterates to $10^{-14}$.
+
 \subsection{Operating point}
 Large $\lambda$ always looks fast because it shatters the graph. We
 therefore report speedup at the $\lambda$ maximising support-recovery F1
@@ -164,6 +225,7 @@ file. Code, data, logs and a full package lock are available at
 \section{Results}
 
 \subsection{Decomposition speedup and the threaded baseline}
+% PENDING-SEEDS: median/range across seeds; PENDING-LAMBDA: 7 edge cells
 At the best-F1 $\lambda$, decomposition is faster than the undecomposed
 solver by a median $2.5\times$ (range $0.99$--$10.9\times$) against an
 8-thread BLAS baseline; per-regime medians are $1.9\times$ (many\_tiny) to
@@ -174,6 +236,7 @@ not fragment at all, decomposition costs a little
 
 A single-threaded baseline overstates the benefit. With the 1- and 8-thread
 runs solving identical instances (verified on all 384 configurations),
+% PENDING-SEEDS: retention by p with seed spread
 the 8-thread baseline keeps a median 96\% of the speedup at $p\le 200$ but
 only 65\% at $p=400$ and 57\% at $p=800$ (Fig.~\ref{fig:threading}).
 Undecomposed ADMM performs one $p\times p$ eigendecomposition per iteration,
@@ -263,6 +326,14 @@ would allow (oracle). For balanced and many\_tiny the truth leaves 80--97.5\%
 of the work outside the largest block, yet the detected components leave
 almost none (median $F_{\max}$ 99.9\%).
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig3_rq1_oracle_gap.pdf}
+\caption{Largest-component work share at the best-F1 $\lambda$ (detected)
+versus the true block structure (oracle), three seeds.}
+\label{fig:oracle}
+\end{figure}
+
 This is not a failure of detection. We verified exactness of screening on
 our instances: solving \eqref{eq:glasso} without decomposition (tol
 $10^{-10}$) and taking components of the solution's support gives a
@@ -301,19 +372,9 @@ component breaks.}
 \label{fig:percolation}
 \end{figure}
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=\columnwidth]{fig3_rq1_oracle_gap.pdf}
-\caption{Largest-component work share at the best-F1 $\lambda$ (detected)
-versus the true block structure (oracle), three seeds.}
-\label{fig:oracle}
-\end{figure}
-
 \subsection{Batched execution on CPU and GPU}
-Our batched solver stacks all blocks of equal size into one $(k,s,s)$ array
-and runs one batched eigendecomposition, soft-threshold and stopping test
-per group and iteration, reproducing GGLasso's ADMM to $10^{-14}$. On the
-CPU, batching alone gives $1.25$--$1.69\times$ over \texttt{block\_SGL} at
+Using the batched solver of Section~\ref{sec:batched}, on the
+CPU batching alone gives $1.25$--$1.69\times$ over \texttt{block\_SGL} at
 the best-F1 $\lambda$ ($p=200$--$800$, imbalanced and many\_tiny).
 
 We report GPU performance as $S_{\mathrm{GPU}}=T_{\mathrm{CPU}}/T_{\mathrm{GPU}}$,
@@ -321,6 +382,7 @@ the batched CPU time (float64) over the batched GPU time, so $S_{\mathrm{GPU}}>1
 means the GPU is faster. On the GPU in double precision, our reference
 configuration, the same batched code has $S_{\mathrm{GPU}}=0.10$--$0.79$
 (i.e.\ $1.3$--$10\times$ \emph{slower}) at these sizes, and in a $\lambda$ scan
+% PENDING-SEEDS/DRIVER: crossover across seeds 0-2, new-driver recheck
 at $p=2000$ it first wins only at $s_{\max}\approx1950$
 ($1.07\times$). Transfers are at most 0.3\% of GPU time; the loss is
 per-iteration launch overhead plus the reduced double-precision throughput of
@@ -452,12 +514,17 @@ every experiment on another machine and records its environment.
 All measurements use one laptop; timings are machine-specific, and the
 consumer GPU's double-precision rate is not representative of data-centre
 GPUs. Data are synthetic, and the \emph{balanced} and \emph{many\_tiny}
-regimes coincide at $p=100$. Speedups come from one instance per
-configuration; structural results use three seeds. In 7 of 48 cells the
+regimes coincide at $p=100$.
+% PENDING-SEEDS: replace next sentence once seeds 1-2 are in
+Speedups come from one instance per
+configuration; structural results use three seeds.
+% PENDING-LAMBDA: replace with the lambda-extension outcome
+In 7 of 48 cells the
 best-F1 $\lambda$ lies at the edge of the grid ($0.05$), so the optimum may be
 lower. The float32 study covers one regime, and the cause of GPU float32
-non-convergence on small blocks is not isolated. We compare against GGLasso only,
-not other graphical lasso solvers.
+non-convergence on small blocks is not isolated. Timings compare against GGLasso's own
+solvers; we do not benchmark QUIC or coordinate-descent implementations, and
+F1 is computable only because the data are synthetic.
 
 % =====================================================================
 \section{Conclusion}
