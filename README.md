@@ -1,29 +1,34 @@
-# GPU-Accelerated Sparse Graphical Lasso
- 
-Parallelising GGLasso's block-sparse (connected-component) decomposition on
-consumer GPUs, and characterising when it helps.
- 
+# Where Does the Block Parallelism Go?
+
+Characterising connected-component decomposition of the graphical lasso
+(GGLasso) on multicore CPUs and a consumer GPU: how much block parallelism is
+usable at statistically useful regularisation, why little of it survives, and
+when batched GPU execution helps.
+
 **Team:** Abhyuday Gandhi (240905036), Shreyas S Hegde (240905118),
 Shrikrishna Bhakhta (240905214)
- 
----
 
-## Reproducing the results
+## Repository map
 
-- **Environment:** [ENVIRONMENT.md](ENVIRONMENT.md) — hardware, OS, BLAS, GPU
-  driver, run conditions, and which commit produced each dataset. Full package
-  lock in `results/environment/requirements-lock.txt`.
-- **How to run:** [notes/runbook.md](notes/runbook.md).
-- **Findings and their history:** [notes/ProgressLog.md](notes/ProgressLog.md),
-  including the bugs that invalidated earlier datasets.
+| path | contents |
+|---|---|
+| `paper/` | manuscript (`main.tex`, IEEE format), references, figures |
+| `src/` | experiment harnesses and the batched solver |
+| `scripts/` | environment setup, the cross-platform run package, analysis helpers |
+| `tests/` | regression test: sampled data must not depend on BLAS thread count |
+| `results/` | every dataset with its provenance; see [results/README.md](results/README.md) |
+| `ENVIRONMENT.md` | hardware, software, run conditions, and the commit behind each dataset |
+| `RUN_PACKAGE.md` | how to reproduce everything on another machine |
+| `notes/` | runbook and the project's chronological research log |
+
+## Reproducing
 
 ```bash
-python3.12 -m venv .venv && source .venv/bin/activate
-pip install -r results/environment/requirements-lock.txt \
-    --extra-index-url https://download.pytorch.org/whl/cu130
-python tests/test_sampling_determinism.py
-scripts/rerun_bug8.sh        # RQ1 sweeps + percolation
-scripts/rerun_rq2_rq3.sh     # RQ2/RQ3 (CUDA GPU required)
-python src/make_graph.py     # figures
+scripts/setup_env.sh                                       # venv from the package lock
+scripts/run_package.sh --machine <name> --tier smoke       # ~10 min check
+scripts/run_package.sh --machine <name> --tier standard    # main experiments, ~3-5 h
+.venv/bin/python src/make_graph.py --out paper/figs        # figures from results/
 ```
 
+Details, tiers and the rules for valid timings: [RUN_PACKAGE.md](RUN_PACKAGE.md).
+Individual experiments: [notes/runbook.md](notes/runbook.md).

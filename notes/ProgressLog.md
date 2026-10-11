@@ -1,5 +1,10 @@
 # Project Progress Log
 
+> **Chronological research notebook.** It records what was tried, what broke
+> and how it was fixed, including numbers that were later corrected. The
+> authoritative results are `paper/main.tex` and `results/` (see
+> `results/README.md`); where this log and the paper differ, the paper wins.
+
 **Project:** GPU-Accelerated Sparse Graphical Lasso — parallelising GGLasso's
 block-sparse (connected-component) decomposition on consumer GPUs.
 
