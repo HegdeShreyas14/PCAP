@@ -31,7 +31,7 @@ The graphical lasso decomposes exactly into independent subproblems, one per
 connected component of the thresholded sample covariance. This looks like a
 natural source of parallelism. We characterise how much of it is usable in
 practice: on a multicore CPU and on a consumer laptop GPU, across four
-block-size regimes, three sample sizes and problem dimensions up to $p=3200$,
+block-size regimes, three sample-to-dimension ratios and problem dimensions up to $p=3200$,
 with every result tied to a recorded code version and machine state.
 We find that (i) decomposition yields a median $2.3$--$2.6\times$ speedup
 (across three independent instances, excluding four cells whose optimal
@@ -46,11 +46,12 @@ fused by the estimator itself, not by the screening step: screening is exact,
 and a few percent of spurious cross-block entries suffice to merge all true
 blocks into one component. Batching the per-block work gives
 $1.2$--$1.7\times$ on the CPU. On a consumer GPU in double precision, the
-batched solver overtakes the CPU only when one block of $\approx1950$
-variables dominates. A precision diagnostic with pre-registered accuracy
-criteria shows why: in single precision the crossover falls to
-$\approx650$ variables, but GPU single precision fails to converge on small
-blocks, so we keep double precision as the reference result.
+batched solver wins only on very large blocks: in a $\lambda$ scan at
+$p=2000$ it overtakes the CPU only when one block of $\approx1950$ variables
+dominates. A precision diagnostic, with accuracy criteria defined before
+measurement, shows why: in single precision the same scans cross at
+$\approx650$--$690$ variables, but GPU single precision fails to converge on
+small blocks, so we keep double precision as the reference result.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -99,7 +100,7 @@ research questions:
   blocks through a small number of spurious cross-block entries.
 \item A batched ADMM solver (NumPy and PyTorch backends) and a measurement of
   where a consumer GPU helps, separating the effect of batching from the
-  effect of floating-point precision, with pre-registered accuracy criteria.
+  effect of floating-point precision, with accuracy criteria defined before measurement.
 \item A reproducibility account: two subtle environmental faults that
   invalidated earlier datasets, and the provenance tooling that caught them.
 \end{itemize}
@@ -216,7 +217,7 @@ against the true precision matrix, never at the fastest $\lambda$.
 
 \subsection{Platform and protocol}
 All measurements use one machine: an AMD Ryzen~9 8945HX (16 cores, 32
-threads), 16\,GB RAM and an NVIDIA RTX~5060 Laptop GPU (8\,GB,
+threads), 16\,GB RAM and an NVIDIA RTX~5060 Laptop GPU (8\,GB nominal,
 compute capability 12.0), running Ubuntu 24.04, Python 3.12, NumPy 2.4.4 with
 OpenBLAS 0.3.31, and PyTorch 2.14 (CUDA 13.0). Runs use the
 \texttt{performance} power profile with no competing load and a recorded
@@ -337,7 +338,7 @@ eigendecomposition & 31\% & 58\% \\
 Python glue & 62\% & 35\% \\
 component detection & 3\% & 4\% \\
 eigh calls (mean) & 801 (0.01\,ms) & 2302 (0.05\,ms) \\
-largest eigh, share & 0.9\% & 1.4\% \\
+largest eigh (\% of eigh time) & 0.9\% & 1.4\% \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -365,11 +366,12 @@ configurations ($p\le400$). The giant component belongs to the graphical
 lasso estimate itself.
 
 The mechanism is connectivity. Counting above-threshold entries of $S$ that
-join two different true blocks (72 best-F1 cells, three seeds), only a
-median 3--4\% of entries cross true blocks in the balanced regime, e.g.\
-33--42 of $\approx1900$ at $p=800$, $n/p=10$. That is enough to fuse all five
+join two different true blocks (72 best-F1 cells, three seeds; entries counted as unordered pairs), only a
+median 3--4\% of above-threshold entries cross true blocks in the balanced
+regime, and as few as 1.7--2.3\% (33--42 of $\approx1900$) at $p=800$,
+$n/p=10$. That is enough to fuse all five
 true blocks in every cell at $p\ge400$, and in the median cell at $p=200$. Overall, the largest component fuses at least
-two true blocks in 68 of 72 cells. Support F1 barely registers 3\% spurious
+two true blocks in 68 of 72 cells. Support F1 barely registers a few percent of spurious
 entries, while parallelism collapses. Because screening is exact, any finer
 partition, such as a higher threshold or a shrunk covariance, no longer
 yields the graphical lasso solution: recovering this parallelism means
@@ -411,8 +413,8 @@ per-iteration launch overhead plus the reduced double-precision throughput of
 a consumer GPU.
 
 \textbf{Precision diagnostic.} To separate precision from batching, we
-added a float32 GPU path and
-pre-registered acceptance criteria before measuring it: all problems
+added a float32 GPU path and defined acceptance criteria before measuring
+it: all problems
 converge at the unchanged tolerance; relative objective difference
 $\le10^{-6}$; elementwise relative error $\le10^{-3}$ and no more than
 $10\times$ the float64 solver's own distance to a high-accuracy solution;
@@ -423,9 +425,10 @@ is 6--50$\times$ smaller than float64's own deviation from the high-accuracy
 solution at the same stopping tolerance, and the objective agrees to within
 $1.3\times10^{-8}$.
 
-Across the full scan (Fig.~\ref{fig:crossover}), float32 moves the GPU
-crossover from $s_{\max}\approx1950$ to $\approx650$, and peak GPU memory
-roughly halves.
+Across the full $\lambda$ scans (Fig.~\ref{fig:crossover}), float32 moves
+the GPU crossover from $s_{\max}\approx1950$ ($p=2000$; float64 never wins at
+$p=1200$) to $s_{\max}\approx643$ ($p=1200$) and $\approx687$ ($p=2000$), and
+peak GPU memory roughly halves.
 
 A float32 GPU compared with a float64 CPU is not a like-for-like comparison,
 so we also timed a float32 CPU solver in the same session at every point.
@@ -481,20 +484,32 @@ Hollow markers: float32 runs that did not converge.}
 \end{figure}
 
 \subsection{GPU memory}
-Peak GPU memory follows a quadratic model in $s_{\max}$ fitted on
-$s_{\max}\le2000$ ($R^2=1.000$), which predicts two held-out anchors
-($s_{\max}=2001$ and $3006$) within 0.2\% (Fig.~\ref{fig:vram}). On the 7.7\,GB visible to CUDA,
-float64 reaches the limit only at $s_{\max}\approx8200$. Memory is not the
-binding constraint in any regime we measured; float32 halves it.
+Peak GPU memory (float64, from PyTorch's allocator) follows
+\begin{equation}
+M(s_{\max}) \approx 32.97 + 1.141\times10^{-4}\,s_{\max}^2 \ \text{MiB},
+\label{eq:vram}
+\end{equation}
+fitted on 22 scan points with $100<s_{\max}\le2000$ ($R^2=0.99998$). It
+predicts two held-out anchors closely (Table~\ref{tab:vram}); the first lies just beyond the fitting range, the
+second is a $1.5\times$ extrapolation in $s_{\max}$. The card has 8151\,MiB
+of physical memory, of which 7707\,MiB is available to CUDA; \eqref{eq:vram}
+reaches that limit only at $s_{\max}\approx8200$. Memory is not the binding
+constraint in any regime we measured; float32 halves it.
 
-\begin{figure}[t]
+\begin{table}[t]
 \centering
-\includegraphics[width=0.82\columnwidth]{fig7_rq3_vram_model.pdf}
-\caption{Peak GPU memory (float64) against the largest block size: quadratic
-model fitted on $s_{\max}\le2000$ (inset: measured range) and two held-out
-anchors, extrapolated to the 7707\,MiB visible to CUDA.}
-\label{fig:vram}
-\end{figure}
+\caption{Held-out VRAM anchors against \eqref{eq:vram}.}
+\label{tab:vram}
+\begin{tabular}{rrrrr}
+\toprule
+$p$ & $s_{\max}$ & predicted & observed & error \\
+\midrule
+2400 & 2001 & 489.8\,MiB & 490.3\,MiB & $-0.10\%$ \\
+3200 & 3006 & 1063.8\,MiB & 1066.2\,MiB & $-0.22\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 
 % =====================================================================
 \section{Reproducibility lessons}
