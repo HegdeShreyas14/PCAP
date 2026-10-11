@@ -384,56 +384,73 @@ def fig_rq1_percolation(res, out, ext, regime="balanced", p=400, ratio=10):
 # --------------------------------------------------------------------------
 
 def fig_rq2_crossover(res, out, ext):
-    rows = load_csv(os.path.join(res, "gpu_crossover.csv"))
-    if rows is None:
+    """
+    GPU speedup over the batched float64 CPU solver vs largest block size,
+    float64 and (if present) float32 GPU. Colour = precision, marker = p.
+    float32 points that did not converge within max_iter are drawn hollow:
+    they are not valid results, and hiding them would overstate float32.
+    """
+    series = {}
+    for dt, fn, anchor_fns in (
+            ("float64", "gpu_crossover.csv", ("gpu_mem_2400.csv", "gpu_mem_3200.csv")),
+            ("float32", "gpu_crossover_fp32.csv", ("gpu_mem_2400_fp32.csv", "gpu_mem_3200_fp32.csv"))):
+        rows = load_csv(os.path.join(res, fn)) if os.path.exists(os.path.join(res, fn)) else None
+        if rows is None:
+            continue
+        anchors = []
+        for afn in anchor_fns:
+            if os.path.exists(os.path.join(res, afn)):
+                anchors.extend(load_csv(os.path.join(res, afn)) or [])
+        series[dt] = (rows, anchors)
+    if "float64" not in series:
+        print("  [skip] fig5: gpu_crossover.csv not found", file=sys.stderr)
         return
 
-    # anchors are optional extras
-    anchors = []
-    for fn in ("gpu_mem_2400.csv", "gpu_mem_3200.csv"):
-        a = load_csv(os.path.join(res, fn))
-        if a:
-            anchors.extend(a)
-
-    by_p = defaultdict(list)
-    for r in rows:
-        by_p[inum(r, "p")].append(r)
-
-    fig, ax = plt.subplots(figsize=(3.4, 2.6))
-    markers = ["-o", "-s", "-^", "-v"]
-    colors = [COL["blue"], COL["orange"], COL["purple"], COL["red"]]
-    for i, p in enumerate(sorted(by_p)):
-        sub = sorted(by_p[p], key=lambda r: fnum(r, "s_max"))
-        xs = [fnum(r, "s_max") for r in sub]
-        ys = [gpu_speedup(r) for r in sub]
-        ax.plot(xs, ys, markers[i % 4], ms=3.5, lw=1.1,
-                color=colors[i % 4], label=f"$p={p}$ ({len(sub)} pts)")
-
-    if anchors:
-        xs = [fnum(r, "s_max") for r in anchors]
-        ys = [gpu_speedup(r) for r in anchors]
-        ax.plot(xs, ys, "^", ms=7, color=COL["green"],
-                label="RQ3 anchors", linestyle="none")
-        # label each anchor by p: the write-up references them individually
-        for r, x0, y0 in zip(anchors, xs, ys):
-            ax.annotate(f"$p$={inum(r, 'p')}", (x0, y0),
-                        textcoords="offset points", xytext=(0, -11),
-                        ha="center", fontsize=6.2, color=COL["green"])
-
+    colour = {"float64": COL["blue"], "float32": COL["orange"]}
+    marker = {1200: "o", 2000: "s"}
+    fig, ax = plt.subplots(figsize=(3.4, 2.8))
+    hollow_drawn = False
+    for dt, (rows, anchors) in series.items():
+        by_p = defaultdict(list)
+        for r in rows:
+            by_p[inum(r, "p")].append(r)
+        for p in sorted(by_p):
+            sub = sorted(by_p[p], key=lambda r: fnum(r, "s_max"))
+            xs = [fnum(r, "s_max") for r in sub]
+            ys = [gpu_speedup(r) for r in sub]
+            ax.plot(xs, ys, "-", lw=1.1, color=colour[dt], alpha=0.8)
+            for r, x0, y0 in zip(sub, xs, ys):
+                bad = inum(r, "not_converged_torch", 0) > 0
+                hollow_drawn |= bad
+                ax.plot(x0, y0, marker.get(p, "D"), ms=4,
+                        mec=colour[dt], mfc="none" if bad else colour[dt], mew=1)
+            ax.plot([], [], "-" + marker.get(p, "D"), color=colour[dt], ms=4,
+                    label=f"{dt}, $p={p}$")
+        if anchors:
+            ax.plot([fnum(r, "s_max") for r in anchors], [gpu_speedup(r) for r in anchors],
+                    "^", ms=7, color=colour[dt], linestyle="none")
+    ax.plot([], [], "^", ms=6, color=COL["grey"], linestyle="none",
+            label="anchors ($p$=2400, 3200)")
+    if hollow_drawn:
+        ax.plot([], [], "o", ms=4, mec=COL["grey"], mfc="none",
+                linestyle="none", label="float32 not converged")
+    ax.set_yscale("log")
     ax.axhline(1.0, color=COL["grey"], lw=0.8, ls="--")
     ax.set_xlabel("$s_{\\max}$ (largest detected block)", fontsize=8)
-    ax.set_ylabel("GPU speedup: $T_{\\mathrm{numpy}}/T_{\\mathrm{torch}}$", fontsize=8)
-    ax.legend(fontsize=6.5, frameon=False, loc="upper left")
+    ax.set_ylabel("GPU speedup over batched CPU (float64)", fontsize=8)
+    ax.legend(fontsize=6, frameon=False, loc="lower right")
     save(fig, out, "fig5_rq2_crossover", ext)
 
-    # report the crossover per series
-    for p in sorted(by_p):
-        sub = sorted(by_p[p], key=lambda r: fnum(r, "s_max"))
-        won = [r for r in sub if gpu_speedup(r) > 1.0]
-        if won:
-            r = won[0]
-            print(f"    p={p}: crosses 1.0 at s_max={inum(r,'s_max')} "
-                  f"(n_groups={inum(r,'n_groups')}, lambda={fnum(r,'lam'):.2f})")
+    for dt, (rows, _) in series.items():
+        by_p = defaultdict(list)
+        for r in rows:
+            by_p[inum(r, "p")].append(r)
+        for p in sorted(by_p):
+            sub = sorted(by_p[p], key=lambda r: fnum(r, "s_max"))
+            won = [r for r in sub if gpu_speedup(r) > 1.0]
+            if won:
+                print(f"    {dt} p={p}: crosses 1.0 at s_max={inum(won[0], 's_max')} "
+                      f"(lambda={fnum(won[0], 'lam'):.2f})")
 
 
 # --------------------------------------------------------------------------
