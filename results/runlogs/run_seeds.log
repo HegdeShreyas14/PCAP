@@ -1,0 +1,18 @@
+commit 5832e228c3f6793024ae84288f551dac4e813b0b started 2026-10-11T13:19:07+05:30
+OK: S is identical (to 1e-10) at 1 and 8 BLAS threads
+[2026-10-11T13:19:09+05:30] START rq1_1t_seed1
+[2026-10-11T14:38:39+05:30] DONE  rq1_1t_seed1
+[2026-10-11T14:38:39+05:30] START rq1_8t_seed1
+[2026-10-11T15:21:28+05:30] DONE  rq1_8t_seed1
+[2026-10-11T15:21:28+05:30] START rq1_compare_seed1
+[2026-10-11T15:21:28+05:30] DONE  rq1_compare_seed1
+# pairing check [S fingerprint + detected structure]: 384/384 configurations identical
+[2026-10-11T15:21:28+05:30] START rq1_1t_seed2
+[2026-10-11T16:37:35+05:30] DONE  rq1_1t_seed2
+[2026-10-11T16:37:35+05:30] START rq1_8t_seed2
+[2026-10-11T17:22:31+05:30] DONE  rq1_8t_seed2
+[2026-10-11T17:22:31+05:30] START rq1_compare_seed2
+[2026-10-11T17:22:31+05:30] DONE  rq1_compare_seed2
+# pairing check [S fingerprint + detected structure]: 384/384 configurations identical
+[2026-10-11T17:22:31+05:30] START crossover_fp64_seed1
+[2026-10-11T17:31:23+05:30] restarted trade_plat container
