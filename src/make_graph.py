@@ -251,7 +251,7 @@ def fig_rq1_fragmentation(res, out, ext, source="rq1_primary_1t.csv"):
 
     # Two stacked panels sharing the bucket axis, not twin y-axes.
     x = np.arange(len(labels))
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(3.4, 3.2), sharex=True)
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(3.4, 2.8), sharex=True)
     ax1.plot(x, speed, "-o", ms=4, color=COL["blue"])
     ax1.set_yscale("log")
     ax1.set_ylabel("Median speedup", fontsize=8)
@@ -348,7 +348,7 @@ def fig_rq1_percolation(res, out, ext, regime="balanced", p=400, ratio=10):
     f1 = [median(by_lam_f1[l]) for l in lams]
 
     # Two stacked panels sharing lambda, not twin y-axes.
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(3.4, 3.2), sharex=True)
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(3.4, 2.8), sharex=True)
     ax1.plot(lams, fmax, "-o", ms=3.5, color=COL["red"])
     ax1.set_ylabel("$F_{\\max}$ (%)", fontsize=8)
     ax1.set_ylim(0, 105)
@@ -545,12 +545,13 @@ def fig_rq3_vram(res, out, ext, fit_below=2000, device_mib=None):
     ax.legend(fontsize=6.2, frameon=False, loc="upper left")
     # Label the limit line on the RIGHT, below it: the legend occupies the
     # upper-left and the line sits near the top of the axes.
-    ax.text(grid_hi * 0.98, device_mib * 0.955,
+    # above the limit line, centred: below it the wall annotation's arrow crosses it
+    ax.text(grid_hi * 0.55, device_mib * 1.01,
             f"{device_mib:.0f} MiB device limit", fontsize=6.2,
-            color=COL["grey"], ha="right", va="top")
+            color=COL["grey"], ha="center", va="bottom")
     if wall == wall:
         ax.annotate(f"wall at $s_{{\\max}}\\approx${wall:.0f}",
-                    xy=(wall, device_mib), xytext=(wall * 0.52, device_mib * 0.66),
+                    xy=(wall, device_mib), xytext=(wall * 0.30, device_mib * 0.78),
                     fontsize=6.2, color=COL["grey"],
                     arrowprops=dict(arrowstyle="->", color=COL["grey"], lw=0.7))
 

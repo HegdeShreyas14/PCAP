@@ -34,7 +34,8 @@ practice: on a multicore CPU and on a consumer laptop GPU, across four
 block-size regimes, three sample sizes and problem dimensions up to $p=3200$,
 with every result tied to a recorded code version and machine state.
 We find that (i) decomposition yields a median $2.3$--$2.6\times$ speedup
-(across three independent instances) against an 8-thread CPU baseline at the
+(across three independent instances, excluding four cells whose optimal
+regularisation lies below our grid) against an 8-thread CPU baseline at the
 statistically best regularisation, and the
 multithreaded baseline erodes the gain as $p$ grows; (ii) speedup and
 estimation quality pull in opposite directions, so the fastest
@@ -233,20 +234,21 @@ file. Code, data, logs and a full package lock are available at
 \subsection{Decomposition speedup and the threaded baseline}
 \label{sec:speedup}
 At the best-F1 $\lambda$, decomposition is faster than the undecomposed
-solver by a median $2.50\times$, $2.60\times$ and $2.28\times$ for three
+solver by a median $2.39\times$, $2.60\times$ and $2.28\times$ for three
 independent problem instances (seeds 0--2) against an 8-thread BLAS
-baseline. Per-regime medians across the three instances range from
+baseline, excluding the four grid-edge cells described below ($2.50\times$
+for seed 0 if they are included). Per-regime medians across the three instances range from
 $1.7$--$2.0\times$ (many\_tiny) to $2.4$--$3.7\times$ (imbalanced).
 
 \textbf{Grid edge.} In 7 of 48 seed-0 cells the best-F1 $\lambda$ fell at the
 smallest grid value (0.05). The structural study evaluates F1 on the same
 instances on a finer grid (step 0.02): in four of these cells the optimum is
-at 0.06, so 0.05 is simply the nearest grid point; in three one\_giant
-$p=800$ cells (and one more in seed 2) it lies at 0.02--0.04, below the grid.
-Those cells produced the largest speedups in the sweep ($9.0\times$ and
-$10.9\times$), which are therefore overstated. Excluding them leaves the
-medians essentially unchanged ($2.39\times$ for seed 0) and caps the largest
-speedup at $5.2$--$6.5\times$ across instances. The two solvers agree to a relative objective gap
+at 0.06, so 0.05 is simply the nearest grid point. In four cells (three in
+seed 0, one in seed 2; all one\_giant at $p=800$) it lies at 0.02--0.04,
+below the grid. Those cells produced the largest speedups in the sweep
+($9.0\times$ and $10.9\times$), which are therefore overstated; we exclude
+them from the medians above. Without them the largest speedup is
+$5.2$--$6.5\times$ across instances. The two solvers agree to a relative objective gap
 of at most $1.8\times10^{-4}$, within solver tolerance. When the graph does
 not fragment at all, decomposition costs a little
 (median $0.97\times$, $n=50$): detection overhead with no payoff.
@@ -304,7 +306,7 @@ blocks & median speedup & median F1 & $n$ \\
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\columnwidth]{fig2_rq1_fragmentation_trap.pdf}
+\includegraphics[width=0.82\columnwidth]{fig2_rq1_fragmentation_trap.pdf}
 \caption{Speedup rises with fragmentation while estimation quality collapses.}
 \label{fig:trap}
 \end{figure}
@@ -349,7 +351,7 @@ almost none (median $F_{\max}$ 99.9\%).
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\columnwidth]{fig3_rq1_oracle_gap.pdf}
+\includegraphics[width=0.82\columnwidth]{fig3_rq1_oracle_gap.pdf}
 \caption{Largest-component work share at the best-F1 $\lambda$ (detected)
 versus the true block structure (oracle), three seeds.}
 \label{fig:oracle}
@@ -385,7 +387,7 @@ work for two seeds, and 100\% for the third.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\columnwidth]{fig4_rq1_percolation.pdf}
+\includegraphics[width=0.82\columnwidth]{fig4_rq1_percolation.pdf}
 \caption{Percolation cliff at balanced $p=400$, $n/p=10$ (median of three
 seeds): largest-component work share $F_{\max}$ and support F1 against
 $\lambda$. The best-F1 $\lambda$ lies on the plateau, before the giant
@@ -423,17 +425,21 @@ $1.3\times10^{-8}$.
 
 Across the full scan (Fig.~\ref{fig:crossover}), float32 moves the GPU
 crossover from $s_{\max}\approx1950$ to $\approx650$, and peak GPU memory
-roughly halves. Against the float64 CPU baseline the float32 GPU reaches
-$2.2$--$6.1\times$ for $s_{\max}\ge1000$.
+roughly halves.
 
 A float32 GPU compared with a float64 CPU is not a like-for-like comparison,
 so we also timed a float32 CPU solver in the same session at every point.
 Single precision does not help the CPU here: float32 NumPy is a median
 $0.98\times$ the speed of float64 (range $0.62$--$1.32\times$) with the same
-OpenBLAS eigensolver. Like for like, the float32 GPU overtakes the float32
-CPU at $s_{\max}\approx500$--$700$, is $2.5$--$10.2\times$ faster for
-$s_{\max}\ge1000$, and $6.9\times$ and $9.0\times$ faster at
-$s_{\max}=2001$ and $3006$ (Table~\ref{tab:fp32}).
+OpenBLAS eigensolver. In this session, for $s_{\max}\ge1000$ in the scan
+the float32 GPU is $2.6$--$6.7\times$ faster than the float64 CPU and
+$2.5$--$10.2\times$ faster than the float32 CPU; the upper end of the latter
+comes from a point ($s_{\max}=1951$) where float32 was $1.5\times$
+\emph{slower} than float64 on the CPU. At the two held-out anchors
+($s_{\max}=2001$ and $3006$) the float32 GPU is $7.3\times$ and $9.6\times$
+faster than the float64 CPU, and $6.9\times$ and $9.0\times$ faster like for
+like (Table~\ref{tab:fp32}). Like for like, it overtakes the float32 CPU at
+$s_{\max}\approx500$--$700$.
 
 Float32 is not a free replacement on the GPU, however. In 13 of 36 scan
 configurations, all with $s_{\max}\le112$, the float32 GPU solver fails to
@@ -446,8 +452,9 @@ size-dependent precision policy) is needed for small blocks.
 
 \begin{table}[t]
 \centering
-\caption{Like-for-like float32 timing (same session): GPU speedup over the
-batched CPU solver, valid (converged) points only.}
+\caption{Float32 GPU speedup over the batched CPU solver, one session,
+converged points only. Scan rows: $p=1200$ and $2000$; anchors: $p=2400$
+and $3200$.}
 \label{tab:fp32}
 \begin{tabular}{lrr}
 \toprule
@@ -456,14 +463,17 @@ $s_{\max}$ & vs.\ CPU float32 & vs.\ CPU float64 \\
 $<200$ & $0.08$--$0.26\times$ & $0.08$--$0.26\times$ \\
 $200$--$640$ & $0.44$--$1.01\times$ & $0.40$--$1.16\times$ \\
 $640$--$1000$ & $1.19$--$2.93\times$ & $1.24$--$3.38\times$ \\
-$\ge1000$ & $\mathbf{2.45}$--$\mathbf{10.2\times}$ & $2.56$--$9.62\times$ \\
+$\ge1000$ & $\mathbf{2.45}$--$\mathbf{10.2\times}$ & $2.56$--$6.65\times$ \\
+\midrule
+anchor $2001$ & $6.87\times$ & $7.33\times$ \\
+anchor $3006$ & $8.96\times$ & $9.62\times$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\columnwidth]{fig5_rq2_crossover.pdf}
+\includegraphics[width=0.82\columnwidth]{fig5_rq2_crossover.pdf}
 \caption{GPU speedup over the batched CPU solver against the largest
 block size, in float64 and float32 on the GPU (CPU baseline float64).
 Hollow markers: float32 runs that did not converge.}
@@ -473,9 +483,18 @@ Hollow markers: float32 runs that did not converge.}
 \subsection{GPU memory}
 Peak GPU memory follows a quadratic model in $s_{\max}$ fitted on
 $s_{\max}\le2000$ ($R^2=1.000$), which predicts two held-out anchors
-($s_{\max}=2001$ and $3006$) within 0.2\%. On the 7.7\,GB visible to CUDA,
+($s_{\max}=2001$ and $3006$) within 0.2\% (Fig.~\ref{fig:vram}). On the 7.7\,GB visible to CUDA,
 float64 reaches the limit only at $s_{\max}\approx8200$. Memory is not the
 binding constraint in any regime we measured; float32 halves it.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.82\columnwidth]{fig7_rq3_vram_model.pdf}
+\caption{Peak GPU memory (float64) against the largest block size: quadratic
+model fitted on $s_{\max}\le2000$ (inset: measured range) and two held-out
+anchors, extrapolated to the 7707\,MiB visible to CUDA.}
+\label{fig:vram}
+\end{figure}
 
 % =====================================================================
 \section{Reproducibility lessons}
@@ -537,8 +556,9 @@ GPUs. Data are synthetic, and the \emph{balanced} and \emph{many\_tiny}
 regimes coincide at $p=100$.
 CPU speedups and all structural results use three
 independent instances; the GPU results use one (seed 0), so the GPU crossover
-sizes carry instance-to-instance variation we did not measure. For four cells
-the statistically best $\lambda$ lies below our timing grid (Section~\ref{sec:speedup}). The float32 study covers one regime, and the cause of GPU float32
+sizes carry instance-to-instance variation we did not measure. In four cells (three in seed 0, one in seed 2; all one\_giant at $p=800$)
+the statistically best $\lambda$ lies below our timing grid
+(Section~\ref{sec:speedup}); they are excluded from the reported medians. The float32 study covers one regime, and the cause of GPU float32
 non-convergence on small blocks is not isolated. Timings compare against GGLasso's own
 solvers; we do not benchmark QUIC or coordinate-descent implementations, and
 F1 is computable only because the data are synthetic.
@@ -552,8 +572,8 @@ of spurious entries, the work that remains is dominated by per-block overhead
 rather than arithmetic, and a multithreaded CPU baseline recovers much of the
 apparent gain. Batching recovers $1.2$--$1.7\times$ on the CPU. On a
 consumer GPU, precision rather than batching decides the outcome: in single
-precision the GPU is $2.5$--$10\times$ faster than a like-for-like CPU on
-large blocks, while small blocks need double precision to converge on the
+precision the GPU is a median $5.9\times$ faster than a like-for-like CPU
+on blocks of 1000 or more variables, while small blocks need double precision to converge on the
 GPU. The binding constraint on block parallelism is the
 estimator's structure, not the hardware.
 
