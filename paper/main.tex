@@ -46,7 +46,7 @@ fused by the estimator itself, not by the screening step: screening is exact,
 and a few percent of spurious cross-block entries suffice to merge all true
 blocks into one component. Batching the per-block work gives
 $1.2$--$1.7\times$ on the CPU. On a consumer GPU in double precision, the
-batched solver overtakes the CPU only when one block of $\approx2000$
+batched solver overtakes the CPU only when one block of $\approx1950$
 variables dominates. A precision diagnostic with pre-registered accuracy
 criteria shows why: in single precision the crossover falls to
 $\approx650$ variables, but GPU single precision fails to converge on small
@@ -558,8 +558,9 @@ CPU speedups and all structural results use three
 independent instances; the GPU results use one (seed 0), so the GPU crossover
 sizes carry instance-to-instance variation we did not measure. In four cells (three in seed 0, one in seed 2; all one\_giant at $p=800$)
 the statistically best $\lambda$ lies below our timing grid
-(Section~\ref{sec:speedup}); they are excluded from the reported medians. The float32 study covers one regime, and the cause of GPU float32
-non-convergence on small blocks is not isolated. Timings compare against GGLasso's own
+(Section~\ref{sec:speedup}); they are excluded from the reported medians. The float32 study covers one regime: every float32 measurement (scan,
+anchors, diagnostic and CPU baseline) uses many\_tiny. The cause of GPU
+float32 non-convergence on small blocks is not isolated. Timings compare against GGLasso's own
 solvers; we do not benchmark QUIC or coordinate-descent implementations, and
 F1 is computable only because the data are synthetic.
 
@@ -572,8 +573,8 @@ of spurious entries, the work that remains is dominated by per-block overhead
 rather than arithmetic, and a multithreaded CPU baseline recovers much of the
 apparent gain. Batching recovers $1.2$--$1.7\times$ on the CPU. On a
 consumer GPU, precision rather than batching decides the outcome: in single
-precision the GPU is a median $5.9\times$ faster than a like-for-like CPU
-on blocks of 1000 or more variables, while small blocks need double precision to converge on the
+precision the GPU is $2.5$--$10\times$ faster than a like-for-like CPU on
+blocks of 1000 or more variables (Table~\ref{tab:fp32}), while small blocks need double precision to converge on the
 GPU. The binding constraint on block parallelism is the
 estimator's structure, not the hardware.
 
