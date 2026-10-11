@@ -151,8 +151,11 @@ All measurements use one machine: an AMD Ryzen~9 8945HX (16 cores, 32
 threads), 16\,GB RAM and an NVIDIA RTX~5060 Laptop GPU (8\,GB,
 compute capability 12.0), running Ubuntu 24.04, Python 3.12, NumPy 2.4.4 with
 OpenBLAS 0.3.31, and PyTorch 2.14 (CUDA 13.0). Runs use the
-\texttt{performance} power profile with no competing load, BLAS threads
-pinned before NumPy is imported, and a recorded machine state. Every dataset
+\texttt{performance} power profile with no competing load and a recorded
+machine state. ``$t$ threads'' caps every native thread pool before NumPy is
+imported: NumPy's OpenBLAS, the separate SciPy OpenBLAS used by GGLasso's
+numba-compiled kernels, and OpenMP. Both OpenBLAS pools do real work, so an
+8-thread run can have up to 15 active workers on the 16 physical cores. Every dataset
 stores the producing commit, a dirty-tree flag and the hash of every source
 file. Code, data, logs and a full package lock are available at
 \todo{repository URL}.
