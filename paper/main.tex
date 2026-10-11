@@ -544,9 +544,8 @@ on per-launch overhead and the double-precision rate. We expect the
 qualitative pattern (decomposition helps most at moderate $p$; a GPU helps
 only on large blocks) to transfer, but the crossover block sizes will move.
 A data-centre GPU with full-rate double precision should narrow the gap
-between our float64 and float32 crossovers. To make these measurements
-repeatable elsewhere, we release a one-command run package that reproduces
-every experiment on another machine and records its environment.
+between our float64 and float32 crossovers. Our run package repeats every
+experiment on another machine with one command.
 
 % =====================================================================
 \section{Limitations}
@@ -558,8 +557,7 @@ CPU speedups and all structural results use three
 independent instances; the GPU results use one (seed 0), so the GPU crossover
 sizes carry instance-to-instance variation we did not measure. In four cells (three in seed 0, one in seed 2; all one\_giant at $p=800$)
 the statistically best $\lambda$ lies below our timing grid
-(Section~\ref{sec:speedup}); they are excluded from the reported medians. The float32 study covers one regime: every float32 measurement (scan,
-anchors, diagnostic and CPU baseline) uses many\_tiny. The cause of GPU
+(Section~\ref{sec:speedup}); they are excluded from the reported medians. All float32 measurements use the many\_tiny regime, and the cause of GPU
 float32 non-convergence on small blocks is not isolated. Timings compare against GGLasso's own
 solvers; we do not benchmark QUIC or coordinate-descent implementations, and
 F1 is computable only because the data are synthetic.
