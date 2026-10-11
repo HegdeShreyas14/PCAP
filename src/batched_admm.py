@@ -95,6 +95,24 @@ class _NumpyBackend:
         pass  # no device to sync
 
 
+class _NumpyBackend32(_NumpyBackend):
+    """float32 CPU variant: only for a like-for-like comparison with the
+    float32 GPU path. Never the default baseline."""
+    name = "numpy"
+
+    @staticmethod
+    def asarray(x):
+        return np.asarray(x, dtype=np.float32)
+
+    @staticmethod
+    def zeros(shape):
+        return np.zeros(shape, dtype=np.float32)
+
+    @staticmethod
+    def eye_batch(k, s):
+        return np.broadcast_to(np.eye(s, dtype=np.float32), (k, s, s)).copy()
+
+
 class _TorchBackend:
     name = "torch"
 
@@ -148,17 +166,16 @@ class _TorchBackend:
 
 def get_backend(name="numpy", device="cuda", dtype="float64"):
     """
-    dtype applies to the torch backend only. float64 is the reference and the
-    default; float32 exists to measure how much of the GPU result is the cost
-    of FP64 on a consumer GPU. The numpy backend is the CPU baseline and stays
-    float64 so the baseline cannot be changed by accident.
+    float64 is the reference and the default for both backends. float32
+    exists to measure how much of the GPU result is the cost of FP64 on a
+    consumer GPU, and on the CPU only so that comparison is like-for-like.
     """
     if dtype not in ("float64", "float32"):
         raise ValueError(f"unknown dtype {dtype!r}")
     if name == "numpy":
-        if dtype != "float64":
-            raise ValueError("numpy backend is the float64 CPU baseline")
-        return _NumpyBackend()
+        # float64 is the CPU baseline; float32 must be requested explicitly and
+        # exists only to make float32 GPU comparisons like-for-like
+        return _NumpyBackend() if dtype == "float64" else _NumpyBackend32()
     if name == "torch":
         import torch
         return _TorchBackend(device=device, dtype=getattr(torch, dtype))
@@ -382,7 +399,8 @@ def batched_block_SGL(S, lambda1, backend="numpy", device="cuda",
             # the reference at every size tested so far, but it is a
             # different artifact and should be labeled as such in any table
             # or figure: "CPU-best (batched)", not bare "CPU".
-            "cpu_baseline_label": "CPU-best (batched numpy)" if backend == "numpy" else None,
+            "cpu_baseline_label": ("CPU-best (batched numpy)" if dtype == "float64"
+                                   else "CPU batched numpy float32") if backend == "numpy" else None,
             # batch-composition memory metrics (see comment above)
             "max_group_k": max_group_k,
             "mem_group_s": mem_group_s,      # s of the memory-dominant group
