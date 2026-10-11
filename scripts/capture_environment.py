@@ -178,8 +178,7 @@ python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r results/environment/requirements-lock.txt \\
     --extra-index-url https://download.pytorch.org/whl/cu130
 python tests/test_sampling_determinism.py   # must pass before any run
-scripts/rerun_bug8.sh                       # RQ1 sweeps + percolation (~2 h)
-scripts/rerun_rq2_rq3.sh                    # batched CPU/GPU, crossover, VRAM (~20 min; needs CUDA GPU)
+scripts/run_package.sh --machine <name> --tier standard   # all experiments (see RUN_PACKAGE.md)
 python src/make_graph.py                    # all figures from results/
 ```
 

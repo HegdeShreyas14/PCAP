@@ -249,21 +249,17 @@ def fig_rq1_fragmentation(res, out, ext, source="rq1_primary_1t.csv"):
         f1s.append(median([fnum(r, "support_f1") for r in sub]))
         ns.append(len(sub))
 
+    # Two stacked panels sharing the bucket axis, not twin y-axes.
     x = np.arange(len(labels))
-    fig, ax1 = plt.subplots(figsize=(3.4, 2.5))
-    ax2 = ax1.twinx()
-    l1, = ax1.plot(x, speed, "-o", ms=4, color=COL["blue"], label="Median speedup")
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(3.4, 3.2), sharex=True)
+    ax1.plot(x, speed, "-o", ms=4, color=COL["blue"])
     ax1.set_yscale("log")
-    ax1.set_ylabel("Median speedup (log scale)", color=COL["blue"], fontsize=8)
-    ax1.tick_params(axis="y", labelcolor=COL["blue"])
-    l2, = ax2.plot(x, f1s, "-s", ms=4, color=COL["red"], label="Median F1")
-    ax2.set_ylabel("Median support-recovery F1", color=COL["red"], fontsize=8)
-    ax2.tick_params(axis="y", labelcolor=COL["red"])
-    ax2.set_ylim(0, max(f1s) * 1.25)
-    ax2.grid(False)
-    ax1.set_xticks(x); ax1.set_xticklabels(labels, fontsize=7.5)
-    ax1.set_xlabel("Detected block count", fontsize=8)
-    ax1.legend(handles=[l1, l2], fontsize=7, frameon=False, loc="upper left")
+    ax1.set_ylabel("Median speedup", fontsize=8)
+    ax2.plot(x, f1s, "-s", ms=4, color=COL["red"])
+    ax2.set_ylabel("Median support F1", fontsize=8)
+    ax2.set_ylim(0, max(f1s) * 1.2)
+    ax2.set_xticks(x); ax2.set_xticklabels(labels, fontsize=7.5)
+    ax2.set_xlabel("Detected block count", fontsize=8)
     save(fig, out, "fig2_rq1_fragmentation_trap", ext)
 
     print("    buckets: " + ", ".join(
@@ -350,32 +346,23 @@ def fig_rq1_percolation(res, out, ext, regime="balanced", p=400, ratio=10):
     fmax = [100 * median(by_lam[l]) for l in lams]
     f1 = [median(by_lam_f1[l]) for l in lams]
 
-    fig, ax1 = plt.subplots(figsize=(3.4, 2.5))
-    ax2 = ax1.twinx()
-    l1, = ax1.plot(lams, fmax, "-o", ms=3.5, color=COL["red"], label="$F_{\\max}$")
-    ax1.set_xlabel("$\\lambda$ (regularization strength)", fontsize=8)
-    ax1.set_ylabel("$F_{\\max}$ (%)", color=COL["red"], fontsize=8)
-    ax1.tick_params(axis="y", labelcolor=COL["red"])
+    # Two stacked panels sharing lambda, not twin y-axes.
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(3.4, 3.2), sharex=True)
+    ax1.plot(lams, fmax, "-o", ms=3.5, color=COL["red"])
+    ax1.set_ylabel("$F_{\\max}$ (%)", fontsize=8)
     ax1.set_ylim(0, 105)
-    l2, = ax2.plot(lams, f1, "-s", ms=3.5, color=COL["blue"], label="Support F1")
-    ax2.set_ylabel("Support-recovery F1", color=COL["blue"], fontsize=8)
-    ax2.tick_params(axis="y", labelcolor=COL["blue"])
-    ax2.grid(False)
+    ax2.plot(lams, f1, "-s", ms=3.5, color=COL["blue"])
+    ax2.set_ylabel("Support F1", fontsize=8)
+    ax2.set_xlabel("$\\lambda$ (regularization strength)", fontsize=8)
 
-    # mark the best-F1 lambda: the operating point a practitioner would choose
+    # mark the best-F1 lambda (the operating point a practitioner would choose)
     if any(v == v for v in f1):
         bi = int(np.nanargmax(f1))
-        ax1.axvline(lams[bi], color=COL["grey"], ls="--", lw=0.9)
+        for ax in (ax1, ax2):
+            ax.axvline(lams[bi], color=COL["grey"], ls="--", lw=0.9)
         ax1.text(lams[bi], 50, " best-F1 $\\lambda$", fontsize=6.5,
                  color=COL["grey"], rotation=90, va="center")
-
-    # loc="best" plus an opaque frame: hardcoded placement collides with the
-    # F_max curve for the default panel and would break differently for other
-    # --perc-regime / --perc-p / --perc-ratio choices.
-    leg = ax1.legend(handles=[l1, l2], fontsize=6.8, loc="best",
-                     frameon=True, framealpha=0.92)
-    leg.get_frame().set_edgecolor("none")
-    ax1.set_title(f"{regime}, $p$={p}, $n/p$={ratio}", fontsize=8)
+    ax1.set_title(f"{regime}, $p$={p}, $n/p$={ratio} (median of seeds)", fontsize=8)
     save(fig, out, "fig4_rq1_percolation", ext)
 
 
@@ -615,6 +602,8 @@ def main():
     ap.add_argument("--perc-ratio", type=int, default=10)
     ap.add_argument("--device-mib", type=float, default=None,
                     help="GPU memory (MiB) for the RQ3 limit line; default: vram_total_mib from gpu_crossover_env.json")
+    ap.add_argument("--figs", nargs="+", type=int, default=list(range(1, 8)),
+                    help="which figures to write (the paper uses 1-5)")
     args = ap.parse_args()
 
     set_style()
@@ -633,6 +622,8 @@ def main():
         (lambda: fig_rq3_vram(res, out, ext, device_mib=args.device_mib),
          "fig7 RQ3 VRAM model"),
     ]:
+        if int(label.split()[0][3:]) not in args.figs:
+            continue
         print(label)
         try:
             fn()

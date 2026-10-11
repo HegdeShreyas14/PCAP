@@ -3,7 +3,7 @@
 # Strictly sequential (runbook: never run two sweeps concurrently).
 # Old datasets stay recoverable from git history (commit 96f4249).
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 PY=.venv/bin/python
 L=results/runlogs
 mkdir -p "$L"

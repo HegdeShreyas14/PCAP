@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Like-for-like float32 CPU vs GPU timing. Restarts the stopped container on exit.
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 L=results/runlogs
 trap 'docker start trade_plat-matching-engine-1 >/dev/null 2>&1 && echo "[$(date -Is)] restarted trade_plat container" >> "$L/fp32_cpu_baseline.log"' EXIT
 if [ -n "$(git status --porcelain --untracked-files=no -- src)" ]; then echo "commit src/ first" >&2; exit 1; fi

@@ -371,14 +371,14 @@ Package quirks (not our bugs, but they bite):
 
 | File | What it is |
 |---|---|
-| `src/phase1_repro.py` | Install check + environment fingerprint. Run once per machine |
+| ~~`src/phase1_repro.py`~~ | Removed 2026-10-11 (used the pre-fix SVD sampler); superseded by `tests/` and `scripts/setup_env.sh` |
 | `src/blockgen.py` | Block-sparse ground truth with arbitrary block-size distributions |
 | `src/sweep.py` | RQ1 harness: CPU ADMM_SGL vs CPU block_SGL, 66-column CSV |
 | `src/analyze.py` | Tables 1–4, `--compare` for the threading crossover |
 | `src/profile_block.py` | cProfile with linalg-vs-glue attribution |
 | `src/percolation.py` | Percolation threshold vs optimal lambda, multi-seed, oracle diagnostic |
 | `src/provenance.py` | Writes `<out>_env.json`: commit, src-dirty flag, file md5s, versions, args |
-| `scripts/rerun_bug8.sh` | Sequential 1t → 8t → pairing check → percolation |
+| `scripts/provenance/rerun_bug8.sh` | Sequential 1t → 8t → pairing check → percolation |
 | `tests/test_sampling_determinism.py` | Fails if S depends on BLAS thread count |
 | `results/percolation.csv` | 3600 rows, seeds 0/1/2, commit ebd6d6d. Owns the structural claim |
 | `results/rq1_primary_1t.csv` | 384 configs, 1 BLAS thread, commit ebd6d6d |

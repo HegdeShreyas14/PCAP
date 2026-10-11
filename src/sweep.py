@@ -405,6 +405,12 @@ def main():
     ap.add_argument("--rtol", type=float, default=1e-5)
     ap.add_argument("--max-iter", type=int, default=1000)
     ap.add_argument("--quick", action="store_true")
+    # Optional grid overrides (default: the paper's RQ1 grid). Used e.g. to
+    # extend lambda below 0.05 where the best-F1 point sat at the grid edge.
+    ap.add_argument("--ps", nargs="+", type=int)
+    ap.add_argument("--lambdas", nargs="+", type=float)
+    ap.add_argument("--regimes", nargs="+")
+    ap.add_argument("--ratios", nargs="+", type=int)
     ap.add_argument("--blas-threads", type=int, default=1,
                     help="BLAS threads (applied before numpy import). "
                          "1 = clean algorithmic comparison; >1 = threaded CPU baseline.")
@@ -424,6 +430,10 @@ def main():
         # defensible operating point rather than at whatever lambda is fastest.
         ratios = [2, 5, 10]
         regimes, trials, warmup = REGIMES, args.trials, args.warmup
+        p_values = args.ps or p_values
+        lambdas = args.lambdas or lambdas
+        regimes = args.regimes or regimes
+        ratios = args.ratios or ratios
 
     env = environment()
     print("Environment:")

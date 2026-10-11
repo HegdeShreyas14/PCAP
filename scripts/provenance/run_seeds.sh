@@ -3,7 +3,7 @@
 # so speedups carry instance-to-instance spread. Seed 0 already exists.
 # Strictly sequential; restarts the stopped container on exit.
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 PY=.venv/bin/python; L=results/runlogs; LOG=$L/run_seeds.log
 trap 'docker start trade_plat-matching-engine-1 >/dev/null 2>&1 && echo "[$(date -Is)] restarted trade_plat container" >> "$LOG"' EXIT
 if [ -n "$(git status --porcelain --untracked-files=no -- src)" ]; then echo "commit src/ first" >&2; exit 1; fi

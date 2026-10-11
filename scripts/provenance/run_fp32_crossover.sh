@@ -2,7 +2,7 @@
 # float32 GPU crossover + VRAM anchors (same points as the float64 runs).
 # Only run after fp32_diagnostic.py passes. Restarts the stopped container on exit.
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 PY=.venv/bin/python; L=results/runlogs
 trap 'docker start trade_plat-matching-engine-1 >/dev/null 2>&1 && echo "[$(date -Is)] restarted trade_plat container" >> "$L/run_fp32_crossover.log"' EXIT
 if [ -n "$(git status --porcelain --untracked-files=no -- src)" ]; then echo "commit src/ first" >&2; exit 1; fi

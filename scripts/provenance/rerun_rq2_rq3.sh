@@ -3,7 +3,7 @@
 # produced the originals (reconstructed from their CSVs). Strictly sequential.
 # Restarts the stopped trade_plat container on exit, success or failure.
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 PY=.venv/bin/python
 L=results/runlogs
 mkdir -p "$L"
