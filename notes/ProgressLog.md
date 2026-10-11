@@ -30,6 +30,18 @@ basis for the progress reviews and for the paper's results section.
 
 ---
 
+## Update 2026-10-11: seeds and grid edge
+
+- RQ1 seeds 1 and 2 (1t + 8t) complete; pairing verified 384/384 for each.
+  Best-F1 speedup (8t) medians: 2.50 / 2.60 / 2.28 (seeds 0/1/2). Retention:
+  88–100% at p ≤ 200, 65–81% at p = 400, 46–58% at p = 800.
+- Grid edge: percolation.csv (same instances, λ step 0.02) puts the optimum at
+  0.06 for 4 of the 7 seed-0 edge cells; for one_giant p=800 (n/p 2,5,10, and
+  n/p=10 in seed 2) it is 0.02–0.04, below the timing grid. Those cells gave
+  the largest speedups (9.0×, 10.9×); excluding them, max is 5.2–6.5×.
+- GPU seed runs aborted (driver update mid-session); GPU results stay seed 0
+  only, on one driver (595.91).
+
 ## Headline findings
 
 ### 1. Block decomposition helps, but only in a bounded regime

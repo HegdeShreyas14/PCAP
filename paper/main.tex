@@ -33,9 +33,9 @@ natural source of parallelism. We characterise how much of it is usable in
 practice: on a multicore CPU and on a consumer laptop GPU, across four
 block-size regimes, three sample sizes and problem dimensions up to $p=3200$,
 with every result tied to a recorded code version and machine state.
-% PENDING-SEEDS: add spread across seeds 0-2 to the 2.5x median
-We find that (i) decomposition yields a median $2.5\times$ speedup against an
-8-thread CPU baseline at the statistically best regularisation, and the
+We find that (i) decomposition yields a median $2.3$--$2.6\times$ speedup
+(across three independent instances) against an 8-thread CPU baseline at the
+statistically best regularisation, and the
 multithreaded baseline erodes the gain as $p$ grows; (ii) speedup and
 estimation quality pull in opposite directions, so the fastest
 regularisation is never the useful one;
@@ -225,20 +225,34 @@ file. Code, data, logs and a full package lock are available at
 \section{Results}
 
 \subsection{Decomposition speedup and the threaded baseline}
-% PENDING-SEEDS: median/range across seeds; PENDING-LAMBDA: 7 edge cells
+\label{sec:speedup}
 At the best-F1 $\lambda$, decomposition is faster than the undecomposed
-solver by a median $2.5\times$ (range $0.99$--$10.9\times$) against an
-8-thread BLAS baseline; per-regime medians are $1.9\times$ (many\_tiny) to
-$3.4\times$ (imbalanced). The two solvers agree to a relative objective gap
+solver by a median $2.50\times$, $2.60\times$ and $2.28\times$ for three
+independent problem instances (seeds 0--2) against an 8-thread BLAS
+baseline. Per-regime medians across the three instances range from
+$1.7$--$2.0\times$ (many\_tiny) to $2.4$--$3.7\times$ (imbalanced).
+
+\textbf{Grid edge.} In 7 of 48 seed-0 cells the best-F1 $\lambda$ fell at the
+smallest grid value (0.05). The structural study evaluates F1 on the same
+instances on a finer grid (step 0.02): in four of these cells the optimum is
+at 0.06, so 0.05 is simply the nearest grid point; in three one\_giant
+$p=800$ cells (and one more in seed 2) it lies at 0.02--0.04, below the grid.
+Those cells produced the largest speedups in the sweep ($9.0\times$ and
+$10.9\times$), which are therefore overstated. Excluding them leaves the
+medians essentially unchanged ($2.39\times$ for seed 0) and caps the largest
+speedup at $5.2$--$6.5\times$ across instances. The two solvers agree to a relative objective gap
 of at most $1.8\times10^{-4}$, within solver tolerance. When the graph does
 not fragment at all, decomposition costs a little
 (median $0.97\times$, $n=50$): detection overhead with no payoff.
 
 A single-threaded baseline overstates the benefit. With the 1- and 8-thread
 runs solving identical instances (verified on all 384 configurations),
-% PENDING-SEEDS: retention by p with seed spread
 the 8-thread baseline keeps a median 96\% of the speedup at $p\le 200$ but
-only 65\% at $p=400$ and 57\% at $p=800$ (Fig.~\ref{fig:threading}).
+only 65\% at $p=400$ and 57\% at $p=800$ (seed 0, Fig.~\ref{fig:threading}).
+The pattern repeats in every instance: across seeds 0--2 the retention is
+88--100\% at $p\le200$, 65--81\% at $p=400$ and 46--58\% at $p=800$, with the
+1- and 8-thread runs solving identical instances in all $3\times384$
+configurations.
 Undecomposed ADMM performs one $p\times p$ eigendecomposition per iteration,
 which becomes large enough to use 8 cores from $p\approx400$; the many small
 block problems do not. The exception is many\_tiny, which keeps 83--91\%
@@ -250,7 +264,8 @@ not-resolvable differences occur at $p\le200$.
 \includegraphics[width=\columnwidth]{fig1_rq1_threading.pdf}
 \caption{(a) Median speedup at the best-F1 $\lambda$ with 1 and 8 BLAS
 threads. (b) Speedup retained by the 8-thread baseline, per configuration;
-hollow markers are not resolvable (overlapping trial bands).}
+hollow markers are not resolvable (overlapping trial bands). Seed 0; seeds
+1--2 show the same pattern (text).}
 \label{fig:threading}
 \end{figure}
 
@@ -382,7 +397,6 @@ the batched CPU time (float64) over the batched GPU time, so $S_{\mathrm{GPU}}>1
 means the GPU is faster. On the GPU in double precision, our reference
 configuration, the same batched code has $S_{\mathrm{GPU}}=0.10$--$0.79$
 (i.e.\ $1.3$--$10\times$ \emph{slower}) at these sizes, and in a $\lambda$ scan
-% PENDING-SEEDS/DRIVER: crossover across seeds 0-2, new-driver recheck
 at $p=2000$ it first wins only at $s_{\max}\approx1950$
 ($1.07\times$). Transfers are at most 0.3\% of GPU time; the loss is
 per-iteration launch overhead plus the reduced double-precision throughput of
@@ -515,13 +529,10 @@ All measurements use one laptop; timings are machine-specific, and the
 consumer GPU's double-precision rate is not representative of data-centre
 GPUs. Data are synthetic, and the \emph{balanced} and \emph{many\_tiny}
 regimes coincide at $p=100$.
-% PENDING-SEEDS: replace next sentence once seeds 1-2 are in
-Speedups come from one instance per
-configuration; structural results use three seeds.
-% PENDING-LAMBDA: replace with the lambda-extension outcome
-In 7 of 48 cells the
-best-F1 $\lambda$ lies at the edge of the grid ($0.05$), so the optimum may be
-lower. The float32 study covers one regime, and the cause of GPU float32
+CPU speedups and all structural results use three
+independent instances; the GPU results use one (seed 0), so the GPU crossover
+sizes carry instance-to-instance variation we did not measure. For four cells
+the statistically best $\lambda$ lies below our timing grid (Section~\ref{sec:speedup}). The float32 study covers one regime, and the cause of GPU float32
 non-convergence on small blocks is not isolated. Timings compare against GGLasso's own
 solvers; we do not benchmark QUIC or coordinate-descent implementations, and
 F1 is computable only because the data are synthetic.

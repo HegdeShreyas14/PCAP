@@ -14,11 +14,12 @@ reproduce the work elsewhere: use `scripts/run_package.sh` (see
 | `run_fp32_crossover.sh` | `gpu_crossover_fp32.csv`, `gpu_mem_*_fp32.csv` |
 | `run_fp32_cpu_baseline.sh` | `fp32_cpu_baseline.csv` |
 | `run_seeds.sh` | `seeds/rq1_primary_{1t,8t}_seed{1,2}.csv` (its GPU steps were aborted; see below) |
-| `run_after_reboot.sh` | `lambda_boundary/`, `seeds/gpu_crossover*_seed{1,2}.csv`, `driver_recheck/` |
 | `edge_cells.py` | helper: cells whose best-F1 lambda lies at the grid edge |
 
 `run_seeds.sh`'s GPU steps were stopped because an automatic update replaced
-the NVIDIA user-space driver while the old kernel module was still loaded;
-they were rerun by `run_after_reboot.sh` on a consistent driver.
+the NVIDIA user-space driver while the old kernel module was still loaded.
+They were not rerun: the GPU results are reported for seed 0 only, all on one
+driver (595.91). The RQ1 grid-edge question was answered from the finer
+lambda grid in `percolation.csv` (same instances) instead of new timing runs.
 
 The scripts `cd` to the repository root, so run them from anywhere.
