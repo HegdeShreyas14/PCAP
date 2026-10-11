@@ -263,19 +263,26 @@ The paper must say this plainly; it inverts the original "batched GPU" pitch.
 written into the claims above).** Diagnostic (`fp32_diagnostic.csv`, criteria
 pre-registered in commit 3e2a362) passed 4/4; full crossover in float32
 (`gpu_crossover_fp32.csv`, anchors `gpu_mem_*_fp32.csv`):
-- Large blocks: GPU speedup over batched numpy float64 is 2.1–6.1× for
-  s_max ≥ ~650, and 5.7× / 8.7× at the s_max 2001 / 3006 anchors. Crossover
+- Large blocks: GPU speedup over batched numpy float64 crosses 1× at
+  s_max ≈ 650 (1.2–1.5× at 650–700), reaches 2.2–6.1× for s_max ≥ ~1000,
+  and 5.7× / 8.7× at the s_max 2001 / 3006 anchors. Crossover
   falls from s_max ≈ 1950 (float64) to **≈ 650** (p = 1200 and 2000 agree).
   Peak VRAM roughly halves. Accuracy within the pre-registered 1e-3 bound
   everywhere (max 5e-4 relative).
 - Small blocks: **13/36 points (s_max ≲ 120) fail to converge** in float32
   (hit max_iter = 1000; float64 needs 118–329). The absolute term of the
-  stopping test (dim·tol) is below float32 resolution for tiny blocks. So
-  float32 is valid only where the GPU wins anyway, and fails the
-  pre-registered `all_converged` criterion elsewhere.
-- Still owed before quoting: a float32 CPU baseline (GPU fp32 vs CPU fp64 is
-  not like-for-like), and a decision on how to report the small-block
-  non-convergence (mixed precision, or float64 fallback below a block size).
+  stopping test (dim·tol) was first suspected (see correction below: the CPU
+  float32 path converges, so this is GPU-specific). float32 GPU fails the
+  pre-registered `all_converged` criterion on small blocks.
+- **Like-for-like (2026-10-11, `fp32_cpu_baseline.csv`):** float32 does not
+  speed up the CPU (median 0.98×, range 0.62–1.32×). float32 GPU vs float32
+  CPU: crossover s_max ≈ 500–700; 2.5–10.2× for s_max ≥ 1000; 6.9× / 9.0×
+  at the anchors.
+- **Correction:** CPU float32 converges at all 38 points; only the GPU float32
+  path fails (same 13 small-block points). So non-convergence is GPU-specific,
+  not a float32 resolution limit as first assumed. Cause not isolated.
+- Reported as: float32 GPU valid for large blocks; float64 needed on the GPU
+  for small blocks.
 
 The pre-fix measurements claimed crossovers at s_max 1035 / 1522 and 1.36× /
 1.59× at the anchors. Those were inflated ~30% by a throttled CPU baseline

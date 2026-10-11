@@ -1,0 +1,44 @@
+commit a154654561c9065d27d97d5208752bc1d71b6c03 started 2026-10-11T12:52:50+05:30
+environment -> results/fp32_cpu_baseline_env.json
+p= 1200 lam=0.030 s_max= 1200  np64 2.383s  np32 2.411s  torch32 0.471s  | GPU vs CPU32 5.12x  (vs CPU64 5.06x)  nc np32=0 gpu32=0
+p= 1200 lam=0.052 s_max= 1186  np64 2.312s  np32 2.656s  torch32 0.500s  | GPU vs CPU32 5.31x  (vs CPU64 4.63x)  nc np32=0 gpu32=0
+p= 1200 lam=0.074 s_max= 1115  np64 2.453s  np32 3.965s  torch32 0.512s  | GPU vs CPU32 7.74x  (vs CPU64 4.79x)  nc np32=0 gpu32=0
+p= 1200 lam=0.095 s_max= 1016  np64 1.615s  np32 1.627s  torch32 0.533s  | GPU vs CPU32 3.05x  (vs CPU64 3.03x)  nc np32=0 gpu32=0
+p= 1200 lam=0.117 s_max=  904  np64 1.587s  np32 1.379s  torch32 0.470s  | GPU vs CPU32 2.93x  (vs CPU64 3.38x)  nc np32=0 gpu32=0
+p= 1200 lam=0.139 s_max=  776  np64 1.007s  np32 1.083s  torch32 0.454s  | GPU vs CPU32 2.38x  (vs CPU64 2.22x)  nc np32=0 gpu32=0
+p= 1200 lam=0.161 s_max=  643  np64 1.095s  np32 1.011s  torch32 0.512s  | GPU vs CPU32 1.97x  (vs CPU64 2.14x)  nc np32=0 gpu32=0
+p= 1200 lam=0.182 s_max=  508  np64 0.670s  np32 0.586s  torch32 0.580s  | GPU vs CPU32 1.01x  (vs CPU64 1.16x)  nc np32=0 gpu32=0
+p= 1200 lam=0.204 s_max=  365  np64 0.394s  np32 0.393s  torch32 0.724s  | GPU vs CPU32 0.54x  (vs CPU64 0.54x)  nc np32=0 gpu32=0
+p= 1200 lam=0.226 s_max=  260  np64 0.303s  np32 0.332s  torch32 0.753s  | GPU vs CPU32 0.44x  (vs CPU64 0.40x)  nc np32=0 gpu32=0
+p= 1200 lam=0.248 s_max=  162  np64 0.201s  np32 0.203s  torch32 0.835s  | GPU vs CPU32 0.24x  (vs CPU64 0.24x)  nc np32=0 gpu32=0
+p= 1200 lam=0.269 s_max=  112  np64 0.153s  np32 0.157s  torch32 1.728s  | GPU vs CPU32 0.09x  (vs CPU64 0.09x)  nc np32=0 gpu32=1
+p= 1200 lam=0.291 s_max=   88  np64 0.155s  np32 0.148s  torch32 1.554s  | GPU vs CPU32 0.10x  (vs CPU64 0.10x)  nc np32=0 gpu32=1
+p= 1200 lam=0.313 s_max=   64  np64 0.121s  np32 0.125s  torch32 1.305s  | GPU vs CPU32 0.10x  (vs CPU64 0.09x)  nc np32=0 gpu32=1
+p= 1200 lam=0.335 s_max=   56  np64 0.107s  np32 0.112s  torch32 1.184s  | GPU vs CPU32 0.09x  (vs CPU64 0.09x)  nc np32=0 gpu32=1
+p= 1200 lam=0.356 s_max=   56  np64 0.106s  np32 0.109s  torch32 1.176s  | GPU vs CPU32 0.09x  (vs CPU64 0.09x)  nc np32=0 gpu32=1
+p= 1200 lam=0.378 s_max=   46  np64 0.093s  np32 0.112s  torch32 1.120s  | GPU vs CPU32 0.10x  (vs CPU64 0.08x)  nc np32=0 gpu32=1
+p= 1200 lam=0.400 s_max=   34  np64 0.083s  np32 0.083s  torch32 1.047s  | GPU vs CPU32 0.08x  (vs CPU64 0.08x)  nc np32=0 gpu32=0
+p= 2000 lam=0.030 s_max= 2000  np64 5.901s  np32 5.978s  torch32 0.977s  | GPU vs CPU32 6.12x  (vs CPU64 6.04x)  nc np32=0 gpu32=0
+p= 2000 lam=0.052 s_max= 1951  np64 6.349s  np32 9.755s  torch32 0.955s  | GPU vs CPU32 10.22x  (vs CPU64 6.65x)  nc np32=0 gpu32=0
+p= 2000 lam=0.074 s_max= 1784  np64 5.173s  np32 5.915s  torch32 1.002s  | GPU vs CPU32 5.90x  (vs CPU64 5.16x)  nc np32=0 gpu32=0
+p= 2000 lam=0.095 s_max= 1411  np64 4.077s  np32 3.174s  torch32 0.807s  | GPU vs CPU32 3.93x  (vs CPU64 5.05x)  nc np32=0 gpu32=0
+p= 2000 lam=0.117 s_max= 1027  np64 1.899s  np32 1.815s  torch32 0.742s  | GPU vs CPU32 2.45x  (vs CPU64 2.56x)  nc np32=0 gpu32=0
+p= 2000 lam=0.139 s_max=  687  np64 0.889s  np32 0.849s  torch32 0.716s  | GPU vs CPU32 1.19x  (vs CPU64 1.24x)  nc np32=0 gpu32=0
+p= 2000 lam=0.161 s_max=  392  np64 0.627s  np32 0.631s  torch32 0.996s  | GPU vs CPU32 0.63x  (vs CPU64 0.63x)  nc np32=0 gpu32=0
+p= 2000 lam=0.182 s_max=  241  np64 0.504s  np32 0.494s  torch32 0.932s  | GPU vs CPU32 0.53x  (vs CPU64 0.54x)  nc np32=0 gpu32=0
+p= 2000 lam=0.204 s_max=  136  np64 0.243s  np32 0.240s  torch32 0.927s  | GPU vs CPU32 0.26x  (vs CPU64 0.26x)  nc np32=0 gpu32=0
+p= 2000 lam=0.226 s_max=  120  np64 0.217s  np32 0.227s  torch32 1.336s  | GPU vs CPU32 0.17x  (vs CPU64 0.16x)  nc np32=0 gpu32=0
+p= 2000 lam=0.248 s_max=   54  np64 0.157s  np32 0.162s  torch32 1.425s  | GPU vs CPU32 0.11x  (vs CPU64 0.11x)  nc np32=0 gpu32=1
+p= 2000 lam=0.269 s_max=   47  np64 0.160s  np32 0.164s  torch32 1.283s  | GPU vs CPU32 0.13x  (vs CPU64 0.12x)  nc np32=0 gpu32=1
+p= 2000 lam=0.291 s_max=   38  np64 0.146s  np32 0.160s  torch32 1.304s  | GPU vs CPU32 0.12x  (vs CPU64 0.11x)  nc np32=0 gpu32=1
+p= 2000 lam=0.313 s_max=   37  np64 0.198s  np32 0.150s  torch32 1.213s  | GPU vs CPU32 0.12x  (vs CPU64 0.16x)  nc np32=0 gpu32=1
+p= 2000 lam=0.335 s_max=   35  np64 0.206s  np32 0.215s  torch32 1.433s  | GPU vs CPU32 0.15x  (vs CPU64 0.14x)  nc np32=0 gpu32=1
+p= 2000 lam=0.356 s_max=   23  np64 0.136s  np32 0.143s  torch32 0.799s  | GPU vs CPU32 0.18x  (vs CPU64 0.17x)  nc np32=0 gpu32=0
+p= 2000 lam=0.378 s_max=   23  np64 0.128s  np32 0.130s  torch32 1.252s  | GPU vs CPU32 0.10x  (vs CPU64 0.10x)  nc np32=0 gpu32=1
+p= 2000 lam=0.400 s_max=   23  np64 0.122s  np32 0.181s  torch32 1.127s  | GPU vs CPU32 0.16x  (vs CPU64 0.11x)  nc np32=0 gpu32=1
+p= 2400 lam=0.080 s_max= 2001  np64 8.120s  np32 7.612s  torch32 1.108s  | GPU vs CPU32 6.87x  (vs CPU64 7.33x)  nc np32=0 gpu32=0
+p= 3200 lam=0.060 s_max= 3006  np64 16.123s  np32 15.018s  torch32 1.676s  | GPU vs CPU32 8.96x  (vs CPU64 9.62x)  nc np32=0 gpu32=0
+
+wrote 38 rows to results/fp32_cpu_baseline.csv
+[2026-10-11T13:14:00+05:30] done
+[2026-10-11T13:14:00+05:30] restarted trade_plat container

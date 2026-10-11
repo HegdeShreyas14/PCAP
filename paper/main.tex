@@ -46,8 +46,9 @@ blocks into one component. Batching the per-block work gives
 $1.2$--$1.7\times$ on the CPU. On the GPU, double precision hides
 most of the benefit: in single precision, validated against pre-registered
 accuracy criteria, the GPU wins from blocks of $\approx 650$ variables, but
-single precision fails to converge on very small blocks.
-\todo{like-for-like float32 CPU vs GPU number from fp32\_cpu\_baseline.csv}
+compared like for like with a float32 CPU solver it is $2.5$--$10\times$
+faster on blocks of 1000 or more variables. GPU single precision, however,
+fails to converge on very small blocks.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -270,7 +271,7 @@ The mechanism is connectivity. Counting above-threshold entries of $S$ that
 join two different true blocks (72 best-F1 cells, three seeds), only a
 median 3--4\% of entries cross true blocks in the balanced regime, e.g.\
 33--42 of $\approx1900$ at $p=800$, $n/p=10$. That is enough to fuse all five
-true blocks at every $p\ge200$. Overall, the largest component fuses at least
+true blocks in every cell at $p\ge400$, and in the median cell at $p=200$. Overall, the largest component fuses at least
 two true blocks in 68 of 72 cells. Support F1 barely registers 3\% spurious
 entries, while parallelism collapses. Because screening is exact, any finer
 partition, such as a higher threshold or a shrunk covariance, no longer
@@ -293,8 +294,8 @@ versus the true block structure (oracle), three seeds.}
 Our batched solver stacks all blocks of equal size into one $(k,s,s)$ array
 and runs one batched eigendecomposition, soft-threshold and stopping test
 per group and iteration, reproducing GGLasso's ADMM to $10^{-14}$. On the
-CPU, batching alone gives $1.20$--$1.68\times$ over \texttt{block\_SGL} at
-the best-F1 $\lambda$ ($p=200$--$800$).
+CPU, batching alone gives $1.25$--$1.69\times$ over \texttt{block\_SGL} at
+the best-F1 $\lambda$ ($p=200$--$800$, imbalanced and many\_tiny).
 
 On the GPU in double precision, the same batched code is $1.3$--$10\times$
 \emph{slower} than the batched CPU at these sizes, and in a $\lambda$ scan
@@ -310,28 +311,57 @@ $\le10^{-6}$; elementwise relative error $\le10^{-3}$ and no more than
 $10\times$ the float64 solver's own distance to a high-accuracy solution;
 support disagreement $\le0.1\%$ with no flips of clearly nonzero entries; and
 F1 within 0.005. Float32 passed every criterion on four diagnostic points.
-Its deviation from float64 ($3\times10^{-5}$--$1.4\times10^{-4}$) is about
-$10\times$ smaller than float64's own deviation from the high-accuracy
-solution, and the objective agrees to $10^{-8}$.
+Its deviation from float64 ($3\times10^{-5}$--$1.4\times10^{-4}$ relative)
+is 6--50$\times$ smaller than float64's own deviation from the high-accuracy
+solution at the same stopping tolerance, and the objective agrees to within
+$1.3\times10^{-8}$.
 
 Across the full scan (Fig.~\ref{fig:crossover}), float32 moves the GPU
-crossover from $s_{\max}\approx1950$ to $\approx650$. Against the float64
-CPU baseline it reaches $2.1$--$6.1\times$ for $s_{\max}\ge650$ and
-$5.7\times$ and $8.7\times$ at $s_{\max}=2001$ and $3006$, while halving
-peak GPU memory. \todo{like-for-like: GPU float32 vs CPU float32 speedup,
-from fp32\_cpu\_baseline.csv}
-Float32 is not a free replacement, however. In 13 of 36 configurations,
-all with $s_{\max}\lesssim120$, it fails to converge within 1000
-iterations, where float64 needs at most 329: the absolute term of the
-stopping test falls below single-precision resolution for small blocks.
-Single precision is thus viable exactly where the GPU wins, and float64 or a
-mixed-precision policy is needed below.
+crossover from $s_{\max}\approx1950$ to $\approx650$, and peak GPU memory
+roughly halves. Against the float64 CPU baseline the float32 GPU reaches
+$2.2$--$6.1\times$ for $s_{\max}\ge1000$.
+
+A float32 GPU compared with a float64 CPU is not a like-for-like comparison,
+so we also timed a float32 CPU solver in the same session at every point.
+Single precision does not help the CPU here: float32 NumPy is a median
+$0.98\times$ the speed of float64 (range $0.62$--$1.32\times$) with the same
+OpenBLAS eigensolver. Like for like, the float32 GPU overtakes the float32
+CPU at $s_{\max}\approx500$--$700$, is $2.5$--$10.2\times$ faster for
+$s_{\max}\ge1000$, and $6.9\times$ and $9.0\times$ faster at
+$s_{\max}=2001$ and $3006$ (Table~\ref{tab:fp32}).
+
+Float32 is not a free replacement on the GPU, however. In 13 of 36 scan
+configurations, all with $s_{\max}\le112$, the float32 GPU solver fails to
+converge within 1000 iterations, whereas float64 needs at most 329. The
+float32 CPU solver, with the same stopping test, converges at every point,
+so the failure is specific to the GPU single-precision path rather than to
+single precision as such; we have not isolated its cause. Single precision on
+the GPU is therefore viable exactly where the GPU wins, and float64 (or a
+size-dependent precision policy) is needed for small blocks.
+
+\begin{table}[t]
+\centering
+\caption{Like-for-like float32 timing (same session): GPU speedup over the
+batched CPU solver, valid (converged) points only.}
+\label{tab:fp32}
+\begin{tabular}{lrr}
+\toprule
+$s_{\max}$ & vs.\ CPU float32 & vs.\ CPU float64 \\
+\midrule
+$<200$ & $0.08$--$0.26\times$ & $0.08$--$0.26\times$ \\
+$200$--$640$ & $0.44$--$1.01\times$ & $0.40$--$1.16\times$ \\
+$640$--$1000$ & $1.19$--$2.93\times$ & $1.24$--$3.38\times$ \\
+$\ge1000$ & $\mathbf{2.45}$--$\mathbf{10.2\times}$ & $2.56$--$9.62\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{fig5_rq2_crossover.pdf}
 \caption{GPU speedup over the batched CPU solver against the largest
-block size. \todo{regenerate with float32 series overlaid}}
+block size, in float64 and float32 on the GPU (CPU baseline float64).
+Hollow markers: float32 runs that did not converge.}
 \label{fig:crossover}
 \end{figure}
 
@@ -365,8 +395,9 @@ unaffected. CPU-only speedup ratios survived because both solvers slowed
 together, but every GPU-versus-CPU ratio was inflated by about 30\%. Every run
 now records CPU, BLAS library, power profile, load and running containers.
 
-A clean reinstall from the published package lock reproduces all
-structural results (detected blocks, objective values, F1) bit for bit.
+A clean reinstall from the published package lock reproduces the
+structural results (detected blocks, objective values, F1) bit for bit on a
+16-configuration check.
 
 % =====================================================================
 \section{Limitations}
@@ -376,7 +407,8 @@ GPUs. Data are synthetic, and the \emph{balanced} and \emph{many\_tiny}
 regimes coincide at $p=100$. Speedups come from one instance per
 configuration; structural results use three seeds. In 7 of 48 cells the
 best-F1 $\lambda$ lies at the edge of the grid ($0.05$), so the optimum may be
-lower. The float32 study covers one regime. We compare against GGLasso only,
+lower. The float32 study covers one regime, and the cause of GPU float32
+non-convergence on small blocks is not isolated. We compare against GGLasso only,
 not other graphical lasso solvers.
 
 % =====================================================================
@@ -388,8 +420,9 @@ of spurious entries, the work that remains is dominated by per-block overhead
 rather than arithmetic, and a multithreaded CPU baseline recovers much of the
 apparent gain. Batching recovers $1.2$--$1.7\times$ on the CPU. On a
 consumer GPU, precision rather than batching decides the outcome: in single
-precision the GPU wins on large blocks, while small blocks need double
-precision to converge. The binding constraint on block parallelism is the
+precision the GPU is $2.5$--$10\times$ faster than a like-for-like CPU on
+large blocks, while small blocks need double precision to converge on the
+GPU. The binding constraint on block parallelism is the
 estimator's structure, not the hardware.
 
 \bibliographystyle{IEEEtran}
