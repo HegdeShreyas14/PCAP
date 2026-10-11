@@ -109,18 +109,24 @@ research questions:
 banerjee2008} has been solved by block coordinate descent \cite{friedman2008},
 alternating linearisation \cite{scheinberg2010}, ADMM \cite{boyd2011}, and
 second-order methods such as QUIC \cite{hsieh2014quic}, whose BigQUIC variant
-scales to a million variables through block-wise computation and
-parallelism \cite{hsieh2013bigquic}. Mazumder and Hastie \cite{mazumder2012ejs}
+solves problems with a million variables on a single machine using
+block-coordinate descent over clustered blocks and bounded memory
+\cite{hsieh2013bigquic}. Mazumder and Hastie \cite{mazumder2012ejs}
 analyse the convergence behaviour of the block coordinate algorithm. We do not
 propose a new solver; we study how much parallelism the exact component
 decomposition exposes to an existing ADMM solver \cite{gglasso2021}.
 
 \textbf{Screening.} Witten et al.\ \cite{witten2011} and Mazumder and Hastie
 \cite{mazumder2012} showed that thresholding the sample covariance yields the
-exact component structure of the solution, and used it to solve large
-problems block by block. Their analyses establish exactness; our contribution
-is to measure how much block parallelism survives at statistically useful
-regularisation, and why it does not.
+exact component structure of the graphical lasso solution, and used it to
+solve large problems block by block. Fattahi and Sojoudi \cite{fattahi2019}
+give conditions under which thresholding reproduces the solution's entire
+sparsity pattern. These results relate the thresholded covariance to the
+graphical lasso \emph{estimate}; they say nothing about how the estimate's
+components relate to the planted block structure. That second relation is
+what decides how much block parallelism is usable, and it is what we
+measure: screening is exact on our instances, yet the estimate fuses the true
+blocks at statistically useful regularisation.
 
 \textbf{Batched and GPU linear algebra.} Batched BLAS and LAPACK interfaces
 target many small independent matrix problems, where per-call launch overhead
@@ -219,7 +225,7 @@ numba-compiled kernels, and OpenMP. Both OpenBLAS pools do real work, so an
 8-thread run can have up to 15 active workers on the 16 physical cores. Every dataset
 stores the producing commit, a dirty-tree flag and the hash of every source
 file. Code, data, logs and a full package lock are available at
-\todo{repository URL}.
+\url{https://github.com/HegdeShreyas14/PCAP}.
 
 % =====================================================================
 \section{Results}
