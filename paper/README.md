@@ -5,7 +5,7 @@ IEEE conference format (`IEEEtran`, built into Overleaf and TeX Live).
 ## Build
 
 1. Regenerate figures from `results/`: `python src/make_graph.py --out paper/figs --figs 1 2 3 4 5`
-2. Upload `paper/` to Overleaf (or `latexmk -pdf main.tex` locally).
+2. `paper/build.sh` (TeX Live or TinyTeX) writes `paper/main.pdf`; or upload `paper/` to Overleaf.
 
 ## Before submission
 

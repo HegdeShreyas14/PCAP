@@ -306,10 +306,11 @@ def fig_rq1_oracle_gap(res, out, ext):
     fig, ax = plt.subplots(figsize=(3.4, 2.5))
     ax.bar(x - w/2, dv, w, label="Detected (at best-F1 $\\lambda$)", color=COL["red"])
     ax.bar(x + w/2, ov, w, label="Oracle (planted structure)", color=COL["green"])
-    ax.set_xticks(x); ax.set_xticklabels(regimes, fontsize=7.5)
+    ax.set_xticks(x); ax.set_xticklabels([r.replace("_", "\n") for r in regimes], fontsize=7)
+    ax.set_yticks(range(0, 101, 20))
     ax.set_ylabel("$F_{\\max}$: share of cubic work\nin largest block (%)", fontsize=8)
-    ax.set_ylim(0, 118)
-    ax.legend(fontsize=6.8, frameon=False, loc="lower right")
+    ax.set_ylim(0, 135)    # headroom above the 100% bars for the legend
+    ax.legend(fontsize=6.8, frameon=False, loc="upper center", ncol=2)
     save(fig, out, "fig3_rq1_oracle_gap", ext)
 
     for k, d, o in zip(regimes, dv, ov):

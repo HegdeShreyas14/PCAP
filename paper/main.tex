@@ -265,15 +265,15 @@ block problems do not. The exception is many\_tiny, which keeps 83--91\%
 because its speedup is only $\approx1.3\times$ to begin with. All 11
 not-resolvable differences occur at $p\le200$.
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=\columnwidth]{fig1_rq1_threading.pdf}
+\includegraphics[width=0.85\textwidth]{fig1_rq1_threading.pdf}
 \caption{(a) Median speedup at the best-F1 $\lambda$ with 1 and 8 BLAS
 threads. (b) Speedup retained by the 8-thread baseline, per configuration;
 hollow markers are not resolvable (overlapping trial bands). Seed 0; seeds
 1--2 show the same pattern (text).}
 \label{fig:threading}
-\end{figure}
+\end{figure*}
 
 \subsection{The over-fragmentation trap}
 Table~\ref{tab:trap} pools all 384 configurations by detected block count.

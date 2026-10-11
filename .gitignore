@@ -22,3 +22,4 @@ logs/
 
 # figure script output (the paper uses paper/figs/, regenerated with --out paper/figs)
 figs/
+paper/main.pdf
