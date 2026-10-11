@@ -43,12 +43,12 @@ eigendecompositions a cubic cost model predicts; and (iv) the true blocks are
 fused by the estimator itself, not by the screening step: screening is exact,
 and a few percent of spurious cross-block entries suffice to merge all true
 blocks into one component. Batching the per-block work gives
-$1.2$--$1.7\times$ on the CPU. On the GPU, double precision hides
-most of the benefit: in single precision, validated against pre-registered
-accuracy criteria, the GPU wins from blocks of $\approx 650$ variables, but
-compared like for like with a float32 CPU solver it is $2.5$--$10\times$
-faster on blocks of 1000 or more variables. GPU single precision, however,
-fails to converge on very small blocks.
+$1.2$--$1.7\times$ on the CPU. On a consumer GPU in double precision, the
+batched solver overtakes the CPU only when one block of $\approx2000$
+variables dominates. A precision diagnostic with pre-registered accuracy
+criteria shows why: in single precision the crossover falls to
+$\approx650$ variables, but GPU single precision fails to converge on small
+blocks, so we keep double precision as the reference result.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -278,9 +278,25 @@ partition, such as a higher threshold or a shrunk covariance, no longer
 yields the graphical lasso solution: recovering this parallelism means
 trading exactness for speed.
 
-The structure is also unstable near the percolation threshold: at balanced
-$p=400$, $n/p=10$, $\lambda=0.14$ the largest component holds 87\% and 55\%
-of the work for two seeds, and 100\% for a third.
+Thresholding $S$ and taking components is a percolation process, and
+Fig.~\ref{fig:percolation} shows its cliff. At balanced $p=400$, $n/p=10$
+the largest component holds essentially all the cubic work up to
+$\lambda\approx0.14$ and drops to under 40\% by $\lambda=0.16$ (median of
+three seeds). The best-F1 $\lambda$ (0.10) sits on the plateau, left of the
+cliff: at the statistically useful operating point, the giant component has
+not yet broken up. Near the cliff the structure is also unstable across
+draws: at $\lambda=0.14$ the largest component holds 87\% and 55\% of the
+work for two seeds, and 100\% for the third.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig4_rq1_percolation.pdf}
+\caption{Percolation cliff at balanced $p=400$, $n/p=10$ (median of three
+seeds): largest-component work share $F_{\max}$ and support F1 against
+$\lambda$. The best-F1 $\lambda$ lies on the plateau, before the giant
+component breaks.}
+\label{fig:percolation}
+\end{figure}
 
 \begin{figure}[t]
 \centering
@@ -297,14 +313,18 @@ per group and iteration, reproducing GGLasso's ADMM to $10^{-14}$. On the
 CPU, batching alone gives $1.25$--$1.69\times$ over \texttt{block\_SGL} at
 the best-F1 $\lambda$ ($p=200$--$800$, imbalanced and many\_tiny).
 
-On the GPU in double precision, the same batched code is $1.3$--$10\times$
-\emph{slower} than the batched CPU at these sizes, and in a $\lambda$ scan
+We report GPU performance as $S_{\mathrm{GPU}}=T_{\mathrm{CPU}}/T_{\mathrm{GPU}}$,
+the batched CPU time (float64) over the batched GPU time, so $S_{\mathrm{GPU}}>1$
+means the GPU is faster. On the GPU in double precision, our reference
+configuration, the same batched code has $S_{\mathrm{GPU}}=0.10$--$0.79$
+(i.e.\ $1.3$--$10\times$ \emph{slower}) at these sizes, and in a $\lambda$ scan
 at $p=2000$ it first wins only at $s_{\max}\approx1950$
 ($1.07\times$). Transfers are at most 0.3\% of GPU time; the loss is
 per-iteration launch overhead plus the reduced double-precision throughput of
 a consumer GPU.
 
-To separate precision from batching, we added a float32 GPU path and
+\textbf{Precision diagnostic.} To separate precision from batching, we
+added a float32 GPU path and
 pre-registered acceptance criteria before measuring it: all problems
 converge at the unchanged tolerance; relative objective difference
 $\le10^{-6}$; elementwise relative error $\le10^{-3}$ and no more than
@@ -398,6 +418,31 @@ now records CPU, BLAS library, power profile, load and running containers.
 A clean reinstall from the published package lock reproduces the
 structural results (detected blocks, objective values, F1) bit for bit on a
 16-configuration check.
+
+% =====================================================================
+\section{What generalises}
+The findings fall into two classes. The \emph{structural} results are
+properties of the estimator and the data, not of our hardware: exactness of
+screening, the fusion of true blocks by a few spurious cross-block entries,
+the percolation cliff, and the opposition between fragmentation and
+estimation quality. They are deterministic given the seed, identical across
+BLAS thread counts, and would hold for any exact solver that uses component
+screening, including other graphical lasso implementations. They bound
+block parallelism for \emph{any} hardware: if the useful $\lambda$ leaves one
+giant component, no parallel scheme over components can beat the time to
+solve that component.
+
+The \emph{performance} results are platform-dependent and should be read as
+measurements of one CPU, one BLAS library and one consumer GPU: how much a
+multithreaded baseline erodes the decomposition gain depends on how well the
+BLAS parallelises one large eigendecomposition, and the GPU crossover depends
+on per-launch overhead and the double-precision rate. We expect the
+qualitative pattern (decomposition helps most at moderate $p$; a GPU helps
+only on large blocks) to transfer, but the crossover block sizes will move.
+A data-centre GPU with full-rate double precision should narrow the gap
+between our float64 and float32 crossovers. To make these measurements
+repeatable elsewhere, we release a one-command run package that reproduces
+every experiment on another machine and records its environment.
 
 % =====================================================================
 \section{Limitations}
