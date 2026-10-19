@@ -1,6 +1,11 @@
 # Paper
 
-IEEE conference format (`IEEEtran`, built into Overleaf and TeX Live).
+Two versions sharing `refs.bib` and `figs/`:
+
+- `main.tex`: IEEE conference format (`IEEEtran`, built into Overleaf and TeX Live).
+- `main_springer.tex`: Springer Nature journal format (`sn-jnl`). The `sn-jnl` class is not
+  included: download Springer Nature's LaTeX template package and place `sn-jnl.cls`
+  (and its `.bst` files) next to it, or compile on Overleaf from that template.
 
 ## Build
 
