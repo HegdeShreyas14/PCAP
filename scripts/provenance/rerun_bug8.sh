@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 # Regenerate the RQ1 pair and percolation after the bug-8 sampler fix.
-# Strictly sequential (runbook: never run two sweeps concurrently).
-# Old datasets stay recoverable from git history (commit 96f4249).
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 PY=.venv/bin/python

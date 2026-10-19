@@ -1,17 +1,5 @@
-"""
-capture_environment.py — snapshot the machine and software environment for
+"""capture_environment.py — snapshot the machine and software environment for
 the paper's reproducibility appendix, and regenerate ENVIRONMENT.md.
-
-Writes
-    results/environment/system.json          hardware, OS, BLAS, power, GPU
-    results/environment/requirements-lock.txt full `pip freeze` of the venv
-    ENVIRONMENT.md                            human-readable summary, plus a
-                                              provenance table built from every
-                                              results/*_env.json
-
-Run on the machine that produced the datasets, ideally in the same session:
-
-    .venv/bin/python scripts/capture_environment.py
 """
 
 import glob
@@ -56,8 +44,10 @@ def machine_states():
 
 
 def commit_map():
-    """old -> new hash from results/environment/commit_map.tsv (history rewrite;
-    trees identical). Env files keep the hash that was current when they ran."""
+    """old -> new hash from results/environment/commit_map.tsv (history
+    rewrite; trees identical). Env files keep the hash that was current when
+    they ran.
+    """
     path = os.path.join(OUT, "commit_map.tsv")
     if not os.path.exists(path):
         return {}

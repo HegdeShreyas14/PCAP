@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
-# Extra seeds for every timed result (RQ1 1t/8t pair + GPU crossover fp64/fp32),
-# so speedups carry instance-to-instance spread. Seed 0 already exists.
-# Strictly sequential; restarts the stopped container on exit.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 PY=.venv/bin/python; L=results/runlogs; LOG=$L/run_seeds.log

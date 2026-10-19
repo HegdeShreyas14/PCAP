@@ -1,19 +1,4 @@
-"""
-fp32_cpu_baseline.py — like-for-like float32 comparison for the GPU result.
-
-The float32 GPU crossover (gpu_crossover_fp32.csv) is measured against the
-float64 CPU baseline. A float32 CPU solver is faster too, so the fair GPU
-speedup is t_numpy32 / t_torch32. This times, in one session and under the
-crossover protocol (2 warm-up + 5 timed, median):
-
-    numpy float64  (reference baseline)
-    numpy float32
-    torch float32
-
-at every lambda of the p=1200/2000 crossover scan plus the two VRAM anchors.
-
-    python src/fp32_cpu_baseline.py --blas-threads 8
-"""
+"""fp32_cpu_baseline.py — like-for-like float32 comparison for the GPU result."""
 
 import argparse
 import csv

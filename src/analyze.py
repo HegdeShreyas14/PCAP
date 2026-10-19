@@ -1,45 +1,4 @@
-"""
-analyze.py — turn sweep CSVs into the numbers that go in the paper.
-
-The central quantity is not raw speedup. It is the fraction of the
-*theoretically available* speedup that block_SGL actually realizes, and the
-ceiling that the largest connected component places on any block-parallel
-scheme.
-
-Definitions
------------
-    theoretical = p^3 / sum_i s_i^3     arithmetic gain available from the
-                                        decomposition (ADMM's per-iteration
-                                        cost is dominated by an O(p^3) eigh)
-
-    realized    = observed / theoretical   near 1 => arithmetic-bound;
-                                           near 0 => overhead-bound
-
-    critical    = p^3 / max_i(s_i)^3    ceiling on ANY block-parallel scheme.
-                                        The blocks are independent, so with
-                                        unlimited hardware the runtime is set
-                                        by the largest block alone.
-
-    max_share   = max_i(s_i)^3 / sum_i s_i^3    fraction of block arithmetic
-                                                in the single largest block
-
-Note on mean block size: connected components partition the p variables, so
-mean block size is exactly p / detected_n_blocks. We do NOT compute it from
-detected_sizes_json, which sweep.py truncates to the 200 largest blocks --
-that truncation inflates the mean by 15-60% on highly fragmented configs.
-The truncation does not affect `theoretical`, `critical` or `max_share`: the
-dropped blocks are all singletons (1^3 is negligible in sum s_i^3) and the
-largest block is always retained by the descending sort.
-
-Usage
------
-    python src/analyze.py results/rq1_primary_8t.csv
-    python src/analyze.py --compare results/rq1_primary_1t.csv results/rq1_primary_8t.csv
-
-Passing several files WITHOUT --compare analyses each separately, because
-pooling runs from different thread settings would silently interleave their
-operating points.
-"""
+"""analyze.py — turn sweep CSVs into the numbers that go in the paper."""
 
 import argparse
 import csv
@@ -48,9 +7,6 @@ import statistics
 import sys
 
 
-# --------------------------------------------------------------------------
-# metrics
-# --------------------------------------------------------------------------
 
 def theoretical_speedup(p, detected_sizes):
     denom = sum(float(s) ** 3 for s in detected_sizes)
@@ -58,12 +14,8 @@ def theoretical_speedup(p, detected_sizes):
 
 
 def critical_path(p, detected_sizes):
-    """
-    Ceiling on any block-parallel scheme: Amdahl applied to the decomposition.
-
-    Measured on real sweeps the largest block holds 78-100% of the total block
-    work, so block COUNT is a poor predictor of available parallelism and
-    largest-block SIZE is the one that matters.
+    """Ceiling on any block-parallel scheme: Amdahl applied to the
+    decomposition.
     """
     if not detected_sizes:
         return float("nan")
@@ -78,9 +30,6 @@ def max_block_share(detected_sizes):
     return (float(max(detected_sizes)) ** 3) / tot
 
 
-# --------------------------------------------------------------------------
-# loading
-# --------------------------------------------------------------------------
 
 REQUIRED = ("regime", "p", "lambda", "detected_n_blocks", "algorithmic_speedup",
             "support_f1", "n_samples", "detected_sizes_json")
@@ -149,9 +98,6 @@ def best_f1_rows(rows):
     return out
 
 
-# --------------------------------------------------------------------------
-# single-file report
-# --------------------------------------------------------------------------
 
 def report(rows, label):
     print()
@@ -254,18 +200,9 @@ blocks onto a GPU cannot approach that ceiling, however many there are.""")
                   f"obs {b['algorithmic_speedup']:.2f}x, ceiling {b['critical']:.1f}x")
 
 
-# --------------------------------------------------------------------------
-# compare mode
-# --------------------------------------------------------------------------
 
 def compare(rows_a, label_a, rows_b, label_b):
-    """
-    Join two runs on (regime, p, n/p, lambda) and show the crossover.
-
-    Operating points are chosen from run A, then the SAME configuration is
-    looked up in run B. Picking each run's own best-F1 lambda independently
-    would compare different lambdas and is not a crossover.
-    """
+    """Join two runs on (regime, p, n/p, lambda) and show the crossover."""
     key = lambda r: (r["regime"], r["p"], r["n_over_p"], round(r["lambda"], 4))
     A = {key(r): r for r in rows_a}
     B = {key(r): r for r in rows_b}
@@ -277,8 +214,6 @@ def compare(rows_a, label_a, rows_b, label_b):
     print("#" * 92)
 
     # A crossover is only meaningful if both runs solved the same problems.
-    # Bug 8: the pre-fix 1t/8t runs drew different S and agreed on detected
-    # structure in only 141/384 configs.
     unpaired = [k for k in shared if A[k]["detected_sizes_json"] != B[k]["detected_sizes_json"]]
     fp_cols = ("S_trace", "S_fro", "S_sum")
     if all(c in A[next(iter(shared))] and c in B[next(iter(shared))] for c in fp_cols):
@@ -318,9 +253,7 @@ def compare(rows_a, label_a, rows_b, label_b):
         sa, sb = b["algorithmic_speedup"], other["algorithmic_speedup"]
 
         flags = []
-        # Overlapping trial bands mean the difference is not resolvable by
-        # this measurement, whatever the ratio says. This is why 'retained'
-        # can exceed 100%: it is noise, not the threaded run being faster.
+        # Overlapping trial bands mean the difference is not resolvable by this measurement, whatever the ratio says.
         try:
             alo, ahi = float(b["speedup_lo"]), float(b["speedup_hi"])
             blo, bhi = float(other["speedup_lo"]), float(other["speedup_hi"])
@@ -340,10 +273,6 @@ def compare(rows_a, label_a, rows_b, label_b):
     print("             resolvable by this measurement. Do not read these as a")
     print("             threading effect, in either direction.")
     print("        junk-F1 = estimate quality has collapsed; not a usable operating point.")
-
-
-# --------------------------------------------------------------------------
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("csvs", nargs="+")
@@ -366,9 +295,7 @@ def main():
         compare(ra, pa.split("/")[-1], rb, pb.split("/")[-1])
         return
 
-    # Separate report per file. Pooling runs from different thread settings
-    # would interleave their operating points and produce a table that is
-    # neither run.
+    # Separate report per file.
     for path, rows in loaded:
         report(rows, path)
     if len(loaded) > 1:

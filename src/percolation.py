@@ -1,40 +1,5 @@
-"""
-percolation.py — locate the percolation threshold and compare it to the
+"""percolation.py — locate the percolation threshold and compare it to the
 statistically optimal lambda.
-
-The question
-------------
-analyze.py's Table 4 reports that the largest detected block typically holds
-~99% of the cubic arithmetic, so inter-block headroom H = 1 - F_max is near
-zero and there is little for a GPU to parallelise across blocks. This script
-asks why, and whether it is avoidable.
-
-The mechanism
--------------
-Thresholding the empirical covariance at lambda and taking connected
-components is a percolation process. Below a critical lambda the graph has a
-giant component holding most variables; above it the giant shatters into
-comparable fragments. Because block cost scales as s^3, a surviving giant
-holds essentially all the work no matter how many crumbs surround it.
-
-IMPORTANT: F_max is a CUBIC-WORK fraction, not a node fraction. The two
-diverge sharply. A graph can be shattered node-wise -- hundreds of components
--- while one moderate block still holds 99% of the s^3 work. The output
-reports both (`F_max` and `max_frac_of_p`) because the work fraction is what
-bounds parallel speedup and the node fraction is what looks impressive.
-
-The tension
------------
-The statistically optimal lambda falls as p grows. The percolation threshold
-does not fall as fast. Above some p the optimal lambda sits BELOW the
-threshold, the giant survives at every usable lambda, and inter-block
-parallelism is unavailable at any defensible operating point. That crossing,
-if it exists, limits the approach rather than the implementation.
-
-Usage
------
-    python src/percolation.py --seeds 0 1 2 --out results/percolation.csv
-    python src/percolation.py --no-f1            # structure only; NO verdict
 """
 
 import argparse
@@ -47,12 +12,6 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-# ---------------------------------------------------------------------------
-# BLAS threading must be pinned BEFORE numpy is imported or the setting is
-# ignored. Same pre-parser as sweep.py: an unpinned run inherits whatever the
-# ambient thread count is, which is not reproducible and, on a 16-core chip
-# asked for 32 threads, is pathological.
-# ---------------------------------------------------------------------------
 def _set_blas_threads(n):
     for var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
                 "VECLIB_MAXIMUM_THREADS", "NUMEXPR_NUM_THREADS"):
@@ -73,8 +32,9 @@ from gglasso.solver.single_admm_solver import get_connected_components, block_SG
 
 @contextlib.contextmanager
 def _silence():
-    """block_SGL prints one line per block; at 200+ blocks over a 25-point
-    grid that is tens of thousands of lines."""
+    """block_SGL prints one line per block; at 200+ blocks over a 25-point grid
+    that is tens of thousands of lines.
+    """
     with contextlib.redirect_stdout(io.StringIO()):
         yield
 
@@ -134,9 +94,6 @@ def main():
     ap.add_argument("--lam-max", type=float, default=0.50)
     ap.add_argument("--lam-steps", type=int, default=25)
     ap.add_argument("--f-max-threshold", type=float, default=0.90)
-    # Solver settings default to sweep.py's so lam*(F1) is directly comparable
-    # with the best-F1 lambda in rq1_primary_*.csv. Do not change one without
-    # the other.
     ap.add_argument("--tol", type=float, default=1e-7)
     ap.add_argument("--rtol", type=float, default=1e-5)
     ap.add_argument("--max-iter", type=int, default=1000)
@@ -173,12 +130,7 @@ def main():
                     Omega_0 = np.eye(p)
                     fp = s_fingerprint(S)
 
-                    # Oracle: F_max the TRUE block structure would give if
-                    # detection were perfect. If oracle F_max is low but the
-                    # detected F_max is high, detection is merging true blocks
-                    # (finite-sample noise), not the ground truth lacking
-                    # parallelism. That distinction matters before blaming the
-                    # generator.
+                    # Oracle: F_max the true block structure would give with perfect detection.
                     if seed == args.seeds[0]:
                         oracle_fmax = cubic_summary(p, sorted(sizes, reverse=True))["F_max"]
 
@@ -228,9 +180,7 @@ def main():
                 if ls != ls:
                     verdict = "indeterminate"
                 elif lp != lp:
-                    # never percolates on this grid: the giant survives at
-                    # every lambda tested, which is the strongest form of the
-                    # negative result
+                    # the giant component survives at every lambda on this grid
                     verdict = "NEVER percolates"
                 elif ls < lp:
                     verdict = "NO inter-block work"

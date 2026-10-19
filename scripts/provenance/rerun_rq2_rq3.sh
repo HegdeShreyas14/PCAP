@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
-# Regenerate RQ2/RQ3 on the bug-8-fixed sampler, with the same commands that
-# produced the originals (reconstructed from their CSVs). Strictly sequential.
-# Restarts the stopped trade_plat container on exit, success or failure.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 PY=.venv/bin/python

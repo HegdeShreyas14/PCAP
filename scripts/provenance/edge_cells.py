@@ -1,5 +1,6 @@
 """Print 'regime p ratio' for every cell whose best-F1 lambda is the smallest
-grid value, i.e. the optimum may lie below the grid."""
+grid value, i.e. the optimum may lie below the grid.
+"""
 import csv, sys
 rows = list(csv.DictReader(open(sys.argv[1])))
 lam_min = min(float(r["lambda"]) for r in rows)

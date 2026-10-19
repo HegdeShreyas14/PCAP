@@ -1,13 +1,4 @@
-"""
-provenance.py — record exactly which code and settings produced a dataset.
-
-Every harness writes `<out>_env.json` next to its CSV via write_env(). Without
-it we could not tell which code version produced percolation.csv (bug 8), and
-that file ended up irreproducible.
-
-Also provides s_fingerprint(): two runs that are meant to be paired (e.g. 1t
-vs 8t) must see the same S, and comparing these columns proves they did.
-"""
+"""provenance.py — record exactly which code and settings produced a dataset."""
 
 import hashlib
 import json
@@ -53,8 +44,7 @@ def _cmd(*argv):
 
 
 def system_snapshot():
-    """
-    Hardware, OS, BLAS and power state, best effort (Linux). Recorded with
+    """Hardware, OS, BLAS and power state, best effort (Linux). Recorded with
     every run because two of our bugs were environmental: BLAS behaviour
     (bug 8) and an unrecorded power profile plus competing load (bug 9).
     """
@@ -144,10 +134,9 @@ def write_env(out, extra=None, args=None):
 
 
 def s_fingerprint(S):
-    """
-    Thread-robust fingerprint of a sample covariance. Not a bitwise hash: S is
-    identical across BLAS thread counts only to ~1e-12, so compare these with a
-    relative tolerance (1e-9 is ample) rather than for equality.
+    """Thread-robust fingerprint of a sample covariance. Not a bitwise hash: S
+    is identical across BLAS thread counts only to ~1e-12, so compare these
+    with a relative tolerance (1e-9 is ample) rather than for equality.
     """
     import numpy as np
     return {"S_trace": float(np.trace(S)),

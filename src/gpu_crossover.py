@@ -1,66 +1,5 @@
-"""
-gpu_crossover.py — trace GPU-batched vs CPU-batched speedup as a function of
-the LARGEST DETECTED BLOCK SIZE, not p.
-
-Two modes
----------
-1. CROSSOVER BRACKETING (default): sweep lambda finely at a fixed p, so
-   s_max is directly observed rather than hoped for via a p choice. Use this
-   at 1-2 p anchors (e.g. 1200 and 2000) to trace speedup vs s_max directly,
-   and to check whether the crossover (in terms of s_max) holds steady across
-   p or drifts -- drift would indicate overhead depends on something beyond
-   s_max (see below).
-
-2. MEMORY-WALL ANCHORS (--lam explicit): at large p (2400, 3200, ...) you are
-   not trying to bracket a precise crossover, you are checking scalability
-   and VRAM behaviour, where detection noise in s_max matters far less. Pass
-   one best-known lambda directly instead of scanning.
-
-Why not just sweep p with one lambda per point (as originally proposed)
--------------------------------------------------------------------------
-p is a noisy proxy for s_max. Our own data already shows this: imbalanced
-p=400 produced a SMALLER largest block (43) than p=200 (59), at a single
-best-F1-lambda instance each. Picking p=1000 and hoping its largest block
-lands near a target of 900-1100 is aiming through the same noisy proxy that
-produced an unreliable extrapolation in the first place (see below).
-
-On the "T = T_fixed + T_GPU(s_max)" model
-------------------------------------------
-This is a reasonable HYPOTHESIS, not a derived law. Fitting it from exactly
-two points (many_tiny p=400/800, s_max=299/693) and evaluating at a THIRD
-point we already had (p=200, s_max=14) predicts 0.73s; the measured value was
-0.20s -- 3.7x off. Overhead is not a clean function of s_max alone; it also
-depends on how many distinct block-size GROUPS exist, since each group pays
-its own per-iteration launch/sync cost independent of arithmetic size. This
-script logs n_groups precisely so that can be checked against the real data
-instead of assumed.
-
-Timing breakdown
------------------
-Wall-clock torch time is decomposed into t_h2d (host->device transfer),
-t_compute (the ADMM loop, GPU-only), and t_d2h (device->host), accumulated
-across groups. This is what turns "torch is slower" into "here is exactly
-where the time goes" -- e.g. whether the small-p penalty is transfer-bound or
-dispatch-bound informs a completely different fix.
-
-CPU baseline labeling
-----------------------
-Every row carries `cpu_baseline_label`. Above the point where the unbatched
-gglasso reference becomes too expensive to run (see RUNBOOK, p>1600), the
-CPU baseline is the batched-numpy path, not the original reference. It is
-validated to ~1e-14 against the reference at every size tested so far, but it
-is a different artifact and must be labeled "CPU-best (batched numpy)" in any
-table or figure, never bare "CPU" -- conflating the two would misrepresent
-which baseline a given number was measured against.
-
-Usage
------
-    # crossover bracketing
-    python src/gpu_crossover.py --p 1200 --regime many_tiny
-    python src/gpu_crossover.py --p 1200 2000 --regime many_tiny imbalanced
-
-    # memory-wall anchor at a single known-good lambda
-    python src/gpu_crossover.py --p 3200 --regime many_tiny --lam 0.08
+"""gpu_crossover.py — trace GPU-batched vs CPU-batched speedup as a function of
+the largest detected block size, not p.
 """
 
 import argparse
@@ -187,20 +126,11 @@ def main():
                 max_rel_diff = maxdiff / float(np.max(np.abs(sol_np["Theta"])))
                 n_groups = info_np["n_groups"]
 
-                # Structural context, same definitions as analyze.py: F_max is
-                # the share of cubic work in the largest block; cubic_gain is
-                # the arithmetic-reduction proxy, NOT a predicted speedup (see
-                # analyze.py docstring -- profiling already showed this proxy
-                # overweights the largest block relative to measured wall-clock).
+                # F_max and cubic_gain, same definitions as analyze.py.
                 cubic_tot = sum(float(x) ** 3 for x in det_sizes) if det_sizes else float("nan")
                 f_max = (float(s_max) ** 3 / cubic_tot) if cubic_tot else float("nan")
                 cubic_gain = (float(p) ** 3 / cubic_tot) if cubic_tot else float("nan")
 
-                # Sparse reference anchor only, since it is O(s_max^3) and this
-                # script's question is numpy-batched vs torch-batched, not the
-                # unbatched algorithmic gain (already characterized in
-                # sweep.py). t_ref stays NaN on skipped points -- it is a
-                # spot-check column, not a swept quantity.
                 t_ref = float("nan")
                 if i % args.ref_every == 0:
                     with _silence():
@@ -212,7 +142,7 @@ def main():
 
                 ratio_gpu_np = t_np / t_gpu if t_gpu > 0 else float("nan")
                 # float64 must match the numpy path to round-off; float32 is held
-                # to the pre-registered bound from fp32_diagnostic.py
+                # to the bound fixed in advance in fp32_diagnostic.py
                 ok = maxdiff < 1e-8 if args.dtype == "float64" else max_rel_diff <= 1e-3
                 ok = ok and info_gpu["n_not_converged"] == 0
                 flag = "" if ok else "  !! CORRECTNESS/CONVERGENCE"

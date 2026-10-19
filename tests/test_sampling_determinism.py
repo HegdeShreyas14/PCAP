@@ -1,12 +1,6 @@
-"""
-Regression test: the sampled covariance S must not depend on the BLAS thread
+"""Regression test: the sampled covariance S must not depend on the BLAS thread
 count. If it does, the 1t vs 8t sweeps are not a paired comparison (this
 happened once: see ProgressLog, bug 8).
-
-BLAS threads can only be set before numpy is imported, so each thread count
-runs in its own subprocess.
-
-    python tests/test_sampling_determinism.py      # or: pytest tests/
 """
 
 import os

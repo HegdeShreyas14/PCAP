@@ -1,13 +1,5 @@
 #!/usr/bin/env bash
 # Build the project venv from the package lock on a new machine.
-#
-#   scripts/setup_env.sh            # creates .venv
-#   VENV=/path/to/venv scripts/setup_env.sh
-#
-# Everything except PyTorch is installed at the exact locked versions. PyTorch
-# 2.14.0 is installed for the machine: the CUDA 13 build if an NVIDIA driver is
-# present, otherwise the CPU build. GPU experiments are skipped automatically
-# on CPU-only machines; everything else still runs.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 VENV=${VENV:-.venv}

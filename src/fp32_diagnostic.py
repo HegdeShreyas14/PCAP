@@ -1,24 +1,4 @@
-"""
-fp32_diagnostic.py — how much of the GPU result is the cost of FP64?
-
-Consumer GPUs run float64 at a small fraction of their float32 rate, and the
-batched torch solver defaults to float64. This diagnostic re-runs four
-existing crossover points with three variants under the crossover protocol
-(same instance, same lambda, 2 warm-up + 5 timed, median):
-
-    numpy float64   CPU baseline (batched)
-    torch float64   GPU reference
-    torch float32   diagnostic
-
-and judges float32 against PRE-REGISTERED criteria (CRITERIA below, committed
-before any float32 result existed). float32 is not held to the float64
-solver's ~1e-14 agreement: its machine epsilon is ~1.2e-7. It is compared to
-the float64 result and to a high-accuracy float64 solve, because the float64
-result itself only satisfies the solver tolerance (rtol 1e-5), which sets
-the natural error scale.
-
-    python src/fp32_diagnostic.py --blas-threads 8
-"""
+"""fp32_diagnostic.py — how much of the GPU result is the cost of FP64?"""
 
 import argparse
 import contextlib
@@ -40,10 +20,6 @@ from blockgen import make_instance
 from batched_admm import batched_block_SGL
 from provenance import write_env
 
-# ---------------------------------------------------------------------------
-# Pre-registered acceptance criteria for float32 (fixed before running).
-#   Solver settings are NOT relaxed for float32: same tol/rtol/max_iter.
-# ---------------------------------------------------------------------------
 CRITERIA = {
     # every block problem meets the reference stopping test within max_iter
     "all_converged": True,

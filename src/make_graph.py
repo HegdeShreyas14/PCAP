@@ -1,29 +1,5 @@
 #!/usr/bin/env python3
-"""
-make_figures.py -- generate all paper figures directly from results/*.csv.
-
-Nothing here is hardcoded. Every number plotted is read from the CSVs the
-harness produced, so re-running a sweep and re-running this script keeps the
-paper's figures in sync with the data automatically. If a required CSV is
-missing, that figure is skipped with a warning rather than silently plotting
-stale or invented values.
-
-Usage
------
-    python make_figures.py                          # reads ./results, writes ./figs
-    python make_figures.py --results DIR --out DIR
-    python make_figures.py --format png             # for slides instead of the paper
-
-Figures produced
-----------------
-    fig1_rq1_threading           RQ1: 1t vs 8t speedup and retention by p
-    fig2_rq1_fragmentation_trap  RQ1: speedup vs F1 across detected-block buckets
-    fig3_rq1_oracle_gap          RQ1: detected vs oracle F_max (percolation.csv)
-    fig4_rq1_percolation         RQ1: F_max vs lambda, showing the transition
-    fig5_rq2_crossover           RQ2: torch/numpy ratio vs s_max, per p series
-    fig6_rq2_timing_breakdown    RQ2: h2d / compute / d2h split vs s_max
-    fig7_rq3_vram_model          RQ3: fitted VRAM law + held-out anchors
-"""
+"""make_graph.py: generate the paper figures from results/*.csv."""
 
 import argparse
 import csv
@@ -38,9 +14,6 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 
-# --------------------------------------------------------------------------
-# style
-# --------------------------------------------------------------------------
 
 COL = {
     "blue":   "#4C72B0",
@@ -63,12 +36,11 @@ def set_style():
     })
 
 
-# --------------------------------------------------------------------------
-# loading
-# --------------------------------------------------------------------------
 
 def load_csv(path):
-    """Read a CSV into a list of dicts. Returns None (with a warning) if absent."""
+    """Read a CSV into a list of dicts. Returns None (with a warning) if
+    absent.
+    """
     if not os.path.exists(path):
         print(f"  [skip] {os.path.basename(path)} not found", file=sys.stderr)
         return None
@@ -100,7 +72,8 @@ def inum(row, key, default=0):
 
 def gpu_speedup(row):
     """t_numpy / t_torch (>1 = GPU faster). Older CSVs call this column
-    ratio_torch_over_numpy despite holding the same quantity; read either."""
+    ratio_torch_over_numpy despite holding the same quantity; read either.
+    """
     v = fnum(row, "gpu_speedup")
     return v if v == v else fnum(row, "ratio_torch_over_numpy")
 
@@ -111,19 +84,7 @@ def median(xs):
 
 
 def best_f1_rows(rows, by_seed=True):
-    """
-    One row per group: the lambda maximising support_f1.
-
-    by_seed=True keys on (regime, p, n/p, seed) so each seed contributes its
-    own best-lambda operating point. This matters: percolation.py runs
-    multiple seeds precisely so structural quantities can be summarised
-    across them, and grouping without `seed` would instead cherry-pick a
-    single global-best (seed, lambda) row per cell and silently discard the
-    rest.
-
-    by_seed=False reproduces the coarser grouping, for callers that genuinely
-    want one row per (regime, p, n/p).
-    """
+    """One row per group: the lambda maximising support_f1."""
     groups = defaultdict(list)
     for r in rows:
         p = inum(r, "p")
@@ -141,24 +102,11 @@ def best_f1_rows(rows, by_seed=True):
     return out
 
 
-# --------------------------------------------------------------------------
-# Fig 1: RQ1 regime speedup, 1t vs 8t
-# --------------------------------------------------------------------------
+# --- Fig 1 ---
 
 def fig_rq1_threading(res, out, ext):
-    """
-    Fig 1: what an 8-thread BLAS baseline does to the block-decomposition win.
-
-    (a) median speedup at the best-F1 lambda, 1t vs 8t, by p.
-    (b) retention (8t speedup / 1t speedup) per configuration, by p. Hollow
-        markers are `ns`: the two runs' trial bands overlap, so the difference
-        is not resolvable.
-
-    Grouped by p, not regime: with properly paired runs (bug 8) the threading
-    effect is set by p -- ADMM's single p x p eigendecomposition only becomes
-    large enough to use 8 cores from p ~ 400 -- and is flat across regimes.
-    The operating point is chosen from the 1t run and looked up at the same
-    lambda in the 8t run, as in analyze.py --compare.
+    """Fig 1: what an 8-thread BLAS baseline does to the block-decomposition
+    win.
     """
     r1 = load_csv(os.path.join(res, "rq1_primary_1t.csv"))
     r8 = load_csv(os.path.join(res, "rq1_primary_8t.csv"))
@@ -225,9 +173,7 @@ def fig_rq1_threading(res, out, ext):
                     f"{sum(1 for q in pts if q[0] == p)})" for p, m in zip(ps, med)))
 
 
-# --------------------------------------------------------------------------
-# Fig 2: over-fragmentation trap
-# --------------------------------------------------------------------------
+# --- Fig 2 ---
 
 BUCKETS = [(1, 1, "1"), (2, 9, "2-9"), (10, 49, "10-49"),
            (50, 99, "50-99"), (100, 199, "100-199"), (200, None, "200+")]
@@ -267,21 +213,14 @@ def fig_rq1_fragmentation(res, out, ext, source="rq1_primary_1t.csv"):
         for l, s, f, n in zip(labels, speed, f1s, ns)))
 
 
-# --------------------------------------------------------------------------
-# Fig 3: detected vs oracle F_max
-# --------------------------------------------------------------------------
+# --- Fig 3 ---
 
 def fig_rq1_oracle_gap(res, out, ext):
     rows = load_csv(os.path.join(res, "percolation.csv"))
     if rows is None:
         return
 
-    # Two-stage aggregation. Seeds are replicates OF A CELL, not independent
-    # observations, so we take the median across seeds within each
-    # (regime, p, n/p) cell first, then the median across cells. Pooling every
-    # (cell, seed) result into one median instead would weight regimes by how
-    # many cells they happen to have and differs materially here -- up to
-    # 1.1pp on imbalanced (99.3% pooled vs 98.3% two-stage).
+    # Median across seeds within each cell first, then across cells.
     best = best_f1_rows(rows, by_seed=True)
     percell_det, percell_orc = defaultdict(list), defaultdict(list)
     for r in best:
@@ -320,9 +259,7 @@ def fig_rq1_oracle_gap(res, out, ext):
               f"[{len(det[k])} cells x {sorted(nseeds[k])} seeds]")
 
 
-# --------------------------------------------------------------------------
-# Fig 4: percolation transition
-# --------------------------------------------------------------------------
+# --- Fig 4 ---
 
 def fig_rq1_percolation(res, out, ext, regime="balanced", p=400, ratio=10):
     rows = load_csv(os.path.join(res, "percolation.csv"))
@@ -367,13 +304,10 @@ def fig_rq1_percolation(res, out, ext, regime="balanced", p=400, ratio=10):
     save(fig, out, "fig4_rq1_percolation", ext)
 
 
-# --------------------------------------------------------------------------
-# Fig 5: GPU crossover
-# --------------------------------------------------------------------------
+# --- Fig 5 ---
 
 def fig_rq2_crossover(res, out, ext):
-    """
-    GPU speedup over the batched float64 CPU solver vs largest block size,
+    """GPU speedup over the batched float64 CPU solver vs largest block size,
     float64 and (if present) float32 GPU. Colour = precision, marker = p.
     float32 points that did not converge within max_iter are drawn hollow:
     they are not valid results, and hiding them would overstate float32.
@@ -441,9 +375,7 @@ def fig_rq2_crossover(res, out, ext):
                       f"(lambda={fnum(won[0], 'lam'):.2f})")
 
 
-# --------------------------------------------------------------------------
-# Fig 6: GPU timing breakdown (h2d / compute / d2h)
-# --------------------------------------------------------------------------
+# --- Fig 6 ---
 
 def fig_rq2_timing_breakdown(res, out, ext):
     rows = load_csv(os.path.join(res, "gpu_crossover.csv"))
@@ -476,9 +408,7 @@ def fig_rq2_timing_breakdown(res, out, ext):
               f"median {np.median(finite):.2f}%, max {finite.max():.2f}%")
 
 
-# --------------------------------------------------------------------------
-# Fig 7: RQ3 VRAM model, fitted + held-out anchors
-# --------------------------------------------------------------------------
+# --- Fig 7 ---
 
 def fig_rq3_vram(res, out, ext, fit_below=2000, device_mib=None):
     rows = load_csv(os.path.join(res, "gpu_crossover.csv"))
@@ -521,10 +451,7 @@ def fig_rq3_vram(res, out, ext, fit_below=2000, device_mib=None):
     wall = np.sqrt(max(device_mib - beta[0], 0) / beta[1]) if beta[1] > 0 else float("nan")
 
     data_hi = max([fnum(r, "s_max") for r in anchors], default=s.max())
-    # Main panel spans all the way to the wall. Showing only the data range
-    # with a device-limit line at the top would visually imply the curve is
-    # approaching the limit, when in fact the crossing is >2x beyond any
-    # measured point -- the opposite of this section's finding.
+    # Main panel spans all the way to the wall.
     grid_hi = wall * 1.08 if wall == wall else data_hi * 1.2
     grid = np.linspace(0, grid_hi, 400)
     model = beta[0] + beta[1] * grid**2
@@ -543,9 +470,7 @@ def fig_rq3_vram(res, out, ext, fit_below=2000, device_mib=None):
     ax.set_xlabel("$s_{\\max}$ (largest detected block)", fontsize=8)
     ax.set_ylabel("Peak GPU memory (MB)", fontsize=8)
     ax.legend(fontsize=6.2, frameon=False, loc="upper left")
-    # Label the limit line on the RIGHT, below it: the legend occupies the
-    # upper-left and the line sits near the top of the axes.
-    # above the limit line, centred: below it the wall annotation's arrow crosses it
+    # Device-limit label sits above the line, clear of the wall annotation.
     ax.text(grid_hi * 0.55, device_mib * 1.01,
             f"{device_mib:.0f} MiB device limit", fontsize=6.2,
             color=COL["grey"], ha="center", va="bottom")
@@ -579,10 +504,6 @@ def fig_rq3_vram(res, out, ext, fit_below=2000, device_mib=None):
     print(f"    fit R2={r2:.4f} on n={len(fit)} rows (s_max<={fit_below}); "
           f"device limit reached at s_max~{wall:.0f} "
           f"({wall/data_hi:.1f}x beyond the largest measured point)")
-
-
-# --------------------------------------------------------------------------
-
 def save(fig, out, name, ext):
     os.makedirs(out, exist_ok=True)
     path = os.path.join(out, f"{name}.{ext}")

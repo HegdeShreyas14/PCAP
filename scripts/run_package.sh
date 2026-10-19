@@ -1,18 +1,5 @@
 #!/usr/bin/env bash
-# Cross-platform run package: reproduce the paper's experiments on another
-# machine and bundle the results for comparison with the primary machine.
-#
-#   scripts/run_package.sh --machine NAME --tier smoke|standard|full [--yes]
-#
-#   smoke     ~10 min   setup check: determinism test, quick sweep, tiny GPU run
-#   standard  ~3-5 h    RQ1 1t/8t pair, profiling, percolation, GPU crossover in
-#                       float64 and float32, float32 diagnostic and CPU baseline
-#   full      ~8-10 h   standard + seeds 1-2, batched CPU/GPU, VRAM anchors,
-#                       screening exactness
-#
-# Output: results/machines/NAME/ and results/machines/NAME.tar.gz (+ .sha256).
-# Send the .tar.gz back. Times are for the primary machine; slower machines
-# take longer. GPU steps are skipped when CUDA is unavailable.
+# Cross-platform run package.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 

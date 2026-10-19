@@ -1,22 +1,4 @@
-"""
-screening.py — why the detected blocks are not the true blocks.
-
-Two checks behind Finding 6:
-
-1. Exactness. Thresholding |S| at lambda and taking connected components gives
-   EXACTLY the vertex partition of the graphical lasso solution at that lambda
-   (Witten, Friedman & Simon 2011; Mazumder & Hastie 2012). We verify it on our
-   instances by solving the full problem without decomposition and comparing
-   partitions. If it holds, "detection" is not a noisy step that loses blocks:
-   the estimator itself has merged them.
-
-2. Mechanism. At each best-F1 lambda, count above-threshold entries of S that
-   connect two different TRUE blocks, and how many true blocks the giant
-   component fuses. A few spurious cross-block entries are enough to merge
-   blocks, so oracle and detected F_max diverge.
-
-    python src/screening.py --blas-threads 8
-"""
+"""screening.py — why the detected blocks are not the true blocks."""
 
 import argparse
 import contextlib
@@ -98,7 +80,9 @@ def exactness(args):
 
 
 def mechanism(args):
-    """Cross-true-block entries at percolation best-F1 points (low-oracle regimes)."""
+    """Cross-true-block entries at percolation best-F1 points (low-oracle
+    regimes).
+    """
     rows = best_f1(read_csv(args.perc), ("regime", "p", "n_over_p", "seed"))
     rows = [r for r in rows if r["regime"] in ("balanced", "many_tiny")]
     out = []

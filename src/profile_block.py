@@ -1,34 +1,4 @@
-"""
-profile_block.py — attribute block_SGL runtime for ONE configuration.
-
-Splits a single block_SGL call into:
-
-    eigh        time in np.linalg.eigh / eigvalsh   (the decomposition arithmetic)
-    detect      time in get_connected_components    (building the block structure)
-    assemble    time in scipy block_diag            (stitching blocks back together)
-    glue        everything else: the Python for-loop over components, per-block
-                S[ix_(C,C)] slicing, ADMM_SGL setup + per-block mask allocation,
-                and the inverse-permutation indexing
-
-Why this exists
----------------
-analyze.py TABLE 4 says the largest detected block usually holds ~99% of the
-cubic work, so inter-block parallelism looks scarce. But "cubic work" is an
-arithmetic model. What actually runs is hundreds of small ADMM_SGL calls, each
-with fixed Python overhead. If the fragmented regime is dominated by that
-overhead rather than by eigh, then:
-
-  * a GPU that only accelerates the eigendecomposition kernel will not help it,
-  * but batching the many small blocks into one call will,
-
-and the Phase 3 design is a hybrid — batch the fragments, accelerate the giant —
-backed by measurement instead of assumption.
-
-Run the two poles and compare the `eigh` fraction:
-
-    python src/profile_block.py --regime imbalanced --p 200 --ratio 10 --lam 0.15
-    python src/profile_block.py --regime balanced   --p 800 --ratio 10 --lam 0.10
-"""
+"""profile_block.py — attribute block_SGL runtime for one configuration."""
 
 import argparse
 import os
@@ -56,9 +26,7 @@ from gglasso.solver.single_admm_solver import block_SGL, get_connected_component
 from blockgen import make_instance
 
 
-# --------------------------------------------------------------------------
-# instrumentation: wrap the calls we want to attribute time to
-# --------------------------------------------------------------------------
+# --- instrumentation ---
 
 class Tally:
     def reset(self):
@@ -131,10 +99,6 @@ def _unpatch():
     np.linalg.eigvalsh = _orig_eigvalsh
     sas.get_connected_components = _orig_ccomp
     sas.block_diag = _orig_block_diag
-
-
-# --------------------------------------------------------------------------
-
 def ms(x):
     return f"{x * 1e3:.2f} ms"
 
@@ -241,8 +205,7 @@ def main():
         print(f"  eigh dims   : " + "  ".join(hist))
     print("-" * 78)
 
-    # verdict — the Phase 3 question is "is there a giant kernel to accelerate,
-    # or is it death by a thousand small calls + Python overhead?"
+    # Verdict: one dominant kernel to accelerate, or many small calls plus Python overhead?
     eigh_frac = eigh_t / wall if wall else float("nan")
     conc = (max(eigh_times) / eigh_t) if eigh_times and eigh_t else float("nan")
     mean_call = statistics.fmean(eigh_times) if eigh_times else float("nan")

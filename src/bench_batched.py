@@ -1,23 +1,5 @@
-"""
-bench_batched.py — CPU benchmark of batched_block_SGL against gglasso's block_SGL.
-
-Uses sweep.py's measurement discipline, because the point is a number that can
-go in the paper:
-
-  * BLAS threads pinned BEFORE numpy is imported (an unpinned run is not
-    reproducible, and ADMM/block respond to threading very differently)
-  * warm-up runs discarded, median of N timed trials, full trial vector kept
-  * solver stdout suppressed inside the timed region (block_SGL prints one line
-    per block, which penalises the reference specifically)
-  * identical tol/rtol/max_iter/rho across every backend
-  * correctness checked per config against block_SGL, not assumed
-
-Lambda defaults to each config's best-F1 value taken from an existing sweep CSV,
-so the comparison sits at the statistically defensible operating point rather
-than at whatever lambda happens to be fastest.
-
-    python src/bench_batched.py --blas-threads 8
-    python src/bench_batched.py --blas-threads 8 --backends numpy torch
+"""bench_batched.py — CPU benchmark of batched_block_SGL against gglasso's
+block_SGL.
 """
 
 import argparse
@@ -58,7 +40,9 @@ def _silence():
 
 
 def timed(fn, warmup, trials):
-    """Warm up (discarded), then time `trials` runs. Returns (times, last result)."""
+    """Warm up (discarded), then time `trials` runs. Returns (times, last
+    result).
+    """
     with _silence():
         for _ in range(warmup):
             fn()

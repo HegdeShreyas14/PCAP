@@ -1,17 +1,4 @@
-"""
-compare_machines.py — cross-platform table from returned run packages.
-
-Reads the primary machine's results (results/) and every unpacked package in
-results/machines/<name>/, and reports per machine:
-
-  - hardware and BLAS (from system.json)
-  - structural identity with the primary: same seed must give the same S and
-    the same detected components on every machine (timing-independent)
-  - RQ1: best-F1 speedup (multithreaded baseline) and threading retention by p
-  - RQ2: float64 / float32 GPU crossover and like-for-like float32 speedup
-
-    python scripts/compare_machines.py           # prints table, writes results/cross_platform.csv
-"""
+"""compare_machines.py — cross-platform table from returned run packages."""
 
 import csv
 import glob

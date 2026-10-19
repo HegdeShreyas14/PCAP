@@ -1,40 +1,4 @@
-"""
-sweep.py — RQ1 experimental harness (v2).
-
-Compares CPU ADMM_SGL against CPU block_SGL across:
-    - problem size p
-    - block-size distribution regime (balanced / imbalanced / many_tiny / one_giant)
-    - regularization lambda
-
-Design commitments
-------------------
-1. NOTHING is logged, measured, or introspected inside the timing path.
-   Iteration counts and peak memory come from separate diagnostic runs.
-   Solver stdout is suppressed during timing (block_SGL prints once per
-   block; at ~100 blocks that is ~100 console writes inside the measured
-   region, and it biases the block solver specifically).
-
-2. Run-to-run variance is real. On one machine, an identical config with an
-   identical seed produced speedups of 4.98x, 5.18x and 6.04x across three
-   repeats of median-of-5. We therefore record the full trial vector, not
-   just a median, so any reported speedup can carry a spread. Do not quote a
-   single speedup number without one.
-
-3. true_n_blocks != detected_n_blocks. The ground truth we generate and the
-   components GGLasso finds at a given lambda are different things: S is a
-   finite-sample covariance, so the estimated graph differs from the
-   population graph. Performance is governed by DETECTED blocks, since those
-   are what actually execute independently. Both are recorded.
-
-4. The schema is deliberately wide. Re-running 128 configs to recover a
-   column we forgot is expensive; storing an extra float is not.
-
-Usage
------
-    python src/sweep.py --quick                        # ~1 min smoke test
-    python src/sweep.py --machine primary \
-                        --out results/rq1_primary.csv  # full sweep
-"""
+"""sweep.py — RQ1 harness: ADMM_SGL vs block_SGL over regimes, p, n/p and lambda."""
 
 import argparse
 import contextlib
@@ -49,22 +13,6 @@ import time
 import tracemalloc
 from datetime import datetime
 
-# ---------------------------------------------------------------------------
-# BLAS threading must be pinned BEFORE numpy is imported, or the setting is
-# ignored.
-#
-# Why this matters: NumPy dispatches eigendecomposition to a threaded BLAS.
-# ADMM_SGL does one large eigendecomposition per iteration, which a threaded
-# BLAS parallelises well. block_SGL does many small ones, which it does not --
-# small matrices cannot saturate the threads. So on a multi-core machine the
-# CPU baseline speeds up more than the block solver does, and the measured
-# "algorithmic speedup" silently depends on how many cores BLAS grabbed.
-#
-# Leaving this uncontrolled makes results incomparable across our three
-# machines, which is precisely the cross-platform claim we are trying to make.
-# Default to 1 thread so the algorithmic comparison is clean; use
-# --blas-threads N to measure the threaded case deliberately.
-# ---------------------------------------------------------------------------
 def _set_blas_threads(n):
     for var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
                 "VECLIB_MAXIMUM_THREADS", "NUMEXPR_NUM_THREADS"):
@@ -85,9 +33,6 @@ from blockgen import make_instance, REGIMES
 from provenance import run_metadata, s_fingerprint
 
 
-# --------------------------------------------------------------------------
-# environment
-# --------------------------------------------------------------------------
 
 def environment():
     env = {
@@ -116,18 +61,9 @@ def environment():
     return env
 
 
-# --------------------------------------------------------------------------
-# metrics
-# --------------------------------------------------------------------------
 
 def glasso_objective(Theta, S, lam):
-    """
-    -log det(Theta) + tr(S Theta) + lam * ||Theta||_{1,od}
-
-    Off-diagonal penalty only, matching GGLasso's prox_od_1norm, which copies
-    the diagonal through untouched. Returns inf for a non-PD iterate so a
-    diverged solve is comparable instead of crashing the sweep.
-    """
+    """-log det(Theta) + tr(S Theta) + lam * ||Theta||_{1,od}"""
     sign, logdet = np.linalg.slogdet(Theta)
     if sign <= 0:
         return float("inf")
@@ -141,23 +77,8 @@ def support_agreement(A, B, tol=1e-6):
 
 
 def support_recovery(Theta_hat, Theta_true, tol=1e-6):
-    """
-    Precision / recall / F1 of the recovered off-diagonal support against the
-    TRUE precision matrix.
-
-    Why this is here
-    ----------------
-    Runtime alone can mislead. In testing, the fastest configuration
-    (imbalanced, p=200, lambda=0.25) reached 5.9x by detecting 116 components
-    of which 79 were singletons, with a largest block of 16 -- against a true
-    structure of [180, 8, 8, 2, 2]. The speedup came from over-fragmenting the
-    graph, not from recovering its real structure.
-
-    A large lambda will always look fast, because it shatters the problem into
-    trivial pieces. Without a statistical quality measure alongside the timing,
-    we cannot tell "GPU acceleration helps" from "we over-regularized until
-    there was nothing left to compute". These columns let us restrict the
-    performance claims to the lambda range where the estimate is still useful.
+    """Precision / recall / F1 of the recovered off-diagonal support against
+    the TRUE precision matrix.
     """
     p = Theta_hat.shape[0]
     off = ~np.eye(p, dtype=bool)
@@ -203,9 +124,7 @@ def size_stats(sizes, prefix):
     }
 
 
-# --------------------------------------------------------------------------
-# timing: nothing but the solver call inside the measured region
-# --------------------------------------------------------------------------
+# --- timing ---
 
 @contextlib.contextmanager
 def _silence():
@@ -214,7 +133,9 @@ def _silence():
 
 
 def timed(fn, warmup, trials):
-    """Warm up (discarded), then time `trials` runs. Returns (times, last_result)."""
+    """Warm up (discarded), then time `trials` runs. Returns (times,
+    last_result).
+    """
     with _silence():
         for _ in range(warmup):
             fn()
@@ -238,29 +159,15 @@ def timing_summary(times, prefix):
     }
 
 
-# --------------------------------------------------------------------------
-# diagnostics: run OUTSIDE the timing path
-# --------------------------------------------------------------------------
+# --- diagnostics ---
 
 def diagnostics(S, lam, Omega_0, common):
-    """
-    Separate, untimed runs to collect iteration counts and peak memory.
-
-    Kept out of the timing path on purpose: measure=True adds bookkeeping and
-    tracemalloc adds substantial allocation-tracking overhead, either of which
-    would contaminate the runtime numbers.
-
-    NOTE (gglasso 0.3.0): block_SGL returns `sol` only, not (sol, info),
-    despite its docstring. There is no per-block iteration count available, so
-    block_iterations is recorded as NaN. Verified against the installed source.
-    """
+    """Separate, untimed runs to collect iteration counts and peak memory."""
     out = {}
     with _silence():
         res = ADMM_SGL(S, lam, Omega_0, **{**common, "measure": True})
         info_admm = res[1] if isinstance(res, tuple) and len(res) > 1 else {}
-        # gglasso 0.3.0's info dict has keys: status, runtime, residual.
-        # There is no 'iter' key; the iteration count is the length of the
-        # recorded residual history.
+        # gglasso 0.3.0 has no 'iter' key; the iteration count is len(residual).
         if isinstance(info_admm, dict) and "residual" in info_admm:
             out["admm_iterations"] = int(len(info_admm["residual"]))
             out["admm_status"] = str(info_admm.get("status", ""))
@@ -284,9 +191,6 @@ def diagnostics(S, lam, Omega_0, common):
     return out
 
 
-# --------------------------------------------------------------------------
-# one configuration
-# --------------------------------------------------------------------------
 
 def run_config(regime, p, n_samples, lam, seed, warmup, trials,
                tol, rtol, max_iter, machine, env):
@@ -344,11 +248,7 @@ def run_config(regime, p, n_samples, lam, seed, warmup, trials,
         # ground-truth block structure
         "true_n_blocks": len(true_sizes),
         "true_sizes_json": json.dumps(true_sizes),
-        # which network model actually generated each block. powerlaw can fail
-        # and fall back to Erdos-Renyi depending on networkx version, so two
-        # machines running identical code may not draw from the same model.
-        # If gen_n_erdos differs across machines, the cross-machine comparison
-        # is invalid and must be re-run with an explicit style.
+        # which network model actually generated each block.
         "gen_style_requested": "powerlaw",
         "gen_n_powerlaw": sum(1 for s in styles if s == "powerlaw"),
         "gen_n_erdos": sum(1 for s in styles if s == "erdos"),
@@ -388,9 +288,6 @@ def run_config(regime, p, n_samples, lam, seed, warmup, trials,
     return row
 
 
-# --------------------------------------------------------------------------
-# driver
-# --------------------------------------------------------------------------
 
 def main():
     ap = argparse.ArgumentParser()
@@ -423,11 +320,7 @@ def main():
     else:
         p_values = [100, 200, 400, 800]
         lambdas = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40]
-        # n/p ratio matters a great deal: at n=2p the estimated graph is so
-        # noisy that the fast (high-lambda) regime is also badly
-        # over-regularized. By n=10p, peak-F1 and ~4x speedup coincide.
-        # Sweeping this is what lets us report speedup at a statistically
-        # defensible operating point rather than at whatever lambda is fastest.
+        # n/p decides how noisy the estimated graph is, so it is swept too.
         ratios = [2, 5, 10]
         regimes, trials, warmup = REGIMES, args.trials, args.warmup
         p_values = args.ps or p_values
@@ -486,10 +379,7 @@ def main():
     print(f"\nWrote {len(rows)} rows ({len(rows[0])} columns) to {args.out}")
     print(f"Environment written to {env_path}")
 
-    # RQ1 readout: speedup against DETECTED block count, bucketed.
-    # F1 is shown alongside because a large lambda always looks fast: it
-    # shatters the graph into trivial pieces. Speedup in a bucket where F1 has
-    # collapsed is not a useful operating point.
+    # RQ1 readout.
     print("\nSpeedup vs detected block count (all regimes pooled):")
     buckets = [(1, 1), (2, 9), (10, 49), (50, 99), (100, 199), (200, 10**9)]
     for lo, hi in buckets:

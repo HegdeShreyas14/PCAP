@@ -1,53 +1,9 @@
-"""
-batched_admm.py — batched block-sparse Graphical Lasso solver.
-
-Why this exists
----------------
-Profiling GGLasso's block_SGL (see notes/PROGRESS.md finding 4) showed the
-runtime is NOT dominated by the eigendecompositions the cubic-work model
-points at. In the control config (balanced p=800, 238 blocks) the largest
-single `eigh` is ~1.7% of eigh time and ~1% of wall-clock. Instead:
-
-    Python per-block glue (loop, ix_ slicing, per-call ADMM_SGL setup,
-    inverse permutation)                                    35-65% of wall
-    thousands of sub-millisecond eigh calls, mostly dispatch  26-58%
-    ADMM_stopping_criterion (4k-10k np.linalg.norm calls)   0.12-0.35 s cumulative
-
-So the lever is BATCHING, not a faster eigensolver.
-
-This module solves all blocks of the same size simultaneously as a stacked
-(k, s, s) array: one batched eigh, one batched prox, one batched stopping test
-per group per iteration, replacing k separate Python-level ADMM runs.
-
-Backends
---------
-NumPy and PyTorch share the same code path: every operation used here is
-batched over leading dimensions in both. Pass backend='torch' with a CUDA
-device for the GPU version. This is deliberate -- the research contribution is
-the mapping of the decomposition onto batched execution, not the framework.
-
-Correctness
------------
-Replicates gglasso 0.3.0's ADMM_SGL exactly:
-  Omega update : phiplus, i.e. 0.5*(sqrt(d^2 + 4/rho) + d) on eigenvalues
-  Theta update : OFF-DIAGONAL soft-thresholding (prox_od_1norm copies the
-                 diagonal through untouched). Getting this wrong silently
-                 solves a different problem.
-  X update     : X += Omega - Theta
-  stopping     : Boyd primal/dual residuals with the same dim factor
-                 ((p^2+p)/2) and the same adaptive rho rule.
-
-Blocks of size 1 are solved in closed form (no penalty applies to a diagonal
-entry), which also avoids a degenerate 1x1 eigendecomposition per singleton --
-and singletons are the majority of detected blocks in fragmented regimes.
-"""
+"""batched_admm.py — batched block-sparse Graphical Lasso solver."""
 
 import numpy as np
 
 
-# --------------------------------------------------------------------------
-# backend shim: numpy and torch expose the same batched API for what we need
-# --------------------------------------------------------------------------
+# --- backend shim ---
 
 class _NumpyBackend:
     name = "numpy"
@@ -97,7 +53,8 @@ class _NumpyBackend:
 
 class _NumpyBackend32(_NumpyBackend):
     """float32 CPU variant: only for a like-for-like comparison with the
-    float32 GPU path. Never the default baseline."""
+    float32 GPU path. Never the default baseline.
+    """
     name = "numpy"
 
     @staticmethod
@@ -165,8 +122,7 @@ class _TorchBackend:
 
 
 def get_backend(name="numpy", device="cuda", dtype="float64"):
-    """
-    float64 is the reference and the default for both backends. float32
+    """float64 is the reference and the default for both backends. float32
     exists to measure how much of the GPU result is the cost of FP64 on a
     consumer GPU, and on the CPU only so that comparison is like-for-like.
     """
@@ -182,16 +138,10 @@ def get_backend(name="numpy", device="cuda", dtype="float64"):
     raise ValueError(f"unknown backend {name!r}")
 
 
-# --------------------------------------------------------------------------
-# batched primitives
-# --------------------------------------------------------------------------
 
 def _phiplus_batch(bk, W, beta):
-    """
-    Batched prox of -beta*logdet: eigendecompose, apply
-    0.5*(sqrt(d^2 + 4*beta) + d), reassemble. W is (k, s, s).
-
-    This is the single batched eigh that replaces k separate calls.
+    """Batched prox of -beta*logdet: eigendecompose, apply 0.5*(sqrt(d^2 +
+    4*beta) + d), reassemble. W is (k, s, s).
     """
     D, Q = bk.eigh(W)                       # (k,s), (k,s,s)
     dpos = 0.5 * (bk.sqrt(D * D + 4.0 * beta) + D)
@@ -200,39 +150,16 @@ def _phiplus_batch(bk, W, beta):
 
 
 def _prox_od_batch(bk, A, lam, diag_mask):
-    """
-    Batched OFF-DIAGONAL soft-thresholding.
-
-    gglasso's prox_od_1norm copies the diagonal through untouched
-    (`res[i,i] = A[i,i]`). Thresholding the diagonal would shrink conditional
-    variances toward zero and silently solve a different problem, so the
-    diagonal is restored explicitly via the mask.
-    """
+    """Batched OFF-DIAGONAL soft-thresholding."""
     out = bk.sign(A) * bk.maximum(bk.abs(A) - lam, 0.0)
     return out * (1.0 - diag_mask) + A * diag_mask
 
 
-# --------------------------------------------------------------------------
-# batched ADMM over a group of equally-sized blocks
-# --------------------------------------------------------------------------
 
 def batched_admm_group(S_stack, lambda1, bk, rho=1.0, max_iter=1000,
                        tol=1e-7, rtol=1e-5, update_rho=True):
-    """
-    Solve k independent Graphical Lasso problems of identical size s at once.
-
-    Returns
-    -------
-    Theta : (k, s, s), Omega : (k, s, s), iters : int, timing : dict
-        timing has keys 't_h2d' (host->device transfer of S and the initial
-        Omega/Theta/X buffers), 't_compute' (the ADMM loop itself), all in
-        seconds. For the numpy backend both transfer costs are ~0 since there
-        is no device boundary; the columns exist so numpy and torch rows share
-        a schema.
-
-    All k problems share an iteration count: the loop runs until EVERY
-    problem in the batch has converged. Converged problems are frozen via a
-    mask so their values do not drift.
+    """Solve k independent Graphical Lasso problems of identical size s at
+    once.
     """
     import time as _time
 
@@ -252,14 +179,7 @@ def batched_admm_group(S_stack, lambda1, bk, rho=1.0, max_iter=1000,
     dim = (s ** 2 + s) / 2.0
     rho_v = bk.zeros((k,)) + rho
     active = bk.zeros((k,)) + 1.0          # 1 = still iterating
-    # Iteration at which each problem FIRST converged, tracked ON-DEVICE as a
-    # length-k vector (0 = not yet). Read back once at the end, never per
-    # iteration -- a per-iteration host copy would add its own sync overhead
-    # and pollute the timing this function exists to measure. The spread
-    # between earliest and latest convergence is the straggler cost of the
-    # shared iteration count (T_group = max_i T_i): if it is large, unexpected
-    # timing is convergence-straggler overhead, not group-count dispatch
-    # overhead. The two are otherwise easy to confuse.
+    # Iteration at which each problem first converged (0 = not yet), kept on device.
     conv_iter_v = bk.zeros((k,))
 
     iters = 0
@@ -267,9 +187,7 @@ def batched_admm_group(S_stack, lambda1, bk, rho=1.0, max_iter=1000,
         iters = it + 1
         r3 = rho_v[:, None, None]
 
-        # --- Omega update: ONE batched eigh for the whole group -----------
-        # beta = 1/rho varies per problem once rho adapts, so the eigenvalue
-        # transform is applied elementwise rather than via a scalar helper.
+        # --- Omega update: one batched eigh for the whole group ----------
         W = Theta - X - S / r3
         Omega_prev = Omega
         D, Q = bk.eigh(W)
@@ -318,9 +236,7 @@ def batched_admm_group(S_stack, lambda1, bk, rho=1.0, max_iter=1000,
     bk.synchronize()
     t_compute = _time.perf_counter() - t0
 
-    # Straggler summary, read back once. Problems that never converged (still
-    # 0 in conv_iter_v) are stamped with the final iteration count so they
-    # count as slowest rather than fastest.
+    # Read convergence iterations back once; unconverged problems count as max_iter.
     ci = bk.to_numpy(conv_iter_v).astype(float)
     n_not_converged = int((ci == 0).sum())
     ci[ci == 0] = iters
@@ -335,19 +251,11 @@ def batched_admm_group(S_stack, lambda1, bk, rho=1.0, max_iter=1000,
     return Theta, Omega, iters, timing
 
 
-# --------------------------------------------------------------------------
-# top-level solver
-# --------------------------------------------------------------------------
 
 def batched_block_SGL(S, lambda1, backend="numpy", device="cuda",
                       max_iter=1000, tol=1e-7, rtol=1e-5, rho=1.0,
                       return_info=False, dtype="float64"):
-    """
-    Drop-in analogue of gglasso's block_SGL using batched execution.
-
-    Detects connected components, groups them by size, and solves each size
-    group as one batched ADMM instead of looping in Python.
-    """
+    """Drop-in analogue of gglasso's block_SGL using batched execution."""
     from gglasso.solver.single_admm_solver import get_connected_components
 
     p = S.shape[0]
@@ -356,10 +264,7 @@ def batched_block_SGL(S, lambda1, backend="numpy", device="cuda",
     numC, allC = get_connected_components(S, lambda1)
     Theta_full = np.zeros((p, p))
 
-    # Singletons: no off-diagonal penalty applies to a 1x1 block, so the
-    # solution is the closed form 1/S_ii. Handling these directly avoids a
-    # degenerate eigendecomposition per singleton, and singletons dominate the
-    # block count in fragmented regimes.
+    # Singletons have the closed-form solution 1/S_ii.
     singles = [c for c in allC if len(c) == 1]
     for c in singles:
         i = int(np.asarray(c)[0])
@@ -372,13 +277,7 @@ def batched_block_SGL(S, lambda1, backend="numpy", device="cuda",
             continue
         groups.setdefault(idx.size, []).append(idx)
 
-    # Batch-composition memory metrics. A batched group is a (k, s, s) tensor,
-    # so its footprint scales as O(k * s^2), NOT as O(p^2). Peak VRAM is driven
-    # by whichever group MAXIMISES k*s^2 -- which is not necessarily the group
-    # with the largest s (that block is often alone, k=1) nor the group with
-    # the largest k (usually tiny crumbs). Record both the max-k and the
-    # max-(k*s^2) group so RQ3 can attribute memory to tensor shape rather than
-    # to global problem dimension p.
+    # Memory scales with k*s^2 of the largest batched group, not with p.
     max_group_k = max((len(v) for v in groups.values()), default=0)
     mem_group_s, mem_group_k, mem_group_ks2 = 0, 0, 0
     for size, idx_list in groups.items():
@@ -392,13 +291,7 @@ def batched_block_SGL(S, lambda1, backend="numpy", device="cuda",
             "n_groups": len(groups), "group_sizes": {}, "iters": {},
             "backend": backend, "dtype": dtype,
             "n_not_converged": 0, "max_iters": 0,
-            # Explicit label so downstream analysis never confuses this with
-            # the unbatched gglasso reference: above p=1600 (see RUNBOOK) the
-            # unbatched block_SGL reference is dropped and this batched-numpy
-            # path becomes the CPU baseline. It is validated to ~1e-14 against
-            # the reference at every size tested so far, but it is a
-            # different artifact and should be labeled as such in any table
-            # or figure: "CPU-best (batched)", not bare "CPU".
+            # Label so tables never confuse this with the unbatched gglasso reference.
             "cpu_baseline_label": ("CPU-best (batched numpy)" if dtype == "float64"
                                    else "CPU batched numpy float32") if backend == "numpy" else None,
             # batch-composition memory metrics (see comment above)
