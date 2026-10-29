@@ -23,3 +23,6 @@ logs/
 # figure script output (the paper uses paper/figs/, regenerated with --out paper/figs)
 figs/
 paper/main.pdf
+
+# exported synthetic instances (regenerable: scripts/export_instances.py)
+data/
