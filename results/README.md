@@ -16,12 +16,15 @@ message-only history rewrite; `environment/commit_map.tsv` maps them.
 | `percolation.csv` | structure + F1 over λ = 0.02…0.50, 3 seeds, 3600 rows; also resolves the RQ1 grid-edge cells | `src/percolation.py` | §V-A, §V-D, Fig. 3–4 |
 | `screening_exactness.csv` | full unscreened solve vs. thresholded-S components (36 cells) | `src/screening.py` | §V-D |
 | `screening_cross_block.csv` | above-threshold entries crossing true blocks (72 cells) | `src/screening.py` | §V-D |
-| `batched_cpu.csv`, `batched_cpu_gpu.csv` | batched solver vs. `block_SGL` at RQ1 best-F1 λ | `src/bench_batched.py` | §V-E |
-| `gpu_crossover.csv` | GPU (float64) vs. batched CPU over a λ scan, p = 1200/2000 | `src/gpu_crossover.py` | §V-E, Fig. 5 |
-| `gpu_crossover_fp32.csv` | same, GPU in float32 | `src/gpu_crossover.py --dtype float32` | §V-E, Fig. 5 |
-| `fp32_diagnostic.csv` | float32 vs. float64 at 4 points against pre-registered criteria | `src/fp32_diagnostic.py` | §V-E |
-| `fp32_cpu_baseline.csv` | like-for-like float32 CPU vs. float32 GPU | `src/fp32_cpu_baseline.py` | §V-E, Table IV |
-| `gpu_mem_{2400,3200}[_fp32].csv` | held-out VRAM anchors (p = 2400, 3200) | `src/gpu_crossover.py --lam` | §V-F, Fig. 5 |
+| `batched_cpu.csv`, `batched_cpu_gpu.csv` | batched solver vs. `block_SGL` at RQ1 best-F1 λ | `src/bench_batched.py` | §V-F |
+| `gpu_crossover.csv` | GPU (float64) vs. batched CPU over a λ scan, p = 1200/2000 | `src/gpu_crossover.py` | §V-F, Fig. 6 |
+| `gpu_crossover_fp32.csv` | same, GPU in float32 | `src/gpu_crossover.py --dtype float32` | §V-F, Fig. 6 |
+| `fp32_diagnostic.csv` | float32 vs. float64 at 4 points against pre-registered criteria | `src/fp32_diagnostic.py` | §V-F |
+| `fp32_cpu_baseline.csv` | like-for-like float32 CPU vs. float32 GPU | `src/fp32_cpu_baseline.py` | §V-F, Table IV |
+| `gpu_mem_{2400,3200}[_fp32].csv` | held-out VRAM anchors (p = 2400, 3200) | `src/gpu_crossover.py --lam` | §V-G, Fig. 6 |
+| `riboflavin_curve.csv`, `riboflavin_independence.csv`, `riboflavin_exactness.csv` | riboflavin structure vs. permutation null, subsample stability, sample independence, screening exactness; no timings | `src/riboflavin_study.py` | §V-E, Fig. 5, Table III |
+| `riboflavin_sensitivity/` | same, by batch: whole-batch subsamples, 24 h only, 48 h only, batch means removed | `scripts/provenance/run_riboflavin.sh` | §V-E, Fig. 5 |
+| `riboflavin_stars.csv` | StARS at p = 200, 500, random and whole-batch subsamples; no timings | `src/riboflavin_stars.py` | §V-E, Table III |
 
 Column naming: in `gpu_crossover.csv` and `gpu_mem_{2400,3200}.csv` the GPU
 speedup column is called `ratio_torch_over_numpy` but holds

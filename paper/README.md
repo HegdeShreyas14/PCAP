@@ -9,7 +9,7 @@ Two versions sharing `refs.bib` and `figs/`:
 
 ## Build
 
-1. Regenerate figures from `results/`: `python src/make_graph.py --out paper/figs --figs 1 2 3 4 5`
+1. Regenerate figures from `results/`: `python src/make_graph.py --out paper/figs --figs 1 2 3 4 5` and `python scripts/plot_riboflavin.py paper/figs/fig6_riboflavin.pdf`
 2. `paper/build.sh` (TeX Live or TinyTeX) writes `paper/main.pdf`; or upload `paper/` to Overleaf.
 
 ## Before submission

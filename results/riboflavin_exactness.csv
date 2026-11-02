@@ -1,0 +1,13 @@
+p,lambda,n_components_threshold,n_components_solution,identical_partition,status
+200,0.36,2,2,True,optimal
+200,0.48,3,3,True,optimal
+200,0.6,6,6,True,optimal
+200,0.72,27,27,True,optimal
+200,0.84,73,73,True,optimal
+200,0.98,189,189,True,optimal
+500,0.36,2,2,True,optimal
+500,0.48,3,3,True,optimal
+500,0.6,3,3,True,optimal
+500,0.72,27,27,True,optimal
+500,0.84,107,107,True,optimal
+500,0.98,488,488,True,optimal

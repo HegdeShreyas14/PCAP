@@ -1,0 +1,45 @@
+subset all: 71 samples, 28 batches
+p=200: curves done; {'p': 200, 'median_nearest_corr': np.float64(0.7827839333508172), 'null_median_nearest_corr': np.float64(0.15105088264984395), 'max_pair_corr': np.float64(0.9272616086087232), 'null_max_pair_corr': np.float64(0.2939912770964815), 'pc1_share': np.float64(0.26130414124074247), 'null_pc1_share': np.float64(0.033854293037746744), 'pairs_above_null_max': 477}
+p=500: curves done; {'p': 500, 'median_nearest_corr': np.float64(0.770867901467233), 'null_median_nearest_corr': np.float64(0.08941171864865614), 'max_pair_corr': np.float64(0.9172986857745935), 'null_max_pair_corr': np.float64(0.18152246484415388), 'pc1_share': np.float64(0.31295111178381957), 'null_pc1_share': np.float64(0.025790883234688523), 'pairs_above_null_max': 780}
+p=1000: curves done; {'p': 1000, 'median_nearest_corr': np.float64(0.7519936712774081), 'null_median_nearest_corr': np.float64(0.05852247784268847), 'max_pair_corr': np.float64(0.934173856820306), 'null_max_pair_corr': np.float64(0.12441551347932049), 'pc1_share': np.float64(0.36715319411211667), 'null_pc1_share': np.float64(0.022117486126243834), 'pairs_above_null_max': 951}
+wrote 147 rows to results/riboflavin_curve.csv
+wrote 3 rows to results/riboflavin_independence.csv
+  exact p=200 lam=0.36  2 vs 2  identical  optimal
+  exact p=200 lam=0.48  3 vs 3  identical  optimal
+  exact p=200 lam=0.60  6 vs 6  identical  optimal
+  exact p=200 lam=0.72  27 vs 27  identical  optimal
+  exact p=200 lam=0.84  73 vs 73  identical  optimal
+  exact p=200 lam=0.98  189 vs 189  identical  optimal
+wrote 6 rows to results/riboflavin_exactness.csv
+  exact p=500 lam=0.36  2 vs 2  identical  optimal
+  exact p=500 lam=0.48  3 vs 3  identical  optimal
+  exact p=500 lam=0.60  3 vs 3  identical  optimal
+  exact p=500 lam=0.72  27 vs 27  identical  optimal
+  exact p=500 lam=0.84  107 vs 107  identical  optimal
+  exact p=500 lam=0.98  488 vs 488  identical  optimal
+wrote 12 rows to results/riboflavin_exactness.csv
+subset all: 71 samples, 28 batches
+p=200: curves done; {'p': 200, 'median_nearest_corr': np.float64(0.7827839333508172), 'null_median_nearest_corr': np.float64(0.15205124329833422), 'max_pair_corr': np.float64(0.9272616086087232), 'null_max_pair_corr': np.float64(0.28328362709466187), 'pc1_share': np.float64(0.26130414124074247), 'null_pc1_share': np.float64(0.034020838262384855), 'pairs_above_null_max': 490}
+p=500: curves done; {'p': 500, 'median_nearest_corr': np.float64(0.770867901467233), 'null_median_nearest_corr': np.float64(0.08900478691540943), 'max_pair_corr': np.float64(0.9172986857745935), 'null_max_pair_corr': np.float64(0.185950092443385), 'pc1_share': np.float64(0.31295111178381957), 'null_pc1_share': np.float64(0.02585673964546523), 'pairs_above_null_max': 769}
+p=1000: curves done; {'p': 1000, 'median_nearest_corr': np.float64(0.7519936712774081), 'null_median_nearest_corr': np.float64(0.05899074610644723), 'max_pair_corr': np.float64(0.934173856820306), 'null_max_pair_corr': np.float64(0.1170905754626632), 'pc1_share': np.float64(0.36715319411211667), 'null_pc1_share': np.float64(0.022130113993926878), 'pairs_above_null_max': 965}
+wrote 147 rows to results/riboflavin_sensitivity/all_batchsub_curve.csv
+wrote 3 rows to results/riboflavin_sensitivity/all_batchsub_independence.csv
+subset pt24: 28 samples, 28 batches
+p=200: curves done; {'p': 200, 'median_nearest_corr': np.float64(0.6539098014630507), 'null_median_nearest_corr': np.float64(0.09988878585025984), 'max_pair_corr': np.float64(0.8685392089402441), 'null_max_pair_corr': np.float64(0.21951321855523614), 'pc1_share': np.float64(0.288552850514096), 'null_pc1_share': np.float64(0.06334461085506501), 'pairs_above_null_max': 84}
+p=500: curves done; {'p': 500, 'median_nearest_corr': np.float64(0.6828685006683779), 'null_median_nearest_corr': np.float64(0.049714431341830456), 'max_pair_corr': np.float64(0.8503310250097253), 'null_max_pair_corr': np.float64(0.1464190692159899), 'pc1_share': np.float64(0.34667963876709507), 'null_pc1_share': np.float64(0.05297631202970494), 'pairs_above_null_max': 135}
+p=1000: curves done; {'p': 1000, 'median_nearest_corr': np.float64(0.7385007098771097), 'null_median_nearest_corr': np.float64(0.023878215404400157), 'max_pair_corr': np.float64(0.8462254227444856), 'null_max_pair_corr': np.float64(0.09213386563834339), 'pc1_share': np.float64(0.398270807236139), 'null_pc1_share': np.float64(0.04783483449335449), 'pairs_above_null_max': 156}
+wrote 147 rows to results/riboflavin_sensitivity/pt24_curve.csv
+wrote 3 rows to results/riboflavin_sensitivity/pt24_independence.csv
+subset pt48: 28 samples, 28 batches
+p=200: curves done; {'p': 200, 'median_nearest_corr': np.float64(0.5222569547896092), 'null_median_nearest_corr': np.float64(0.09844454138976828), 'max_pair_corr': np.float64(0.9308094341863754), 'null_max_pair_corr': np.float64(0.23080702452803128), 'pc1_share': np.float64(0.29504930933036777), 'null_pc1_share': np.float64(0.0628851603891479), 'pairs_above_null_max': 87}
+p=500: curves done; {'p': 500, 'median_nearest_corr': np.float64(0.5720546888965998), 'null_median_nearest_corr': np.float64(0.049159786471565964), 'max_pair_corr': np.float64(0.9267064310101373), 'null_max_pair_corr': np.float64(0.16575847798852428), 'pc1_share': np.float64(0.31197121548442863), 'null_pc1_share': np.float64(0.052906433006183314), 'pairs_above_null_max': 116}
+p=1000: curves done; {'p': 1000, 'median_nearest_corr': np.float64(0.6270773340458251), 'null_median_nearest_corr': np.float64(0.02312633715340256), 'max_pair_corr': np.float64(0.9306548319178974), 'null_max_pair_corr': np.float64(0.09208899918424403), 'pc1_share': np.float64(0.3465185846002517), 'null_pc1_share': np.float64(0.04783304184978383), 'pairs_above_null_max': 136}
+wrote 147 rows to results/riboflavin_sensitivity/pt48_curve.csv
+wrote 3 rows to results/riboflavin_sensitivity/pt48_independence.csv
+subset within_batch: 71 samples, 28 batches
+p=200: curves done; {'p': 200, 'median_nearest_corr': np.float64(0.6892685976896009), 'null_median_nearest_corr': np.float64(0.16664633108876586), 'max_pair_corr': np.float64(0.9234926711019966), 'null_max_pair_corr': np.float64(0.3431367756167285), 'pc1_share': np.float64(0.2881319610531152), 'null_pc1_share': np.float64(0.04865975570259022), 'pairs_above_null_max': 431}
+p=500: curves done; {'p': 500, 'median_nearest_corr': np.float64(0.6774286321242462), 'null_median_nearest_corr': np.float64(0.10380661730997937), 'max_pair_corr': np.float64(0.9089594135285718), 'null_max_pair_corr': np.float64(0.2110978231799119), 'pc1_share': np.float64(0.29281804752833357), 'null_pc1_share': np.float64(0.03954837601854275), 'pairs_above_null_max': 704}
+p=1000: curves done; {'p': 1000, 'median_nearest_corr': np.float64(0.6530706724056997), 'null_median_nearest_corr': np.float64(0.07306310418229406), 'max_pair_corr': np.float64(0.9095983997331422), 'null_max_pair_corr': np.float64(0.1464054712532907), 'pc1_share': np.float64(0.3206488060657765), 'null_pc1_share': np.float64(0.035741662673810175), 'pairs_above_null_max': 854}
+wrote 147 rows to results/riboflavin_sensitivity/within_batch_curve.csv
+wrote 3 rows to results/riboflavin_sensitivity/within_batch_independence.csv
+ALL DONE
