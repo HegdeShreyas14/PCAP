@@ -52,6 +52,8 @@ def main():
     ap.add_argument("--stars", default="results/riboflavin_stars.csv")
     ap.add_argument("--ps", nargs="+", type=int, default=[500, 1000])
     ap.add_argument("--step", type=float, default=0.02)
+    ap.add_argument("--lam", nargs="*", default=["1000:0.10"],
+                    help="p:lambda for sizes with no StARS run; recorded as lam_source=assigned")
     ap.add_argument("--warmup", type=int, default=2)
     ap.add_argument("--trials", type=int, default=9)
     ap.add_argument("--out", default="results/riboflavin_bench.csv")
@@ -61,6 +63,8 @@ def main():
     with open(args.stars) as f:
         chosen = {int(r["p"]): float(r["lambda"]) for r in csv.DictReader(f)
                   if r["selected"] == "True" and r["mode"] == "random"}
+    assigned = {int(a.split(":")[0]): float(a.split(":")[1]) for a in args.lam}
+    chosen.update(assigned)
     X_all = np.load(args.data)["X"]
     order = np.argsort(-X_all.var(0), kind="stable")
     kw = dict(tol=1e-7, rtol=1e-5, max_iter=1000)
@@ -86,7 +90,7 @@ def main():
                 t = float(np.median(times))
                 if ref is None:
                     ref, t_ref = sol["Theta"], t
-                r = dict(p=p, lam_offset=offset, **{"lambda": lam}, n_blocks=nb, s_max=smax,
+                r = dict(p=p, lam_source="assigned" if p in assigned else "stars", lam_offset=offset, **{"lambda": lam}, n_blocks=nb, s_max=smax,
                          F_max=fmax, path=name, t_median=t, t_min=min(times), t_max=max(times),
                          speedup_vs_admm=t_ref / t,
                          theta_rel_diff=float(np.abs(sol["Theta"] - ref).max() / np.abs(ref).max()),
