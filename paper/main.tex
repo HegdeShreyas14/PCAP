@@ -9,6 +9,14 @@
 \usepackage[hidelinks]{hyperref}
 \graphicspath{{figs/}}
 
+\makeatletter
+\newcommand{\linebreakand}{%
+  \end{@IEEEauthorhalign}
+  \hfill\mbox{}\par
+  \mbox{}\hfill\begin{@IEEEauthorhalign}
+}
+\makeatother
+
 \begin{document}
 
 \title{Where Does the Block Parallelism Go?\\
@@ -16,10 +24,34 @@ Characterising Connected-Component Decomposition of the Graphical Lasso
 on Multicore CPUs and a Consumer GPU}
 
 \author{
-\IEEEauthorblockN{Abhyuday Gandhi, Shreyas S Hegde, Shrikrishna Bhakhta}
-\IEEEauthorblockA{
-School of Computer Engineering, Manipal Institute of Technology, Manipal, India
-}
+\IEEEauthorblockN{Abhyuday Gandhi}
+\IEEEauthorblockA{\textit{School of Computer Engineering}\\
+\textit{Manipal Institute of Technology}\\
+\textit{Manipal Academy of Higher Education}\\
+Manipal, India\\
+abhyuday2.mitmpl2024@learner.manipal.edu}
+\and
+\IEEEauthorblockN{Shreyas S Hegde}
+\IEEEauthorblockA{\textit{School of Computer Engineering}\\
+\textit{Manipal Institute of Technology}\\
+\textit{Manipal Academy of Higher Education}\\
+Manipal, India\\
+shreyas4.mitmpl2024@learner.manipal.edu}
+\linebreakand
+\IEEEauthorblockN{Shrikrishna Bhakhta}
+\IEEEauthorblockA{\textit{School of Computer Engineering}\\
+\textit{Manipal Institute of Technology}\\
+\textit{Manipal Academy of Higher Education}\\
+Manipal, India\\
+shrikrishna.mitmpl2024@learner.manipal.edu}
+\and
+\IEEEauthorblockN{Neelima Bayyapu\textsuperscript{*}}
+\IEEEauthorblockA{\textit{School of Computer Engineering}\\
+\textit{Manipal Institute of Technology}\\
+\textit{Manipal Academy of Higher Education}\\
+Manipal, India\\
+neelima.bayyapu@manipal.edu\\
+\textsuperscript{*}Corresponding author}
 }
 
 \maketitle
@@ -28,7 +60,8 @@ School of Computer Engineering, Manipal Institute of Technology, Manipal, India
 The graphical lasso decomposes exactly into independent subproblems, one per
 connected component of the thresholded sample covariance. This looks like a
 natural source of parallelism. We characterise how much of it is usable in
-practice: on a multicore CPU and on a consumer laptop GPU, across four
+practice. Using synthetic data with a known, planted block structure, we
+measure this on a multicore CPU and on a consumer laptop GPU, across four
 block-size regimes, three sample-to-dimension ratios and problem dimensions up to $p=3200$,
 with every result tied to a recorded code version and machine state.
 We find that (i) decomposition yields a median $2.3$--$2.6\times$ speedup
@@ -41,8 +74,7 @@ regularisation is never the useful one;
 (iii) the runtime is dominated by per-block interpreter overhead, not by the
 eigendecompositions a cubic cost model predicts; and (iv) the true blocks are
 fused by the estimator itself, not by the screening step: screening is exact,
-and a few percent of spurious cross-block entries suffice to merge all true
-blocks into one component. Batching the per-block work gives
+and a few percent of spurious cross-block entries suffice to merge all true blocks into one component. On riboflavin gene-expression data, screening is again exact and one component holds nearly all the cubic work over most of the $\lambda$ range, far beyond a permutation null. Batching the per-block work gives
 $1.2$--$1.7\times$ on the CPU. On a consumer GPU in double precision, the
 batched solver wins only on very large blocks: in a $\lambda$ scan at
 $p=2000$ it overtakes the CPU only when one block of $\approx1950$ variables
@@ -84,8 +116,13 @@ research questions:
 \item[RQ3] Is GPU memory a binding constraint at the problem sizes where a GPU
   could help?
 \end{description}
+All timings and estimation-quality measurements use synthetic data with a
+planted block-diagonal precision matrix, so the true block structure is known
+and the parallelism lost to estimation can be measured directly;
+Section~\ref{sec:riboflavin} checks the structural findings on real
+gene-expression data.
 
-\textbf{Contributions.}
+\textbf{Contributions:}
 \begin{itemize}
 \item A controlled characterisation of component decomposition across
   384 configurations per thread setting, reporting speedup only at the
@@ -105,7 +142,7 @@ research questions:
 
 % =====================================================================
 \section{Related Work}
-\textbf{Graphical lasso solvers.} The graphical lasso \cite{friedman2008,
+\textbf{Graphical lasso solvers:} The graphical lasso \cite{friedman2008,
 banerjee2008} has been solved by block coordinate descent \cite{friedman2008},
 alternating linearisation \cite{scheinberg2010}, ADMM \cite{boyd2011}, and
 second-order methods such as QUIC \cite{hsieh2014quic}, whose BigQUIC variant
@@ -116,7 +153,7 @@ analyse the convergence behaviour of the block coordinate algorithm. We do not
 propose a new solver; we study how much parallelism the exact component
 decomposition exposes to an existing ADMM solver \cite{gglasso2021}.
 
-\textbf{Screening.} Witten et al.\ \cite{witten2011} and Mazumder and Hastie
+\textbf{Screening:} Witten et al.\ \cite{witten2011} and Mazumder and Hastie
 \cite{mazumder2012} showed that thresholding the sample covariance yields the
 exact component structure of the graphical lasso solution, and used it to
 solve large problems block by block. Fattahi and Sojoudi \cite{fattahi2019}
@@ -128,19 +165,19 @@ what decides how much block parallelism is usable, and it is what we
 measure: screening is exact on our instances, yet the estimate fuses the true
 blocks at statistically useful regularisation.
 
-\textbf{Batched and GPU linear algebra.} Batched BLAS and LAPACK interfaces
+\textbf{Batched and GPU linear algebra:} Batched BLAS and LAPACK interfaces
 target many small independent matrix problems, where per-call launch overhead
 dominates arithmetic \cite{dongarra2017batched}. Our batched ADMM follows
 this design, and our measurements show the same overhead-bound behaviour for
 small blocks on both CPU and GPU.
 
-\textbf{Mixed precision.} Lower precision can accelerate numerical linear
+\textbf{Mixed precision:} Lower precision can accelerate numerical linear
 algebra substantially on GPUs, but requires care about accuracy and
 convergence \cite{higham2022mixed,abdelfattah2021survey}. We evaluate single
 precision against acceptance criteria fixed before measurement, and find it
 accurate on large blocks but non-convergent on small ones on the GPU.
 
-\textbf{Benchmarking methodology.} Hoefler and Belli \cite{hoefler2015}
+\textbf{Benchmarking methodology:} Hoefler and Belli \cite{hoefler2015}
 catalogue common pitfalls in reporting parallel performance. Our
 reproducibility section adds two concrete, silent failure modes: random data
 that depend on the BLAS thread count, and an uncontrolled machine state that
@@ -237,9 +274,13 @@ solver by a median $2.39\times$, $2.60\times$ and $2.28\times$ for three
 independent problem instances (seeds 0--2) against an 8-thread BLAS
 baseline, excluding the four grid-edge cells described below ($2.50\times$
 for seed 0 if they are included). Per-regime medians across the three instances range from
-$1.7$--$2.0\times$ (many\_tiny) to $2.4$--$3.7\times$ (imbalanced).
+$1.7$--$2.0\times$ (many\_tiny) to $2.4$--$3.7\times$ (imbalanced). Each configuration (regime, $p$, $n/p$) is measured at its own best-F1
+$\lambda$, so different configurations use different $\lambda$: the optimum
+falls as $p$ and $n/p$ grow (median 0.225 at $p=100$ and 0.10 at $p=800$;
+range 0.05--0.35). The 1- and 8-thread runs of a configuration always use
+the same $\lambda$, so the threading comparison below is unaffected by this choice.
 
-\textbf{Grid edge.} In 7 of 48 seed-0 cells the best-F1 $\lambda$ fell at the
+\textbf{Grid edge:} In 7 of 48 seed-0 cells the best-F1 $\lambda$ fell at the
 smallest grid value (0.05). The structural study evaluates F1 on the same
 instances on a finer grid (step 0.02): in four of these cells the optimum is
 at 0.06, so 0.05 is simply the nearest grid point. In four cells (three in
@@ -269,10 +310,12 @@ not-resolvable differences occur at $p\le200$.
 \begin{figure*}[t]
 \centering
 \includegraphics[width=0.85\textwidth]{fig1_rq1_threading.pdf}
-\caption{(a) Median speedup at the best-F1 $\lambda$ with 1 and 8 BLAS
-threads. (b) Speedup retained by the 8-thread baseline, per configuration;
-hollow markers are not resolvable (overlapping trial bands). Seed 0; seeds
-1--2 show the same pattern (text).}
+\caption{(a) Median speedup over the 12 configurations at each $p$, each
+measured at its own best-F1 $\lambda$ (0.05--0.35), with 1 and 8 BLAS
+threads. (b) Speedup retained by the 8-thread baseline, per configuration,
+with both runs at the same $\lambda$; hollow markers are not resolvable
+(overlapping trial bands). Includes the seven grid-edge cells
+($\lambda=0.05$). Seed 0; seeds 1--2 show the same pattern (text).}
 \label{fig:threading}
 \end{figure*}
 
@@ -342,6 +385,7 @@ largest eigh (\% of eigh time) & 0.9\% & 1.4\% \\
 \end{table}
 
 \subsection{Why the true blocks merge}
+\label{sec:merge}
 Fig.~\ref{fig:oracle} compares the largest component's work share
 $F_{\max}$ at the best-F1 $\lambda$ with the share the true block structure
 would allow (oracle). For balanced and many\_tiny the truth leaves 80--97.5\%
@@ -395,6 +439,68 @@ component breaks.}
 \label{fig:percolation}
 \end{figure}
 
+\subsection{Real data: riboflavin}
+\label{sec:riboflavin}
+We repeated the structural analysis on the riboflavin gene-expression data
+\cite{buhlmann2014riboflavin} (71 samples, 4088 genes), taking the $p=200$,
+500 and 1000 highest-variance genes and the sample correlation matrix as $S$.
+There is no ground truth, so no F1, and this analysis reports no timings. As a
+null we shuffle each gene independently across samples (100 permutations),
+which removes dependence between genes and keeps each gene's marginal
+distribution.
+
+Screening is exact here too: a full solve without decomposition gives a
+partition identical to thresholding $S$ in 12 of 12 checks ($p\le500$,
+$\lambda$ from 0.36 to 0.98). The giant component is not noise
+(Fig.~\ref{fig:riboflavin}, Table~\ref{tab:riboflavin}): on shuffled data
+$F_{\max}$ falls below 50\% by $\lambda\approx0.4$, while on real data it stays
+above 99\% up to $\lambda=0.78$--$0.88$ and above 50\% up to $\lambda=0.94$.
+
+The samples are not independent. Their names show 28 fermentation batches
+measured at 2--4 time points, and the median correlation between samples is
+0.38 within a batch and $-0.03$ between batches. The result survives this:
+using one sample per batch (24\,h or 48\,h only, $n=28$), or removing batch
+means and shuffling within batches, $F_{\max}$ stays above 50\% up to
+$\lambda=0.94$--$0.96$, while the corresponding nulls fall below 50\% by
+$\lambda=0.58$--$0.74$. Largest-component share is stable under random and
+whole-batch subsampling over most of this range, but exact membership is less
+so (median adjusted Rand index mostly 0.5--0.9 at $\lambda=0.64$--$0.80$).
+
+To choose $\lambda$ without ground truth we use StARS \cite{liu2010stars}
+(20 subsamples, $\beta=0.05$, tested down to $\lambda=0.10$). It selects
+$\lambda=0.14$--$0.16$ at $p=200$, depending on whether subsamples are random
+samples or whole batches, and reaches the bottom of the tested range at
+$p=500$. At these values the data form a single component, so decomposition has
+nothing to split. Without true blocks we cannot attribute this to the fusion
+mechanism of Section~\ref{sec:merge}: the component lies far above the noise
+level and may reflect real co-regulation.
+
+\begin{table}[t]
+\centering
+\caption{Riboflavin component structure. Null: $\lambda$ by which the 97.5th
+percentile of shuffled $F_{\max}$ is below 50\%. StARS was not run at $p=1000$.}
+\label{tab:riboflavin}
+\begin{tabular}{rrrrr}
+\toprule
+$p$ & null & $F_{\max}\ge99\%$ & StARS $\lambda$ & blocks (largest) \\
+ & $\lambda$ & up to $\lambda$ & (blocks) & at $\lambda=0.70$ \\
+\midrule
+200 & 0.38 & 0.78 & 0.14--0.16 (1) & 23 (117) \\
+500 & 0.40 & 0.86 & $\le0.10$ (1) & 21 (423) \\
+1000 & 0.42 & 0.88 & -- & 30 (901) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.85\textwidth]{fig6_riboflavin.pdf}
+\caption{Largest-component work share against $\lambda$ on the riboflavin data,
+with the batch controls. The grey band is the null for all 71 samples; each
+control's own null is reported in the text.}
+\label{fig:riboflavin}
+\end{figure*}
+
 \subsection{Batched execution on CPU and GPU}
 Using the batched solver of Section~\ref{sec:batched}, on the
 CPU batching alone gives $1.25$--$1.69\times$ over \texttt{block\_SGL} at
@@ -410,7 +516,7 @@ at $p=2000$ it first wins only at $s_{\max}\approx1950$
 per-iteration launch overhead plus the reduced double-precision throughput of
 a consumer GPU.
 
-\textbf{Precision diagnostic.} To separate precision from batching, we
+\textbf{Precision diagnostic:} To separate precision from batching, we
 added a float32 GPU path and defined acceptance criteria before measuring
 it: all problems
 converge at the unchanged tolerance; relative objective difference
@@ -515,7 +621,7 @@ $p$ & $s_{\max}$ & predicted & observed & error \\
 Two faults invalidated earlier versions of these datasets. Neither raised an
 error.
 
-\textbf{Thread-dependent random data.} GGLasso's sampler uses
+\textbf{Thread-dependent random data:} GGLasso's sampler uses
 \texttt{multivariate\_normal} with an SVD of $\Sigma$. Our block-diagonal
 $\Sigma$ has repeated eigenvalues, so the singular vectors returned by
 OpenBLAS, and hence the samples, depended on the BLAS thread count. The same
@@ -525,12 +631,13 @@ configurations. Sampling through the unique Cholesky factor makes the data
 identical across thread counts to $10^{-12}$; a regression test now guards
 this.
 
-\textbf{Uncontrolled machine state.} An unrelated container occupying two
+\textbf{Uncontrolled machine state:} An unrelated container occupying two
 cores, together with an unrecorded power profile, slowed 8-thread CPU runs
 by a median 16\% per iteration while leaving single-threaded runs
 unaffected. CPU-only speedup ratios survived because both solvers slowed
-together, but every GPU-versus-CPU ratio was inflated by about 30\%. Every run
-now records CPU, BLAS library, power profile, load and running containers.
+together, but every GPU-versus-CPU ratio was inflated by about 30\%. All timings in this paper were re-measured with the container stopped and a
+fixed power profile. Each run's machine state, including power profile, load
+and stopped containers, is now recorded in the run logs.
 
 A clean reinstall from the published package lock reproduces the
 structural results (detected blocks, objective values, F1) bit for bit on a
@@ -564,7 +671,7 @@ experiment on another machine with one command.
 \section{Limitations}
 All measurements use one laptop; timings are machine-specific, and the
 consumer GPU's double-precision rate is not representative of data-centre
-GPUs. Data are synthetic, and the \emph{balanced} and \emph{many\_tiny}
+GPUs. Timings and F1 use synthetic data, and the \emph{balanced} and \emph{many\_tiny}
 regimes coincide at $p=100$.
 CPU speedups and all structural results use three
 independent instances; the GPU results use one (seed 0), so the GPU crossover
@@ -573,7 +680,10 @@ the statistically best $\lambda$ lies below our timing grid
 (Section~\ref{sec:speedup}); they are excluded from the reported medians. All float32 measurements use the many\_tiny regime, and the cause of GPU
 float32 non-convergence on small blocks is not isolated. Timings compare against GGLasso's own
 solvers; we do not benchmark QUIC or coordinate-descent implementations, and
-F1 is computable only because the data are synthetic.
+F1 is computable only because the data are synthetic. The riboflavin samples
+are not independent, the analysis covers only high-variance genes, it has no
+F1 or timings, and StARS is designed to retain true edges, so it can select a
+denser graph than the truth.
 
 % =====================================================================
 \section{Conclusion}
@@ -582,7 +692,9 @@ parallel, but at statistically useful regularisation little of that
 parallelism survives. The estimator fuses the true blocks through a handful
 of spurious entries, the work that remains is dominated by per-block overhead
 rather than arithmetic, and a multithreaded CPU baseline recovers much of the
-apparent gain. Batching recovers $1.2$--$1.7\times$ on the CPU. On a
+apparent gain. On riboflavin gene-expression data one component likewise holds
+all the work at the $\lambda$ selected by StARS, though without ground truth we
+cannot attribute this to the same mechanism. Batching recovers $1.2$--$1.7\times$ on the CPU. On a
 consumer GPU, precision rather than batching decides the outcome: in single
 precision the GPU is $2.5$--$10\times$ faster than a like-for-like CPU on
 blocks of 1000 or more variables (Table~\ref{tab:fp32}), while small blocks need double precision to converge on the
